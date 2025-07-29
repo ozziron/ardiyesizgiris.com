@@ -16,7 +16,6 @@ const limanlar = [
     id: "istanbul",
     ad: "İstanbul Limanı",
     konum: "İstanbul, Türkiye",
-    ardiyesizGun: 7,
     resim: "/placeholder.svg?height=200&width=400",
     aciklama:
       "İstanbul Limanı, Türkiye'nin en büyük konteyner limanlarından biridir. Marmara Denizi'nde stratejik bir konuma sahiptir.",
