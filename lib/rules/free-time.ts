@@ -16,6 +16,23 @@ export const FREE_TIME_ARDIYE: Record<string, number> = {
 "nemport|hapag"  	    :6,
 "mip|hapag"       	  :6,
 "limakport|hapag"   	:7,
+
+"marport|maersk" 	    :8,
+"mardas|maersk"    	  :8,
+"kumport|maersk"      :8,
+"safiport|maersk"   	:10,
+"evyapport|maersk" 	  :10,
+"yarimca|maersk"     	:10,
+"yilportgebze|maersk"	:10,
+"beldeport|maersk"   	:10,
+"borusan|maersk"   	  :7,
+"rodaport|maersk"   	:7,
+"yilportgemlik|maersk":7,
+"tceege|maersk"    	  :10,
+"socar|maersk"    	   :10,
+"nemport|maersk"  	   :10,
+"mip|maersk"       	  :6,
+"limakport|maersk"   	:7,
 };
 
 export const DEFAULT_FREE_TIME_ARDIYE = 5;
