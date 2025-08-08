@@ -44,15 +44,15 @@ export default function HesaplamaPage() {
   fetchData();
 };
 
-  return (
-    <div className="container mx-auto px-4 pt-8 pb-10">
-      <div className="mx-auto w-full max-w-3xl">
-      <Tabs defaultValue="ardiye">
-        <TabsList>
+return (
+  <div className="container mx-auto px-4 pt-8 pb-10">
+    <div className="mx-auto w-full max-w-3xl">
+      <Tabs defaultValue="ardiye" className="w-full">
+        <TabsList className="w-full grid grid-cols-2 gap-2">
           <TabsTrigger value="ardiye" className="w-full">Ardiye Hesaplama</TabsTrigger>
           <TabsTrigger value="detention" className="w-full">Detention Hesaplama</TabsTrigger>
         </TabsList>
-      </div>
+
         <TabsContent value="ardiye">
           <Card className="mt-4">
             <CardHeader>
@@ -62,9 +62,7 @@ export default function HesaplamaPage() {
               <div>
                 <Label>Liman</Label>
                 <Select onValueChange={setLiman}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Liman seçiniz" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Liman seçiniz" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Ambarli">Ambarlı</SelectItem>
                     <SelectItem value="Mersin">Mersin</SelectItem>
@@ -76,9 +74,7 @@ export default function HesaplamaPage() {
               <div>
                 <Label>Hat (Carrier)</Label>
                 <Select onValueChange={setHat}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hat seçiniz" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Hat seçiniz" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Maersk">Maersk</SelectItem>
                     <SelectItem value="MSC">MSC</SelectItem>
@@ -97,34 +93,32 @@ export default function HesaplamaPage() {
                 <Input type="date" value={gateInTarihi} onChange={(e) => setGateInTarihi(e.target.value)} />
               </div>
 
-             <Button onClick={handleHesapla} className="w-full">Hesapla</Button>
-                {sonuc && (
-                  <Card className="mt-6">
-                    <CardHeader>
-                      <CardTitle>Hesaplama Sonucu</CardTitle>
-                    </CardHeader>
+              <Button onClick={handleHesapla} className="w-full">Hesapla</Button>
+
+              {sonuc && (
+                <Card className="mt-6">
+                  <CardHeader><CardTitle>Hesaplama Sonucu</CardTitle></CardHeader>
                   <CardContent className="space-y-2">
-                      <p>Free Time Süresi: {sonuc.freeDays} Gün</p>
-                      <p>Ardiyesiz Giriş Tarihi: {formatLocalDate(sonuc.freeUntil)}</p>
+                    <p>Free time süresi: {sonuc.freeDays}</p>
+                    <p>Ardiyesiz Giriş Tarihi: {formatLocalDate(sonuc.freeUntil)}</p>
                   </CardContent>
-                  </Card>
-                )}
+                </Card>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="detention">
-          <Card>
-            <CardHeader>
-              <CardTitle>Detention Hesaplama</CardTitle>
-            </CardHeader>
+          <Card className="mt-4">
+            <CardHeader><CardTitle>Detention Hesaplama</CardTitle></CardHeader>
             <CardContent>
-              {/* Aynı form burada da kullanılabilir, ama şimdilik boş */}
+              {/* İleride dolduracağız */}
               <p>Detention hesaplama formu buraya gelecek.</p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
+  </div>
+);
+
