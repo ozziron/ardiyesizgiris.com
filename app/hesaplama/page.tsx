@@ -1,5 +1,7 @@
 'use client';
 
+import { PORTS } from "@/lib/rules/ports";
+import { CARRIERS } from "@/lib/rules/carriers";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -63,11 +65,9 @@ return (
                 <Label>Liman</Label>
                 <Select onValueChange={setLiman}>
                   <SelectTrigger><SelectValue placeholder="Liman seçiniz" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ambarli">Ambarlı</SelectItem>
-                    <SelectItem value="Mersin">Mersin</SelectItem>
-                    <SelectItem value="Izmir">İzmir</SelectItem>
-                  </SelectContent>
+                     <SelectContent>
+                        {PORTS.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                     </SelectContent>
                 </Select>
               </div>
 
@@ -75,11 +75,9 @@ return (
                 <Label>Hat (Carrier)</Label>
                 <Select onValueChange={setHat}>
                   <SelectTrigger><SelectValue placeholder="Hat seçiniz" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Maersk">Maersk</SelectItem>
-                    <SelectItem value="MSC">MSC</SelectItem>
-                    <SelectItem value="CMA CGM">CMA CGM</SelectItem>
-                  </SelectContent>
+                   <SelectContent>
+                      {CARRIERS.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                   </SelectContent>
                 </Select>
               </div>
 
