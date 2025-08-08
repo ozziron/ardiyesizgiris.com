@@ -46,7 +46,7 @@ export default function HesaplamaPage() {
 
 return (
   <div className="container mx-auto px-4 pt-8 pb-10">
-    <div className="mx-auto w-full max-w-3xl mt-8">
+    <div className="mx-auto w-full max-w-3xl mt-12">
       <Tabs defaultValue="ardiye" className="w-full">
         <TabsList className="w-full grid grid-cols-2 gap-2">
           <TabsTrigger value="ardiye" className="w-full">Ardiye Hesaplama</TabsTrigger>
