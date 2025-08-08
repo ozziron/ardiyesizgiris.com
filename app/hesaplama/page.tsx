@@ -45,15 +45,16 @@ export default function HesaplamaPage() {
 };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto px-4 pt-8 pb-10">
+      <div className="mx-auto w-full max-w-3xl">
       <Tabs defaultValue="ardiye">
         <TabsList>
-          <TabsTrigger value="ardiye">Ardiye Hesaplama</TabsTrigger>
-          <TabsTrigger value="detention">Detention Hesaplama</TabsTrigger>
+          <TabsTrigger value="ardiye" className="w-full">Ardiye Hesaplama</TabsTrigger>
+          <TabsTrigger value="detention" className="w-full">Detention Hesaplama</TabsTrigger>
         </TabsList>
-
+      </div>
         <TabsContent value="ardiye">
-          <Card>
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle>Ardiye Hesaplama</CardTitle>
             </CardHeader>
