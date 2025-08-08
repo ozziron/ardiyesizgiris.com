@@ -104,7 +104,7 @@ export default function HesaplamaPage() {
                     </CardHeader>
                   <CardContent className="space-y-2">
                       <p>Free Time Süresi: {sonuc.freeDays} Gün</p>
-                      <p>Ardiyesiz Giriş Tarihi: {format(new Date(sonuc.freeUntil), "dd.MM.yyyy")}</p>
+                      <p>Ardiyesiz Giriş Tarihi: {formatLocalDate(sonuc.freeUntil)}</p>
                   </CardContent>
                   </Card>
                 )}
