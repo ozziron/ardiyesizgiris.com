@@ -13,11 +13,31 @@ export default function HesaplamaPage() {
   const [hat, setHat] = useState("");
   const [kalkisTarihi, setKalkisTarihi] = useState("");
   const [gateInTarihi, setGateInTarihi] = useState("");
+  const [sonuc, setSonuc] = useState<null | { freeDays: number; freeUntil: string; daysLeft: number }>(null);
 
-  const handleHesapla = () => {
-    console.log({ liman, hat, kalkisTarihi, gateInTarihi });
-    alert("Hesaplama yapılacak (API eklenecek)");
+ const handleHesapla = () => {
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          liman,
+          hat,
+          kalkisTarihi,
+          gateInTarihi: gateInTarihi || null,
+        }),
+      });
+      if (!response.ok) throw new Error("API isteği başarısız");
+      const data = await response.json();
+      setSonuc(data);
+    } catch (error) {
+      console.error(error);
+      alert("Hesaplama sırasında bir hata oluştu.");
+    }
   };
+  fetchData();
+};
 
   return (
     <div className="container mx-auto py-10">
@@ -71,7 +91,19 @@ export default function HesaplamaPage() {
                 <Input type="date" value={gateInTarihi} onChange={(e) => setGateInTarihi(e.target.value)} />
               </div>
 
-              <Button onClick={handleHesapla} className="w-full">Hesapla</Button>
+             <Button onClick={handleHesapla} className="w-full">Hesapla</Button>
+                {sonuc && (
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle>Hesaplama Sonucu</CardTitle>
+                    </CardHeader>
+                  <CardContent className="space-y-2">
+                      <p>Ücretsiz Günler: {sonuc.freeDays}</p>
+                      <p>Ücretsiz Süre Bitiş Tarihi: {sonuc.freeUntil}</p>
+                      <p>Kalan Gün: {sonuc.daysLeft}</p>
+                  </CardContent>
+                  </Card>
+                )}
             </CardContent>
           </Card>
         </TabsContent>
