@@ -19,7 +19,7 @@ const limanlar = [
     resim: "/placeholder.svg?height=200&width=400",
     aciklama:
       "İstanbul Limanı, Türkiye'nin en büyük konteyner limanlarından biridir. Marmara Denizi'nde stratejik bir konuma sahiptir.",
-    ozellikler: ["Konteyner", "Genel Kargo", "Ro-Ro",
+    ozellikler: ["Konteyner", "Genel Kargo", "Ro-Ro"],
   },
   {
     id: "izmir",
