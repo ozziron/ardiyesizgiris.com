@@ -98,9 +98,8 @@ export default function HesaplamaPage() {
                       <CardTitle>Hesaplama Sonucu</CardTitle>
                     </CardHeader>
                   <CardContent className="space-y-2">
-                      <p>Ücretsiz Günler: {sonuc.freeDays}</p>
-                      <p>Ücretsiz Süre Bitiş Tarihi: {sonuc.freeUntil}</p>
-                      <p>Kalan Gün: {sonuc.daysLeft}</p>
+                      <p>Free Time Süresi: {sonuc.freeDays} Gün</p>
+                      <p>Ardiyesiz Giriş Tarihi: {format(new Date(sonuc.freeUntil), "dd.MM.yyyy")}</p>
                   </CardContent>
                   </Card>
                 )}
