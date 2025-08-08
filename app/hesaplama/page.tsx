@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+const formatLocalDate = (isoDate: string) => {
+  const [year, month, day] = isoDate.split("-");
+  return `${day}.${month}.${year}`;
+};
+
 export default function HesaplamaPage() {
   const [liman, setLiman] = useState("");
   const [hat, setHat] = useState("");
