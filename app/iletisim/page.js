@@ -70,5 +70,3 @@ const IletisimPage = () => {
     </main>
   );
 };
-
-export default IletisimPage;
