@@ -1,50 +1,44 @@
-export default IletisimPage;
-
-
 import React from 'react';
 
-// Bu bir JavaScript component'idir ve stiller doğrudan içine yazılmıştır.
+// STİL OBJELERİ ARTIK BURADA, COMPONENT'İN DIŞINDA TANIMLANIYOR
+// Bu, Next.js'in build sürecinin kafasının karışmasını engeller.
+
+const mainStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: '100%',
+  minHeight: 'calc(100vh - 160px)',
+  padding: '8rem 1.5rem 4rem 1.5rem',
+};
+
+const contentWrapperStyle = {
+  maxWidth: '700px',
+  width: '100%',
+  textAlign: 'center',
+};
+
+const titleStyle = {
+  fontSize: '2.8rem',
+  fontWeight: '600',
+  marginBottom: '1rem',
+};
+
+const subtitleStyle = {
+  fontSize: '1.2rem',
+  marginBottom: '3.5rem',
+  color: '#4a5568',
+};
+
+const contactDetailsStyle = {
+  fontSize: '1.15rem',
+  lineHeight: '2.2',
+};
+
+
+// COMPONENT FONKSİYONU ŞİMDİ DAHA TEMİZ VE SADECE GÖRÜNÜMÜ OLUŞTURUYOR
 const IletisimPage = () => {
-
-  // Sayfanın ana yerleşimini düzenleyen stil objesi
-  // Header'ın altında kalma sorununu 'padding' ile çözer
-  const mainStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    width: '100%',
-    minHeight: 'calc(100vh - 160px)', // Footer'ı aşağıda tutar
-    padding: '8rem 1.5rem 4rem 1.5rem', // Üstten 8rem boşluk Header sorununu çözer
-  };
-
-  // İçeriği saran ve genişliğini sınırlayan stil
-  const contentWrapperStyle = {
-    maxWidth: '700px',
-    width: '100%',
-    textAlign: 'center',
-  };
-
-  // Ana başlık stili
-  const titleStyle = {
-    fontSize: '2.8rem',
-    fontWeight: '600',
-    marginBottom: '1rem',
-  };
-
-  // Alt başlık stili
-  const subtitleStyle = {
-    fontSize: '1.2rem',
-    marginBottom: '3.5rem',
-    color: '#4a5568', // Sitenizdeki renklere benzer bir ton
-  };
-
-  // İletişim detayları stili
-  const contactDetailsStyle = {
-    fontSize: '1.15rem',
-    lineHeight: '2.2',
-  };
-
   return (
     <main style={mainStyle}>
       <div style={contentWrapperStyle}>
@@ -70,3 +64,5 @@ const IletisimPage = () => {
     </main>
   );
 };
+
+export default IletisimPage;
