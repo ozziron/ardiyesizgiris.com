@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ardiyesizgiris.com"
+  const baseUrl = "https://www.ardiyesizgiris.com"
 
   // Ana sayfalar
   const routes = ["", "/hesaplama", "/limanlar", "/blog", "/iletisim", "/giris", "/kayit", "/sss"].map((route) => ({

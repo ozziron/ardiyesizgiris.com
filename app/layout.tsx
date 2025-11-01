@@ -8,12 +8,35 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Ardiyesiz Giriş Hesaplama | Tüm Limanlarda Ardiyesiz Gününü Anında Öğrenin",
+  metadataBase: new URL("https://www.ardiyesizgiris.com"),
+  title:
+    "Ardiyesiz Giriş Hesaplama | Tüm Limanlarda Ardiyesiz Gününü Anında Öğrenin",
   description:
     "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
-  keywords: "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
-    generator: 'v0.dev'
-}
+  keywords:
+    "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
+  generator: "v0.dev",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://www.ardiyesizgiris.com/",
+    title:
+      "Ardiyesiz Giriş Hesaplama | Tüm Limanlarda Ardiyesiz Gününü Anında Öğrenin",
+    description:
+      "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
+    siteName: "Ardiyesiz Giriş",
+    locale: "tr_TR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Ardiyesiz Giriş Hesaplama | Tüm Limanlarda Ardiyesiz Gününü Anında Öğrenin",
+    description:
+      "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
+  },
+} as const
 
 export default function RootLayout({
   children,
@@ -34,3 +57,4 @@ export default function RootLayout({
     </html>
   )
 }
+
