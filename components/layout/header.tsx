@@ -41,8 +41,8 @@ export default function Header() {
           <Link href="/hesaplama" className="font-medium hover:text-emerald-600 transition-colors">
             Ardiyesiz Giriş Hesaplama
           </Link>
-          <Link href="/limanlar" className="font-medium hover:text-emerald-600 transition-colors">
-            Limanlar
+          <Link href="/#sss" className="font-medium hover:text-emerald-600 transition-colors">
+            SSS
           </Link>
           <Link href="/iletisim" className="font-medium hover:text-emerald-600 transition-colors">
             İletişim
@@ -94,11 +94,11 @@ export default function Header() {
               Ardiyesiz Giriş Hesaplama
             </Link>
             <Link
-              href="/limanlar"
+              href="/#sss"
               className="font-medium hover:text-emerald-600 transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              Limanlar
+              SSS
             </Link>
             <Link
               href="/iletisim"
@@ -130,3 +130,4 @@ export default function Header() {
     </header>
   )
 }
+

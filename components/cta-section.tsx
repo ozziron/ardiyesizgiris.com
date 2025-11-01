@@ -4,7 +4,7 @@ import { Calculator } from "lucide-react"
 
 export function CtaSection() {
   return (
-    <section className="py-16 bg-emerald-600 text-white">
+    <section id="cta" className="py-16 bg-emerald-600 text-white">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Hemen Hesaplamaya Başlayın</h2>

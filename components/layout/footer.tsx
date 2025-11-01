@@ -14,7 +14,7 @@ export default function Footer() {
             </Link>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli
-              ardiyesiz gün hesaplama aracı.
+              ardiyesiz gün hesaplama aracımızla operasyonlarınızı hızlandırın.
             </p>
             <div className="flex space-x-4">
               <Link href="#" className="text-gray-500 hover:text-emerald-600 transition-colors">
@@ -55,70 +55,65 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/limanlar"
+                  href="/#ozellikler"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  Limanlar
+                  Özellikler
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blog"
+                  href="/#sss"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  Blog
+                  Sık Sorulan Sorular
                 </Link>
               </li>
               <li>
-                <Link href="/sss" className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors">
-                  Sık Sorulan Sorular
+                <Link
+                  href="/iletisim"
+                  className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
+                >
+                  İletişim
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Limanlar */}
+          {/* Kaynaklar */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Limanlar</h3>
+            <h3 className="font-semibold text-lg mb-4">Kaynaklar</h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/limanlar/istanbul"
+                  href="/giris"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  İstanbul Limanı
+                  Giriş Yap
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/limanlar/izmir"
+                  href="/hesaplama"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  İzmir Limanı
+                  Hesaplama Aracı
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/limanlar/mersin"
+                  href="/#sss"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  Mersin Limanı
+                  Destek Merkezi
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/limanlar/iskenderun"
+                  href="/#cta"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  İskenderun Limanı
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/limanlar/tum-limanlar"
-                  className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
-                >
-                  Tüm Limanlar
+                  Demo Talep Et
                 </Link>
               </li>
             </ul>

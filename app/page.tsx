@@ -40,7 +40,7 @@ export default function Home() {
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href="/limanlar">Limanları İncele</Link>
+                  <Link href="/#sss">Sık Sorulan Sorular</Link>
                 </Button>
               </div>
               <div className="flex items-center gap-4 pt-4">
