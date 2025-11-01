@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next"
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.ardiyesizgiris.com"
 
-  // Ana sayfalar
-  const routes = ["", "/hesaplama", "/limanlar", "/blog", "/iletisim", "/giris", "/kayit", "/sss"].map((route) => ({
+  // Ana sayfalar (mevcut sayfalar listelendi; blog henüz yok)
+  const routes = ["", "/hesaplama", "/limanlar", "/iletisim", "/giris", "/kayit", "/sss"].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
