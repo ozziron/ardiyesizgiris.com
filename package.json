@@ -4,6 +4,7 @@
   "description": "Ardiyesiz Giriş Hesaplama - Turkish Port Demurrage Calculator",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.11.0",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
