@@ -12,8 +12,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        // NextAuth v5 best practice: return null on any auth failure rather
+        // than throwing an Error. Throwing surfaces a generic "Configuration"
+        // error to the client; returning null lets v5 emit the standard
+        // "CredentialsSignin" error which the client form can match on.
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email ve şifre gereklidir")
+          return null
         }
 
         const user = await prisma.user.findUnique({
@@ -21,7 +25,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         })
 
         if (!user || !user.passwordHash) {
-          throw new Error("Geçersiz email veya şifre")
+          return null
         }
 
         const isPasswordValid = await bcryptjs.compare(
@@ -30,7 +34,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         )
 
         if (!isPasswordValid) {
-          throw new Error("Geçersiz email veya şifre")
+          return null
         }
 
         return {

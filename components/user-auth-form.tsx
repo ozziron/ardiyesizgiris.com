@@ -24,18 +24,29 @@ export function UserAuthForm({ searchParams }: UserAuthFormProps) {
     setError(null)
 
     try {
+      // NextAuth v5 (beta): with redirect:false the result object is
+      // { error?: string, url?: string | null }. There is NO `ok` field —
+      // the prior code that checked result?.ok always saw undefined and
+      // silently fell through, redirecting bad credentials to /. The right
+      // signal of failure is a non-empty `error` string.
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       })
 
-      if (!result?.ok) {
+      if (result?.error) {
         setError("Geçersiz email veya şifre")
         return
       }
 
-      // Her zaman anasayfaya yönlendir
+      // Defence-in-depth: if neither error nor url came back, something
+      // unexpected happened — surface it instead of silently navigating.
+      if (!result || (result.error === undefined && !result.url)) {
+        setError("Beklenmedik bir yanıt alındı. Lütfen tekrar deneyin.")
+        return
+      }
+
       router.push("/")
       router.refresh()
     } catch (err) {
