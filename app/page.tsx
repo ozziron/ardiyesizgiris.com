@@ -11,6 +11,7 @@ import { FeatureSection } from "@/components/feature-section"
 import { StatsSection } from "@/components/stats-section"
 import { FaqSection } from "@/components/faq-section"
 import { CtaSection } from "@/components/cta-section"
+import { HeroIllustration } from "@/components/hero-illustration"
 
 export default function Home() {
   return (
@@ -25,7 +26,7 @@ export default function Home() {
                 <Ship className="mr-1 h-3.5 w-3.5" />
                 <span>Lojistik Çözümleri</span>
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
                 Ardiyesiz Giriş Tarihini <span className="text-emerald-600">Anında</span> Hesaplayın
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -57,34 +58,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="relative">
-              <div className="relative h-[400px] w-full">
-                <div
-                  className="absolute top-0 right-0 w-4/5 h-4/5 bg-container-green rounded-lg shadow-xl animate-float"
-                  style={{ animationDelay: "0s" }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl">
-                    Konteyner
-                  </div>
-                </div>
-                <div
-                  className="absolute bottom-0 left-0 w-4/5 h-4/5 bg-container-brown rounded-lg shadow-xl animate-float"
-                  style={{ animationDelay: "1s" }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl">
-                    Konteyner
-                  </div>
-                </div>
-                <div
-                  className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-container-red rounded-lg shadow-xl animate-float"
-                  style={{ animationDelay: "2s" }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl">
-                    Konteyner
-                  </div>
-                </div>
-              </div>
-            </div>
+            <HeroIllustration />
           </div>
         </div>
       </section>
@@ -96,7 +70,7 @@ export default function Home() {
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Nasıl Çalışır?</h2>
+            <h2 className="font-display text-3xl font-bold mb-4 tracking-tight">Nasıl Çalışır?</h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Ardiyesiz giriş hesaplama aracımız, birkaç basit adımda size doğru bilgiyi sunar.
             </p>

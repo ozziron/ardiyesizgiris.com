@@ -74,7 +74,7 @@ export default function TariffRulesPage() {
     } catch (error) {
       toast({
         title: "Hata",
-        description: "Tarife silinirken hata olustu",
+        description: "Tarife silinirken hata oluştu",
         variant: "destructive",
       })
     } finally {

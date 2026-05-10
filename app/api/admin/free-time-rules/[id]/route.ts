@@ -40,7 +40,7 @@ export async function GET(
 
     console.error("Free-time rule fetch error:", error)
     return NextResponse.json(
-      { error: "Muafiyet kurali getirilirken hata olustu" },
+      { error: "Muafiyet kuralı getirilirken hata oluştu" },
       { status: 500 }
     )
   }
@@ -91,7 +91,7 @@ export async function PUT(
 
     if (duplicateRule) {
       return NextResponse.json(
-        { error: "Bu hat, liman ve ekipman icin ayni baslangic tarihli kayit zaten var" },
+        { error: "Bu hat, liman ve ekipman için aynı başlangıç tarihli kayıt zaten var" },
         { status: 400 }
       )
     }
@@ -124,7 +124,7 @@ export async function PUT(
 
     console.error("Free-time rule update error:", error)
     return NextResponse.json(
-      { error: "Muafiyet kurali guncellenirken hata olustu" },
+      { error: "Muafiyet kuralı güncellenirken hata oluştu" },
       { status: 500 }
     )
   }
@@ -156,7 +156,7 @@ export async function DELETE(
 
     console.error("Free-time rule delete error:", error)
     return NextResponse.json(
-      { error: "Muafiyet kurali silinirken hata olustu" },
+      { error: "Muafiyet kuralı silinirken hata oluştu" },
       { status: 500 }
     )
   }

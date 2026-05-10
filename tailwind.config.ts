@@ -16,6 +16,28 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        // Body uses --font-sans (Inter), set on <html> by next/font.
+        // Falls back to system stack so SSR HTML is readable before
+        // the font loads.
+        sans: [
+          'var(--font-sans)',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'sans-serif',
+        ],
+        // Display / headings — Inter Tight, applied via .font-display.
+        display: [
+          'var(--font-display)',
+          'var(--font-sans)',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+        ],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

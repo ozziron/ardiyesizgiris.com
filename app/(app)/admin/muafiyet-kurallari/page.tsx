@@ -61,7 +61,7 @@ export default function FreeTimeRulesPage() {
     } catch (error) {
       toast({
         title: "Hata",
-        description: "Kural silinirken hata olustu",
+        description: "Kural silinirken hata oluştu",
         variant: "destructive",
       })
     } finally {

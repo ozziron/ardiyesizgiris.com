@@ -151,14 +151,14 @@ export function TariffRuleForm({
 
       toast({
         title: "Basarili",
-        description: mode === "create" ? "Tarife olusturuldu" : "Tarife guncellendi",
+        description: mode === "create" ? "Tarife oluşturuldu" : "Tarife güncellendi",
       })
       router.push("/admin/ucret-tarifeleri")
       router.refresh()
     } catch (error) {
       toast({
         title: "Hata",
-        description: error instanceof Error ? error.message : "Kayit sirasinda hata olustu",
+        description: error instanceof Error ? error.message : "Kayıt sırasında hata oluştu",
         variant: "destructive",
       })
     }

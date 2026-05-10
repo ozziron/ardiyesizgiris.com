@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "E-posta gonderim servisi henuz aktif degil. Sonucu PDF olarak indirebilirsiniz; e-posta hizmeti yakinda devreye alinacak.",
+            "E-posta gönderim servisi henüz aktif değil. Sonucu PDF olarak indirebilirsiniz; e-posta hizmeti yakında devreye alınacak.",
           code: "EMAIL_NOT_CONFIGURED",
         },
         { status: 503 }

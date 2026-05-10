@@ -128,14 +128,14 @@ export function FreeTimeRuleForm({
       toast({
         title: "Basarili",
         description:
-          mode === "create" ? "Muafiyet kurali olusturuldu" : "Muafiyet kurali guncellendi",
+          mode === "create" ? "Muafiyet kuralı oluşturuldu" : "Muafiyet kuralı güncellendi",
       })
       router.push("/admin/muafiyet-kurallari")
       router.refresh()
     } catch (error) {
       toast({
         title: "Hata",
-        description: error instanceof Error ? error.message : "Kayit sirasinda hata olustu",
+        description: error instanceof Error ? error.message : "Kayıt sırasında hata oluştu",
         variant: "destructive",
       })
     }

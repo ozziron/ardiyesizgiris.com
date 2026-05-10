@@ -40,7 +40,7 @@ export async function GET(
 
     console.error("Tariff rule fetch error:", error)
     return NextResponse.json(
-      { error: "Ucret tarifesi getirilirken hata olustu" },
+      { error: "Ücret tarifesi getirilirken hata oluştu" },
       { status: 500 }
     )
   }
@@ -91,7 +91,7 @@ export async function PUT(
 
     if (duplicateRule) {
       return NextResponse.json(
-        { error: "Bu hat, liman ve ekipman icin ayni baslangic tarihli tarife zaten var" },
+        { error: "Bu hat, liman ve ekipman için aynı başlangıç tarihli tarife zaten var" },
         { status: 400 }
       )
     }
@@ -132,7 +132,7 @@ export async function PUT(
 
     console.error("Tariff rule update error:", error)
     return NextResponse.json(
-      { error: "Ucret tarifesi guncellenirken hata olustu" },
+      { error: "Ücret tarifesi güncellenirken hata oluştu" },
       { status: 500 }
     )
   }
@@ -164,7 +164,7 @@ export async function DELETE(
 
     console.error("Tariff rule delete error:", error)
     return NextResponse.json(
-      { error: "Ucret tarifesi silinirken hata olustu" },
+      { error: "Ücret tarifesi silinirken hata oluştu" },
       { status: 500 }
     )
   }

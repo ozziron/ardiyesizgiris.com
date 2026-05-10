@@ -1,12 +1,26 @@
 import type React from "react"
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Inter, Inter_Tight } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
 import { AppShell } from "@/components/layout/app-shell"
 import Script from "next/script"
 
-const inter = Inter({ subsets: ["latin"] })
+// Body text — Inter Latin Extended subset includes Turkish diacritics.
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+})
+
+// Display / heading typeface — tighter letter-spacing variant of Inter,
+// used for h1/h2 and the brand wordmark to convey confidence.
+const interTight = Inter_Tight({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-display",
+  display: "swap",
+  weight: ["600", "700"],
+})
 
 export const metadata = {
   metadataBase: new URL("https://www.ardiyesizgiris.com"),
@@ -65,8 +79,8 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="tr" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="tr" suppressHydrationWarning className={`${inter.variable} ${interTight.variable}`}>
+      <body className="font-sans antialiased">
         <AuthSessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AppShell>{children}</AppShell>

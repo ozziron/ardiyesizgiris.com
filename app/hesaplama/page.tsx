@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTAINER_TYPE_OPTIONS } from "@/lib/constants/container-types";
+import { CalculationResultCard } from "@/components/calculation/result-card";
 
 type CalculationMode = "planning" | "cost";
 
@@ -122,26 +123,26 @@ const modeCards: ModeCardContent[] = [
   {
     value: "planning",
     badge: "Planlama",
-    title: "Ardiyesiz giris tarihini ogren",
+    title: "Ardiyesiz giriş tarihini öğren",
     description:
-      "Konteyner cekilmeden once, sadece temel operasyon bilgileriyle dogru giris gununu hizlica planlayin.",
+      "Konteyner çekilmeden önce, sadece temel operasyon bilgileriyle doğru giriş gününü hızlıca planlayın.",
     points: [
       "Gate-in tarihi gerekmez",
-      "Musteri oncesi planlama icin uygundur",
-      "Masraf hesaplamasi gostermez",
+      "Müşteri öncesi planlama için uygundur",
+      "Masraf hesaplaması göstermez",
     ],
     icon: CalendarClock,
   },
   {
     value: "cost",
     badge: "Operasyon",
-    title: "Masrafi tum detaylariyla hesapla",
+    title: "Masrafı tüm detaylarıyla hesapla",
     description:
-      "Gate-in ve konteyner bilgisi netlestiginde, ucretli gunleri ve toplam masrafi aninda gorun.",
+      "Gate-in ve konteyner bilgisi netleştiğinde, ücretli günleri ve toplam masrafı anında görün.",
     points: [
-      "Toplam liman gunu ve ucretli gunu verir",
-      "Masraf kirilimini listeler",
-      "PDF ve email olarak paylasilabilir",
+      "Toplam liman günü ve ücretli günü verir",
+      "Masraf kırılımını listeler",
+      "PDF ve email olarak paylaşılabilir",
     ],
     icon: Wallet,
   },
@@ -200,18 +201,18 @@ function ResultActionsPanel({
   const usesSessionEmail = Boolean(sessionEmail && !recipientEmail.trim());
   const description =
     mode === "planning"
-      ? "Planlama sonucunu PDF olarak kaydedin veya ekibinizle e-posta yoluyla paylasin."
-      : "Masraf sonucunu PDF alin veya operasyon ekibine aninda e-posta olarak iletin.";
+      ? "Planlama sonucunu PDF olarak kaydedin veya ekibinizle e-posta yoluyla paylaşın."
+      : "Masraf sonucunu PDF alın veya operasyon ekibine anında e-posta olarak iletin.";
 
   return (
     <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Sonucu paylas ve arsivle</p>
+          <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Sonucu paylaş ve arşivle</p>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         <Badge variant="outline" className="w-fit border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
-          {mode === "planning" ? "Planlama cikti" : "Masraf raporu"}
+          {mode === "planning" ? "Planlama çıktısı" : "Masraf raporu"}
         </Badge>
       </div>
 
@@ -227,8 +228,8 @@ function ResultActionsPanel({
           />
           <p className="text-xs text-muted-foreground">
             {usesSessionEmail
-              ? `Bos birakilirsa oturum emaili olan ${sessionEmail} kullanilir.`
-              : "Oturum emailiniz yoksa gonderim icin bir alici adresi yazin."}
+              ? `Boş bırakılırsa oturum emaili olan ${sessionEmail} kullanılır.`
+              : "Oturum emailiniz yoksa gönderim için bir alıcı adresi yazın."}
           </p>
         </div>
 
@@ -240,12 +241,12 @@ function ResultActionsPanel({
           disabled={isPdfLoading || isEmailLoading}
         >
           <Download className="h-4 w-4" />
-          {isPdfLoading ? "PDF hazirlaniyor..." : "PDF indir"}
+          {isPdfLoading ? "PDF hazırlanıyor..." : "PDF indir"}
         </Button>
 
         <Button type="button" className="gap-2" onClick={onSendEmail} disabled={isEmailLoading || isPdfLoading}>
           <Mail className="h-4 w-4" />
-          {isEmailLoading ? "Email gonderiliyor..." : "Email gonder"}
+          {isEmailLoading ? "Email gönderiliyor..." : "Email gönder"}
         </Button>
       </div>
 
@@ -288,7 +289,7 @@ export default function HesaplamaPage() {
         setPorts(portsData.data || []);
         setCarriers(carriersData.data || []);
       } catch (error) {
-        console.error("Veri yukleme hatasi:", error);
+        console.error("Veri yükleme hatası:", error);
       }
     };
 
@@ -337,7 +338,7 @@ export default function HesaplamaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        const message = data?.error || data?.details?.[0]?.message || "Hesaplama sirasinda bir hata olustu.";
+        const message = data?.error || data?.details?.[0]?.message || "Hesaplama sırasında bir hata oluştu.";
         throw new Error(message);
       }
 
@@ -347,7 +348,7 @@ export default function HesaplamaPage() {
         setCostResult(data.data);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Hesaplama sirasinda bir hata olustu.";
+      const message = error instanceof Error ? error.message : "Hesaplama sırasında bir hata oluştu.";
 
       if (type === "planning") {
         setPlanningError(message);
@@ -364,19 +365,19 @@ export default function HesaplamaPage() {
   };
 
   const validatePlanningForm = () => {
-    if (!planningForm.portId) return "Liman seciniz.";
-    if (!planningForm.shippingCompanyId) return "Hat seciniz.";
-    if (!planningForm.containerType) return "Ekipman tipi seciniz.";
-    if (!planningForm.departureDate) return "Gemi kalkis tarihini giriniz.";
+    if (!planningForm.portId) return "Liman seçiniz.";
+    if (!planningForm.shippingCompanyId) return "Hat seçiniz.";
+    if (!planningForm.containerType) return "Ekipman tipi seçiniz.";
+    if (!planningForm.departureDate) return "Gemi kalkış tarihini giriniz.";
     return null;
   };
 
   const validateCostForm = () => {
-    if (!costForm.portId) return "Liman seciniz.";
-    if (!costForm.shippingCompanyId) return "Hat seciniz.";
-    if (!costForm.containerType) return "Ekipman tipi seciniz.";
+    if (!costForm.portId) return "Liman seçiniz.";
+    if (!costForm.shippingCompanyId) return "Hat seçiniz.";
+    if (!costForm.containerType) return "Ekipman tipi seçiniz.";
     if (!costForm.containerId.trim()) return "Konteyner ID giriniz.";
-    if (!costForm.departureDate) return "Gemi kalkis tarihini giriniz.";
+    if (!costForm.departureDate) return "Gemi kalkış tarihini giriniz.";
     if (!costForm.gateInDate) return "Gate-in tarihini giriniz.";
     return null;
   };
@@ -475,7 +476,7 @@ export default function HesaplamaPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "PDF olusturulamadi.");
+        throw new Error(data?.error || "PDF oluşturulamadı.");
       }
 
       downloadPdfDataUri(data.pdfDataUri, buildFileName(mode, payload.containerId ?? undefined));
@@ -490,7 +491,7 @@ export default function HesaplamaPage() {
       updateExportState(mode, (current) => ({
         ...current,
         isPdfLoading: false,
-        message: error instanceof Error ? error.message : "PDF olusturulamadi.",
+        message: error instanceof Error ? error.message : "PDF oluşturulamadı.",
         messageTone: "error",
       }));
     }
@@ -506,7 +507,7 @@ export default function HesaplamaPage() {
     if (!session?.user?.email && !recipientEmail) {
       updateExportState(mode, (current) => ({
         ...current,
-        message: "Email gondermek icin bir alici adresi girin.",
+        message: "Email göndermek için bir alıcı adresi girin.",
         messageTone: "error",
       }));
       return;
@@ -539,28 +540,28 @@ export default function HesaplamaPage() {
           ...current,
           isEmailLoading: false,
           message:
-            "E-posta hizmeti henuz aktif degil. Sonucu simdilik PDF olarak indirebilirsiniz.",
+            "E-posta hizmeti henüz aktif değil. Sonucu şimdilik PDF olarak indirebilirsiniz.",
           messageTone: "error",
         }));
         return;
       }
 
       if (!response.ok) {
-        throw new Error(data?.error || "Email gonderilemedi.");
+        throw new Error(data?.error || "Email gönderilemedi.");
       }
 
       const successDetail = data?.dryRun ? " (test modu)" : "";
       updateExportState(mode, (current) => ({
         ...current,
         isEmailLoading: false,
-        message: `Sonuc ${recipientEmail || session?.user?.email} adresine gonderildi${successDetail}.`,
+        message: `Sonuç ${recipientEmail || session?.user?.email} adresine gönderildi${successDetail}.`,
         messageTone: "success",
       }));
     } catch (error) {
       updateExportState(mode, (current) => ({
         ...current,
         isEmailLoading: false,
-        message: error instanceof Error ? error.message : "Email gonderilemedi.",
+        message: error instanceof Error ? error.message : "Email gönderilemedi.",
         messageTone: "error",
       }));
     }
@@ -572,9 +573,9 @@ export default function HesaplamaPage() {
         <div className="mb-8 space-y-3">
           <h1 className="text-3xl font-bold tracking-tight">Ardiye Hesaplama</h1>
           <p className="max-w-3xl text-muted-foreground">
-            Operasyonun hangi asamasinda oldugunuza gore iki farkli hesaplama akisindan birini kullanin. Ilk akista
-            sadece ardiyesiz giris tarihini planlayin, ikinci akista ise gate-in bilgisiyle birlikte toplam masrafi
-            tum detaylariyla gorun.
+            Operasyonun hangi aşamasında olduğunuza göre iki farklı hesaplama akışından birini kullanın. İlk akışta
+            sadece ardiyesiz giriş tarihini planlayın, ikinci akışta ise gate-in bilgisiyle birlikte toplam masrafı
+            tüm detaylarıyla görün.
           </p>
         </div>
 
@@ -619,7 +620,7 @@ export default function HesaplamaPage() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  Bu akisla devam et
+                  Bu akışla devam et
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </button>
@@ -630,10 +631,10 @@ export default function HesaplamaPage() {
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as CalculationMode)} className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-2">
             <TabsTrigger value="planning" className="w-full">
-              Tarih Hesabi
+              Tarih Hesabı
             </TabsTrigger>
             <TabsTrigger value="cost" className="w-full">
-              Masraf Hesabi
+              Masraf Hesabı
             </TabsTrigger>
           </TabsList>
 
@@ -642,11 +643,11 @@ export default function HesaplamaPage() {
               <CardHeader className="space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600">
                   <CalendarClock className="h-5 w-5" />
-                  <CardTitle>Konteyner cekilmeden once planlama</CardTitle>
+                  <CardTitle>Konteyner çekilmeden önce planlama</CardTitle>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Gate-in tarihi olmadan, sadece hat, liman, ekipman tipi ve kalkis tarihine gore ardiyesiz giris
-                  baslangicini ogrenin.
+                  Gate-in tarihi olmadan, sadece hat, liman, ekipman tipi ve kalkış tarihine göre ardiyesiz giriş
+                  başlangıcını öğrenin.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -658,7 +659,7 @@ export default function HesaplamaPage() {
                       onValueChange={(value) => setPlanningForm((current) => ({ ...current, portId: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Liman seciniz" />
+                        <SelectValue placeholder="Liman seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {ports.map((port) => (
@@ -679,7 +680,7 @@ export default function HesaplamaPage() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Hat seciniz" />
+                        <SelectValue placeholder="Hat seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {carriers.map((carrier) => (
@@ -700,7 +701,7 @@ export default function HesaplamaPage() {
                       onValueChange={(value) => setPlanningForm((current) => ({ ...current, containerType: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Ekipman tipi seciniz" />
+                        <SelectValue placeholder="Ekipman tipi seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {CONTAINER_TYPE_OPTIONS.map((option) => (
@@ -713,7 +714,7 @@ export default function HesaplamaPage() {
                   </div>
 
                   <div>
-                    <Label>Gemi Kalkis Tarihi</Label>
+                    <Label>Gemi Kalkış Tarihi</Label>
                     <Input
                       type="date"
                       value={planningForm.departureDate}
@@ -726,51 +727,38 @@ export default function HesaplamaPage() {
 
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Bu hesapta masraf bilgisi gosterilmez</AlertTitle>
+                  <AlertTitle>Bu hesapta masraf bilgisi gösterilmez</AlertTitle>
                   <AlertDescription>
-                    Maliyet hesabina gecmek icin gate-in tarihi ile birlikte `Masraf Hesabi` sekmesini kullanin.
+                    Maliyet hesabına geçmek için gate-in tarihi ile birlikte `Masraf Hesabı` sekmesini kullanın.
                   </AlertDescription>
                 </Alert>
 
                 <Button onClick={handlePlanningSubmit} className="w-full" disabled={isPlanningLoading}>
-                  {isPlanningLoading ? "Hesaplaniyor..." : "Ardiyesiz Giris Tarihini Hesapla"}
+                  {isPlanningLoading ? "Hesaplanıyor..." : "Ardiyesiz Giriş Tarihini Hesapla"}
                 </Button>
 
                 {planningError && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Hesaplama yapilamadi</AlertTitle>
+                    <AlertTitle>Hesaplama yapılamadı</AlertTitle>
                     <AlertDescription>{planningError}</AlertDescription>
                   </Alert>
                 )}
 
                 {planningResult && (
-                  <Card className="mt-6">
-                    <CardHeader>
-                      <CardTitle>Tarih Hesabi Sonucu</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-950/30">
-                          <p className="text-sm text-muted-foreground">Muafiyet Suresi</p>
-                          <p className="mt-1 text-2xl font-semibold">{planningResult.free_days} gun</p>
-                        </div>
-                        <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
-                          <p className="text-sm text-muted-foreground">Ardiyesiz Giris Baslangici</p>
-                          <p className="mt-1 text-2xl font-semibold">{formatLocalDate(planningResult.free_until_date)}</p>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      <div className="flex items-start gap-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                        <CalendarClock className="mt-0.5 h-4 w-4 text-emerald-600" />
-                        <p>
-                          Bu sonuc planlama amaclidir. Gate-in tarihi kesinlestiginde masraf hesabina gecerek toplam
-                          ucreti olusturabilirsiniz.
-                        </p>
-                      </div>
-
+                  <div className="mt-6">
+                    <CalculationResultCard
+                      mode="planning"
+                      summary={[
+                        { label: "Liman", value: getOptionName(ports, planningForm.portId) },
+                        { label: "Hat", value: getOptionName(carriers, planningForm.shippingCompanyId) },
+                        { label: "Konteyner", value: getContainerTypeLabel(planningForm.containerType) },
+                        { label: "Kalkış", value: formatLocalDate(planningForm.departureDate), mono: true },
+                      ]}
+                      freeDays={planningResult.free_days}
+                      freeUntilDate={planningResult.free_until_date}
+                      departureDate={planningForm.departureDate}
+                    >
                       <ResultActionsPanel
                         mode="planning"
                         sessionEmail={session?.user?.email}
@@ -785,8 +773,8 @@ export default function HesaplamaPage() {
                         message={planningExport.message}
                         messageTone={planningExport.messageTone}
                       />
-                    </CardContent>
-                  </Card>
+                    </CalculationResultCard>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -797,10 +785,10 @@ export default function HesaplamaPage() {
               <CardHeader className="space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600">
                   <Wallet className="h-5 w-5" />
-                  <CardTitle>Detayli masraf hesabi</CardTitle>
+                  <CardTitle>Detaylı masraf hesabı</CardTitle>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Gate-in tarihi ve konteyner bilgisi ile birlikte toplam ucretli gunleri ve olusan masrafi gorun.
+                  Gate-in tarihi ve konteyner bilgisi ile birlikte toplam ücretli günleri ve oluşan masrafı görün.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -809,7 +797,7 @@ export default function HesaplamaPage() {
                     <Label>Liman</Label>
                     <Select value={costForm.portId} onValueChange={(value) => setCostForm((current) => ({ ...current, portId: value }))}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Liman seciniz" />
+                        <SelectValue placeholder="Liman seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {ports.map((port) => (
@@ -828,7 +816,7 @@ export default function HesaplamaPage() {
                       onValueChange={(value) => setCostForm((current) => ({ ...current, shippingCompanyId: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Hat seciniz" />
+                        <SelectValue placeholder="Hat seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {carriers.map((carrier) => (
@@ -849,7 +837,7 @@ export default function HesaplamaPage() {
                       onValueChange={(value) => setCostForm((current) => ({ ...current, containerType: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Ekipman tipi seciniz" />
+                        <SelectValue placeholder="Ekipman tipi seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
                         {CONTAINER_TYPE_OPTIONS.map((option) => (
@@ -865,7 +853,7 @@ export default function HesaplamaPage() {
                     <Label>Konteyner ID</Label>
                     <Input
                       type="text"
-                      placeholder="Orn: CONT123456789"
+                      placeholder="Örn: CONT123456789"
                       value={costForm.containerId}
                       onChange={(event) => setCostForm((current) => ({ ...current, containerId: event.target.value }))}
                     />
@@ -874,7 +862,7 @@ export default function HesaplamaPage() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label>Gemi Kalkis Tarihi</Label>
+                    <Label>Gemi Kalkış Tarihi</Label>
                     <Input
                       type="date"
                       value={costForm.departureDate}
@@ -895,85 +883,38 @@ export default function HesaplamaPage() {
                 </div>
 
                 <Button onClick={handleCostSubmit} className="w-full" disabled={isCostLoading}>
-                  {isCostLoading ? "Hesaplaniyor..." : "Masrafi Hesapla"}
+                  {isCostLoading ? "Hesaplanıyor..." : "Masrafı Hesapla"}
                 </Button>
 
                 {costError && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Hesaplama yapilamadi</AlertTitle>
+                    <AlertTitle>Hesaplama yapılamadı</AlertTitle>
                     <AlertDescription>{costError}</AlertDescription>
                   </Alert>
                 )}
 
                 {costResult && (
-                  <Card className="mt-6">
-                    <CardHeader>
-                      <CardTitle>Masraf Hesabi Sonucu</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
-                          <p className="text-sm text-muted-foreground">Ardiyesiz Giris Baslangici</p>
-                          <p className="mt-1 text-xl font-semibold">{formatLocalDate(costResult.free_until_date)}</p>
-                        </div>
-                        <div className="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-950/30">
-                          <p className="text-sm text-muted-foreground">Toplam Masraf</p>
-                          <p className="mt-1 text-xl font-semibold">{formatCurrency(costResult.total_charge)}</p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <div className="rounded-lg border p-4">
-                          <p className="text-sm text-muted-foreground">Muafiyet Suresi</p>
-                          <p className="mt-1 text-lg font-semibold">{costResult.free_days} gun</p>
-                        </div>
-                        <div className="rounded-lg border p-4">
-                          <p className="text-sm text-muted-foreground">Toplam Liman Gunu</p>
-                          <p className="mt-1 text-lg font-semibold">{costResult.total_days_at_port} gun</p>
-                        </div>
-                        <div className="rounded-lg border p-4">
-                          <p className="text-sm text-muted-foreground">Ucretli Gun</p>
-                          <p className="mt-1 text-lg font-semibold">{costResult.chargeable_days} gun</p>
-                        </div>
-                      </div>
-
-                      {costResult.warning && (
-                        <Alert>
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle>Uyari</AlertTitle>
-                          <AlertDescription>{costResult.warning}</AlertDescription>
-                        </Alert>
-                      )}
-
-                      {costResult.charge_breakdown && costResult.charge_breakdown.length > 0 && (
-                        <>
-                          <Separator />
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-emerald-600" />
-                              <p className="font-medium">Masraf Kirilimi</p>
-                            </div>
-                            <div className="space-y-2">
-                              {costResult.charge_breakdown.map((item) => (
-                                <div
-                                  key={`${item.tier}-${item.days}`}
-                                  className="flex items-center justify-between rounded-lg border px-4 py-3 text-sm"
-                                >
-                                  <div>
-                                    <p className="font-medium">Kademe {item.tier}</p>
-                                    <p className="text-muted-foreground">
-                                      {item.days} gun x {formatCurrency(item.price_per_day)}
-                                    </p>
-                                  </div>
-                                  <p className="font-semibold">{formatCurrency(item.subtotal)}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      )}
-
+                  <div className="mt-6">
+                    <CalculationResultCard
+                      mode="cost"
+                      summary={[
+                        { label: "Liman", value: getOptionName(ports, costForm.portId) },
+                        { label: "Hat", value: getOptionName(carriers, costForm.shippingCompanyId) },
+                        { label: "Konteyner", value: getContainerTypeLabel(costForm.containerType) },
+                        { label: "Konteyner ID", value: costForm.containerId, mono: true },
+                        { label: "Kalkış", value: formatLocalDate(costForm.departureDate), mono: true },
+                        { label: "Gate-in", value: formatLocalDate(costForm.gateInDate), mono: true },
+                      ]}
+                      freeDays={costResult.free_days}
+                      freeUntilDate={costResult.free_until_date}
+                      departureDate={costForm.departureDate}
+                      totalCharge={costResult.total_charge}
+                      chargeableDays={costResult.chargeable_days}
+                      totalDaysAtPort={costResult.total_days_at_port}
+                      chargeBreakdown={costResult.charge_breakdown}
+                      warning={costResult.warning}
+                    >
                       <ResultActionsPanel
                         mode="cost"
                         sessionEmail={session?.user?.email}
@@ -986,8 +927,8 @@ export default function HesaplamaPage() {
                         message={costExport.message}
                         messageTone={costExport.messageTone}
                       />
-                    </CardContent>
-                  </Card>
+                    </CalculationResultCard>
+                  </div>
                 )}
               </CardContent>
             </Card>

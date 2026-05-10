@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
-import { Menu, X, Ship, Calculator, Sun, Moon, LogOut, User, LayoutDashboard, Settings, History, ChevronDown } from "lucide-react"
+import { Menu, X, Calculator, Sun, Moon, LogOut, User, LayoutDashboard, Settings, History, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Wordmark } from "@/components/brand/wordmark"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 import {
@@ -39,10 +40,8 @@ export default function Header() {
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <Ship className="h-8 w-8 text-emerald-600" />
-          <span className="font-bold text-xl">Ardiyesiz Giriş</span>
-        </Link>
+        <Wordmark />
+
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">

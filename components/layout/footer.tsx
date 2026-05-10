@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Ship, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
+import { Wordmark } from "@/components/brand/wordmark"
 
 export default function Footer() {
   return (
@@ -8,10 +9,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo ve Açıklama */}
           <div>
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Ship className="h-8 w-8 text-emerald-600" />
-              <span className="font-bold text-xl">Ardiyesiz Giriş</span>
-            </Link>
+            <div className="mb-4">
+              <Wordmark />
+            </div>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli
               ardiyesiz gün hesaplama aracımızla operasyonlarınızı hızlandırın.
