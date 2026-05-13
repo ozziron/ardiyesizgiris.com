@@ -238,46 +238,48 @@ export default function HesaplamalarimPage() {
         ) : (
           <div className="space-y-4">
             {calculations.map((calc) => (
-              <Card key={calc.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  {/* Top: header row */}
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
-                        <Ship className="h-5 w-5 text-emerald-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="font-semibold">{calc.portName}</p>
-                          <Badge variant="secondary" className="text-xs">
-                            {calc.containerType}
-                          </Badge>
+              <Link key={calc.id} href={`/hesaplamalarim/${calc.id}`}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-4">
+                    {/* Top: header row */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
+                          <Ship className="h-5 w-5 text-emerald-600" />
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Ship className="h-3 w-3" />
-                            {calc.carrierName}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Kalkış: {formatDate(calc.departureDate)}
-                          </span>
-                          <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                            <Clock className="h-3 w-3" />
-                            Ardiyesiz: {formatDate(calc.freeUntilDate)}
-                          </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <p className="font-semibold">{calc.portName}</p>
+                            <Badge variant="secondary" className="text-xs">
+                              {calc.containerType}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Ship className="h-3 w-3" />
+                              {calc.carrierName}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              Kalkış: {formatDate(calc.departureDate)}
+                            </span>
+                            <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                              <Clock className="h-3 w-3" />
+                              Ardiyesiz: {formatDate(calc.freeUntilDate)}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <p className="text-xs text-muted-foreground flex-shrink-0 hidden sm:block">
+                        {formatDate(calc.createdAt)}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground flex-shrink-0 hidden sm:block">
-                      {formatDate(calc.createdAt)}
-                    </p>
-                  </div>
 
-                  {/* Bottom: export history block */}
-                  <ExportHistory calc={calc} />
-                </CardContent>
-              </Card>
+                    {/* Bottom: export history block */}
+                    <ExportHistory calc={calc} />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

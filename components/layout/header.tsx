@@ -51,6 +51,9 @@ export default function Header() {
           <Link href="/hesaplama" className="font-medium hover:text-emerald-600 transition-colors">
             Hesaplama
           </Link>
+          <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors">
+            Hakkımızda
+          </Link>
           <Link href="/#sss" className="font-medium hover:text-emerald-600 transition-colors">
             SSS
           </Link>
@@ -186,6 +189,9 @@ export default function Header() {
             </Link>
             <Link href="/hesaplama" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
               Hesaplama
+            </Link>
+            <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
+              Hakkımızda
             </Link>
             <Link href="/#sss" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
               SSS
