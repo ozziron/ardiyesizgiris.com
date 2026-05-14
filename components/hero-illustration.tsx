@@ -45,40 +45,41 @@ export function HeroIllustration() {
           <FormRow label="Kalkış" value="01.05.2026" mono />
         </div>
 
-        {/* Timeline */}
+        {/* Timeline — chronological left-to-right (free_until on the LEFT,
+            departure on the RIGHT), matching the live CalculationTimeline
+            so marketing and product feel identical. */}
         <div className="mt-5 space-y-3">
           <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Ship className="h-3 w-3" />
-              Gemi Kalkış
-            </span>
             <span className="flex items-center gap-1.5 text-emerald-600">
-              Ardiyesiz Giriş
               <CheckCircle2 className="h-3 w-3" />
+              Ardiyesiz Giriş
+            </span>
+            <span className="flex items-center gap-1.5">
+              Gemi Kalkış
+              <Ship className="h-3 w-3" />
             </span>
           </div>
 
-          {/* Track */}
+          {/* Full-width emerald muafiyet zone */}
           <div className="relative h-2 rounded-full bg-gray-100 dark:bg-gray-800">
-            {/* Emerald muafiyet zone — covers the right ~70% */}
-            <div className="absolute inset-y-0 left-[28%] right-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400" />
 
-            {/* Start marker */}
-            <div className="absolute -top-1 left-[28%] h-4 w-4 -translate-x-1/2 rounded-full border-2 border-white bg-gray-700 shadow dark:border-gray-900" />
-
-            {/* End marker — pulsing ring + filled emerald dot */}
-            <span className="absolute -top-1 right-0 flex h-4 w-4 translate-x-1/2 items-center justify-center">
+            {/* LEFT marker — pulsing answer (free entry date) */}
+            <span className="absolute -top-1 left-0 flex h-4 w-4 -translate-x-1/2 items-center justify-center">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex h-4 w-4 rounded-full border-2 border-white bg-emerald-500 shadow dark:border-gray-900" />
             </span>
+
+            {/* RIGHT marker — departure date, the supplied input */}
+            <div className="absolute -top-1 right-0 h-4 w-4 translate-x-1/2 rounded-full border-2 border-white bg-gray-700 shadow dark:border-gray-900" />
           </div>
 
           <div className="flex items-center justify-between text-xs">
-            <span className="font-mono tabular-nums text-muted-foreground">01.05.2026</span>
+            <span className="font-mono font-semibold tabular-nums text-emerald-600">25.04.2026</span>
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
               7 gün muafiyet
             </span>
-            <span className="font-mono font-semibold tabular-nums text-emerald-600">25.04.2026</span>
+            <span className="font-mono tabular-nums text-muted-foreground">01.05.2026</span>
           </div>
         </div>
 
