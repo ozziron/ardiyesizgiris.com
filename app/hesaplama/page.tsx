@@ -21,9 +21,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CONTAINER_TYPE_OPTIONS } from "@/lib/constants/container-types";
 import { CalculationResultCard } from "@/components/calculation/result-card";
+import { CalculationTimeline } from "@/components/calculation/timeline";
 
 type CalculationMode = "planning" | "cost";
 
@@ -71,6 +72,17 @@ type ExportState = {
   messageTone: "success" | "error" | null;
   isPdfLoading: boolean;
   isEmailLoading: boolean;
+};
+
+/**
+ * Anticipatory result the live-preview shows BEFORE the user hits
+ * "Hesapla". It only contains the data we can derive purely from
+ * looking up the free-time rule — no chargeable days, no total cost.
+ * Anything cost-related still requires the full /api/calculate roundtrip.
+ */
+type LivePreview = {
+  freeDays: number;
+  freeUntilDate: string;
 };
 
 type ModeCardContent = {
@@ -123,26 +135,26 @@ const modeCards: ModeCardContent[] = [
   {
     value: "planning",
     badge: "Planlama",
-    title: "Ardiyesiz giriş tarihini öğren",
+    title: "Ardiyesiz Giriş Tarihi",
     description:
-      "Konteyner çekilmeden önce, sadece temel operasyon bilgileriyle doğru giriş gününü hızlıca planlayın.",
+      "Yükleme planlamanız için ardiyesiz giriş tarihini hızlıca hesaplayın.",
     points: [
-      "Gate-in tarihi gerekmez",
-      "Müşteri öncesi planlama için uygundur",
-      "Masraf hesaplaması göstermez",
+      "Gate-in tarihi gerekli değildir.",
+      "Masraf bilgisi mevcut değildir.",
+      "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: CalendarClock,
   },
   {
     value: "cost",
-    badge: "Operasyon",
-    title: "Masrafı tüm detaylarıyla hesapla",
+    badge: "Masraf",
+    title: "Demurrage & Detention Hesaplama",
     description:
-      "Gate-in ve konteyner bilgisi netleştiğinde, ücretli günleri ve toplam masrafı anında görün.",
+      "Gate-in tarihi ile birlikte Demurrage & Detention masraflarını hesaplayabilirsiniz.",
     points: [
-      "Toplam liman günü ve ücretli günü verir",
-      "Masraf kırılımını listeler",
-      "PDF ve email olarak paylaşılabilir",
+      "Konteyner ID bilgisi girişi yapılabilir.",
+      "Masraf kırılım bilgisi içerir.",
+      "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: Wallet,
   },
@@ -186,6 +198,38 @@ const downloadPdfDataUri = (pdfDataUri: string, filename: string) => {
   document.body.removeChild(link);
 };
 
+/**
+ * Anticipatory preview card shown above the submit button once the four
+ * lookup fields (port + carrier + container + departure) are filled.
+ * Uses the same CalculationTimeline as the result card so the visual
+ * promise carries through from form → submit → result.
+ */
+function LivePreviewCard({
+  preview,
+  departureDate,
+}: {
+  preview: LivePreview;
+  departureDate: string;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-emerald-300 bg-emerald-50/40 p-4 dark:border-emerald-800/60 dark:bg-emerald-950/20">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+          Önizleme
+        </span>
+        <span className="text-[11px] text-muted-foreground">
+          Hesapla&apos;ya basarak detaylı sonucu görün
+        </span>
+      </div>
+      <CalculationTimeline
+        departureDate={departureDate}
+        freeUntilDate={preview.freeUntilDate}
+        freeDays={preview.freeDays}
+      />
+    </div>
+  );
+}
+
 function ResultActionsPanel({
   mode,
   sessionEmail,
@@ -216,38 +260,46 @@ function ResultActionsPanel({
         </Badge>
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-        <div className="space-y-2">
-          <Label htmlFor={`${mode}-email`}>Email adresi</Label>
+      {/* Single row layout: label on top, input + two buttons share one flex
+          row so heights align. Buttons reordered: Email gönder is the primary
+          action (sits right next to the email input), PDF indir is the
+          secondary fallback on the far right. */}
+      <div className="mt-4">
+        <Label htmlFor={`${mode}-email`}>Email adresi</Label>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-stretch">
           <Input
             id={`${mode}-email`}
             type="email"
             value={recipientEmail}
             onChange={(event) => onRecipientEmailChange(event.target.value)}
             placeholder={sessionEmail ?? "operasyon@firma.com"}
+            className="flex-1"
           />
-          <p className="text-xs text-muted-foreground">
-            {usesSessionEmail
-              ? `Boş bırakılırsa oturum emaili olan ${sessionEmail} kullanılır.`
-              : "Oturum emailiniz yoksa gönderim için bir alıcı adresi yazın."}
-          </p>
+          <Button
+            type="button"
+            className="gap-2 sm:flex-shrink-0"
+            onClick={onSendEmail}
+            disabled={isEmailLoading || isPdfLoading}
+          >
+            <Mail className="h-4 w-4" />
+            {isEmailLoading ? "Email gönderiliyor..." : "Email gönder"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="gap-2 sm:flex-shrink-0"
+            onClick={onDownloadPdf}
+            disabled={isPdfLoading || isEmailLoading}
+          >
+            <Download className="h-4 w-4" />
+            {isPdfLoading ? "PDF hazırlanıyor..." : "PDF indir"}
+          </Button>
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="gap-2"
-          onClick={onDownloadPdf}
-          disabled={isPdfLoading || isEmailLoading}
-        >
-          <Download className="h-4 w-4" />
-          {isPdfLoading ? "PDF hazırlanıyor..." : "PDF indir"}
-        </Button>
-
-        <Button type="button" className="gap-2" onClick={onSendEmail} disabled={isEmailLoading || isPdfLoading}>
-          <Mail className="h-4 w-4" />
-          {isEmailLoading ? "Email gönderiliyor..." : "Email gönder"}
-        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {usesSessionEmail
+            ? `Boş bırakılırsa oturum emaili olan ${sessionEmail} kullanılır.`
+            : "Oturum emailiniz yoksa gönderim için bir alıcı adresi yazın."}
+        </p>
       </div>
 
       {message && (
@@ -265,7 +317,9 @@ function ResultActionsPanel({
 
 export default function HesaplamaPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<CalculationMode>("planning");
+  // activeTab starts null so the page opens with ONLY the mode-selection
+  // cards visible. The form pane mounts only after the user picks a mode.
+  const [activeTab, setActiveTab] = useState<CalculationMode | null>(null);
   const [ports, setPorts] = useState<SelectOption[]>([]);
   const [carriers, setCarriers] = useState<SelectOption[]>([]);
   const [planningForm, setPlanningForm] = useState<PlanningFormState>(initialPlanningForm);
@@ -278,6 +332,10 @@ export default function HesaplamaPage() {
   const [costExport, setCostExport] = useState<ExportState>(initialExportState);
   const [isPlanningLoading, setIsPlanningLoading] = useState(false);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  // Live preview — anticipatory result rendered between the form and the
+  // submit button as soon as the four lookup fields are filled.
+  const [planningPreview, setPlanningPreview] = useState<LivePreview | null>(null);
+  const [costPreview, setCostPreview] = useState<LivePreview | null>(null);
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -295,6 +353,65 @@ export default function HesaplamaPage() {
 
     fetchOptions();
   }, []);
+
+  // Live preview effects: debounced fetch to /api/free-time-preview each
+  // time one of the four lookup fields changes. AbortController cancels
+  // any in-flight request so only the latest response lands in state.
+  useEffect(() => {
+    const { portId, shippingCompanyId, containerType, departureDate } = planningForm;
+    if (!portId || !shippingCompanyId || !containerType || !departureDate) {
+      setPlanningPreview(null);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ portId, shippingCompanyId, containerType, departureDate });
+        const res = await fetch(`/api/free-time-preview?${params}`, { signal: controller.signal });
+        if (!res.ok) {
+          setPlanningPreview(null);
+          return;
+        }
+        const data = await res.json();
+        setPlanningPreview({ freeDays: data.freeDays, freeUntilDate: data.freeUntilDate });
+      } catch (err) {
+        if ((err as { name?: string })?.name === "AbortError") return;
+        setPlanningPreview(null);
+      }
+    }, 250);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [planningForm.portId, planningForm.shippingCompanyId, planningForm.containerType, planningForm.departureDate]);
+
+  useEffect(() => {
+    const { portId, shippingCompanyId, containerType, departureDate } = costForm;
+    if (!portId || !shippingCompanyId || !containerType || !departureDate) {
+      setCostPreview(null);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ portId, shippingCompanyId, containerType, departureDate });
+        const res = await fetch(`/api/free-time-preview?${params}`, { signal: controller.signal });
+        if (!res.ok) {
+          setCostPreview(null);
+          return;
+        }
+        const data = await res.json();
+        setCostPreview({ freeDays: data.freeDays, freeUntilDate: data.freeUntilDate });
+      } catch (err) {
+        if ((err as { name?: string })?.name === "AbortError") return;
+        setCostPreview(null);
+      }
+    }, 250);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [costForm.portId, costForm.shippingCompanyId, costForm.containerType, costForm.departureDate]);
 
   const resetExportFeedback = (mode: CalculationMode) => {
     if (mode === "planning") {
@@ -570,15 +687,10 @@ export default function HesaplamaPage() {
   return (
     <div className="container mx-auto px-4 pb-10 pt-8">
       <div className="mx-auto mt-12 w-full max-w-5xl">
-        <div className="mb-8 space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight">Ardiye Hesaplama</h1>
-          <p className="max-w-3xl text-muted-foreground">
-            Operasyonun hangi aşamasında olduğunuza göre iki farklı hesaplama akışından birini kullanın. İlk akışta
-            sadece ardiyesiz giriş tarihini planlayın, ikinci akışta ise gate-in bilgisiyle birlikte toplam masrafı
-            tüm detaylarıyla görün.
-          </p>
-        </div>
-
+        {/* Mode selection cards. These are the only thing visible on first
+            load — the form panes mount conditionally below once activeTab
+            is non-null. Removes the previous problem where users saw the
+            form immediately and missed the mode affordance. */}
         <div className="mb-8 grid gap-4 md:grid-cols-2">
           {modeCards.map((card) => {
             const Icon = card.icon;
@@ -589,7 +701,7 @@ export default function HesaplamaPage() {
                 key={card.value}
                 type="button"
                 onClick={() => setActiveTab(card.value)}
-                className={`rounded-2xl border p-5 text-left transition-all ${
+                className={`group rounded-2xl border p-5 text-left transition-all ${
                   isActive
                     ? "border-emerald-500 bg-emerald-500/5 shadow-sm"
                     : "border-border bg-card hover:border-emerald-500/40 hover:bg-emerald-500/5"
@@ -619,26 +731,25 @@ export default function HesaplamaPage() {
                   ))}
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  Bu akışla devam et
-                  <ArrowRight className="h-4 w-4" />
-                </div>
+                {/* Minimal CTA: just an arrow that slides right on hover.
+                    Inactive cards show it; the active card hides it (already
+                    chosen, no need to point at it). */}
+                {!isActive && (
+                  <div className="mt-4 flex justify-end">
+                    <ArrowRight className="h-4 w-4 text-emerald-600 transition-transform group-hover:translate-x-1" />
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
 
+        {/* Form pane mounts only after the user picks a mode. The Tabs root
+            stays for content-switching mechanics but the visible TabsList
+            is removed — the mode cards above already drive activeTab. */}
+        {activeTab && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as CalculationMode)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 gap-2">
-            <TabsTrigger value="planning" className="w-full">
-              Tarih Hesabı
-            </TabsTrigger>
-            <TabsTrigger value="cost" className="w-full">
-              Masraf Hesabı
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="planning">
+          <TabsContent value="planning" className="animate-in fade-in slide-in-from-top-4 duration-300">
             <Card className="mt-4">
               <CardHeader className="space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600">
@@ -745,8 +856,19 @@ export default function HesaplamaPage() {
                   </Alert>
                 )}
 
+                {/* Preview / Result share the same slot — preview shows while
+                    inputs are complete but no real result yet; on submit the
+                    preview unmounts and the richer result card animates into
+                    its place (fade + zoom for the "grow into result" feel). */}
+                {planningPreview && !planningResult && (
+                  <LivePreviewCard
+                    preview={planningPreview}
+                    departureDate={planningForm.departureDate}
+                  />
+                )}
+
                 {planningResult && (
-                  <div className="mt-6">
+                  <div className="animate-in fade-in zoom-in-95 duration-500">
                     <CalculationResultCard
                       mode="planning"
                       summary={[
@@ -780,7 +902,7 @@ export default function HesaplamaPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="cost">
+          <TabsContent value="cost" className="animate-in fade-in slide-in-from-top-4 duration-300">
             <Card className="mt-4">
               <CardHeader className="space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600">
@@ -894,8 +1016,16 @@ export default function HesaplamaPage() {
                   </Alert>
                 )}
 
+                {/* Preview / Result share the same slot — see planning tab. */}
+                {costPreview && !costResult && (
+                  <LivePreviewCard
+                    preview={costPreview}
+                    departureDate={costForm.departureDate}
+                  />
+                )}
+
                 {costResult && (
-                  <div className="mt-6">
+                  <div className="animate-in fade-in zoom-in-95 duration-500">
                     <CalculationResultCard
                       mode="cost"
                       summary={[
@@ -934,6 +1064,7 @@ export default function HesaplamaPage() {
             </Card>
           </TabsContent>
         </Tabs>
+        )}
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ export const metadata = {
 }
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Ship, Calculator, Clock, Calendar } from "lucide-react"
 import { Testimonials } from "@/components/testimonials"
 import { FeatureSection } from "@/components/feature-section"
@@ -22,10 +21,6 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-[1]">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <Badge variant="outline" className="px-3 py-1 text-sm bg-white dark:bg-gray-800 shadow-sm">
-                <Ship className="mr-1 h-3.5 w-3.5" />
-                <span>Lojistik Çözümleri</span>
-              </Badge>
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
                 Ardiyesiz Giriş Tarihini <span className="text-emerald-600">Anında</span> Hesaplayın
               </h1>
