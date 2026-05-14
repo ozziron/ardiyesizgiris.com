@@ -103,7 +103,7 @@ export default function AyarlarPage() {
               <span className="font-medium">{session.user?.email}</span>
               <span className="text-muted-foreground">Hesap Türü:</span>
               <span className="font-medium">
-                {(session.user as any)?.role === "ADMIN" ? "Yönetici" : "Standart"}
+                {session.user?.role === "ADMIN" ? "Yönetici" : "Standart"}
               </span>
             </div>
           </CardContent>

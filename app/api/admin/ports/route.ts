@@ -5,7 +5,7 @@ import { portFormSchema } from "@/lib/validation/schemas"
 
 async function checkAdmin() {
   const session = await auth()
-  if (!session || (session.user as any)?.role !== "ADMIN") {
+  if (!session || session.user?.role !== "ADMIN") {
     return null
   }
   return session

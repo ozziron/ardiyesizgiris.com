@@ -5,7 +5,7 @@ import { carrierFormSchema } from "@/lib/validation/schemas"
 
 async function checkAdmin() {
   const session = await auth()
-  if (!session?.user || (session.user as any).role !== "ADMIN") {
+  if (!session?.user || session.user.role !== "ADMIN") {
     throw new Error("UNAUTHORIZED")
   }
 }

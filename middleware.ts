@@ -11,7 +11,7 @@ export default auth((req: any) => {
       return NextResponse.redirect(new URL("/giris?callbackUrl=/admin", nextUrl))
     }
 
-    const userRole = (session.user as any)?.role
+    const userRole = session.user?.role
     if (userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/", nextUrl))
     }

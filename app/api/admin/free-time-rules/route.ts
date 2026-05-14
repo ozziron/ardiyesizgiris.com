@@ -5,7 +5,7 @@ import { freeTimeRuleSchema } from "@/lib/validation/schemas"
 
 async function checkAdmin() {
   const session = await auth()
-  if (!session?.user || (session.user as any)?.role !== "ADMIN") {
+  if (!session?.user || session.user?.role !== "ADMIN") {
     throw new Error("UNAUTHORIZED")
   }
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
           shippingCompanyId: validation.data.shippingCompanyId,
           containerType: validation.data.containerType,
           effectiveFrom: new Date(validation.data.effectiveFrom),
-        } as any,
+        },
       }),
     ])
 

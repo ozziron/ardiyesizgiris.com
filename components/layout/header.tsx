@@ -22,7 +22,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { data: session, status } = useSession()
-  const isAdmin = (session?.user as any)?.role === "ADMIN"
+  const isAdmin = session?.user?.role === "ADMIN"
 
   useEffect(() => {
     const handleScroll = () => {

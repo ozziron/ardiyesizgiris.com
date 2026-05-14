@@ -29,8 +29,8 @@ export default function ProfilPage() {
 
   if (!session) return null
 
-  const isAdmin = (session.user as any)?.role === "ADMIN"
-  const createdAt = (session.user as any)?.createdAt
+  const isAdmin = session.user?.role === "ADMIN"
+  const createdAt = session.user?.createdAt
 
   return (
     <div className="min-h-screen pt-24 pb-12">

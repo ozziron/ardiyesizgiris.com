@@ -20,7 +20,7 @@ export function RoleGuard({ children, requiredRole = "ADMIN" }: RoleGuardProps) 
       return
     }
 
-    const userRole = (session?.user as any)?.role
+    const userRole = session?.user?.role
     if (requiredRole && userRole !== requiredRole) {
       router.push("/")
     }
@@ -30,7 +30,7 @@ export function RoleGuard({ children, requiredRole = "ADMIN" }: RoleGuardProps) 
     return <div className="p-8 text-center">Yükleniyor...</div>
   }
 
-  const userRole = (session?.user as any)?.role
+  const userRole = session?.user?.role
   if (requiredRole && userRole !== requiredRole) {
     return null
   }
