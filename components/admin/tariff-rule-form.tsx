@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { tariffRuleSchema } from "@/lib/validation/schemas"
-import { CONTAINER_TYPE_OPTIONS } from "@/lib/constants/container-types"
+import { useContainerTypes } from "@/hooks/use-container-types"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -68,6 +68,8 @@ export function TariffRuleForm({
   const [ports, setPorts] = useState<SelectOption[]>([])
   const [carriers, setCarriers] = useState<SelectOption[]>([])
   const [loading, setLoading] = useState(true)
+  // Container types from DB (admin-managed) — hook returns active types only
+  const { options: containerTypes } = useContainerTypes()
 
   const form = useForm<TariffRuleFormValues>({
     resolver: zodResolver(tariffRuleSchema),
@@ -258,8 +260,8 @@ export function TariffRuleForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {CONTAINER_TYPE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
+                          {containerTypes.map((option) => (
+                            <SelectItem key={option.id} value={option.code}>
                               {option.label}
                             </SelectItem>
                           ))}

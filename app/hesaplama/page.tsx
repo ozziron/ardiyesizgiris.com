@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { CONTAINER_TYPE_OPTIONS } from "@/lib/constants/container-types";
+import { useContainerTypes } from "@/hooks/use-container-types";
 import { CalculationResultCard } from "@/components/calculation/result-card";
 import { CalculationTimeline } from "@/components/calculation/timeline";
 
@@ -175,9 +175,6 @@ const formatCurrency = (value: number | undefined) => {
   }).format(value);
 };
 
-const getContainerTypeLabel = (value: string) =>
-  CONTAINER_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? value;
-
 const getOptionName = (options: SelectOption[], id: string) =>
   options.find((option) => option.id === id)?.name ?? "-";
 
@@ -322,6 +319,12 @@ export default function HesaplamaPage() {
   const [activeTab, setActiveTab] = useState<CalculationMode | null>(null);
   const [ports, setPorts] = useState<SelectOption[]>([]);
   const [carriers, setCarriers] = useState<SelectOption[]>([]);
+  // Container types come from the DB now (admin-managed). The hook
+  // returns an empty list while loading so selects render empty rather
+  // than crashing; once loaded the user sees the live list.
+  const { options: containerTypes } = useContainerTypes();
+  const getContainerTypeLabel = (code: string) =>
+    containerTypes.find((c) => c.code === code)?.label ?? code;
   const [planningForm, setPlanningForm] = useState<PlanningFormState>(initialPlanningForm);
   const [costForm, setCostForm] = useState<CostFormState>(initialCostForm);
   const [planningResult, setPlanningResult] = useState<CalculationResult | null>(null);
@@ -815,8 +818,8 @@ export default function HesaplamaPage() {
                         <SelectValue placeholder="Ekipman tipi seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
-                        {CONTAINER_TYPE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {containerTypes.map((option) => (
+                          <SelectItem key={option.id} value={option.code}>
                             {option.label}
                           </SelectItem>
                         ))}
@@ -962,8 +965,8 @@ export default function HesaplamaPage() {
                         <SelectValue placeholder="Ekipman tipi seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
-                        {CONTAINER_TYPE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {containerTypes.map((option) => (
+                          <SelectItem key={option.id} value={option.code}>
                             {option.label}
                           </SelectItem>
                         ))}

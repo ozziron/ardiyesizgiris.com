@@ -30,6 +30,20 @@ export const calculationFormSchema = z.object({
   gateInDate: optionalDateField,
 })
 
+// Container type form schema — admin-managed lookup
+export const containerTypeFormSchema = z.object({
+  code: z
+    .string()
+    .min(1, "Kod girin")
+    .max(20, "Kod en fazla 20 karakter olmalı")
+    .regex(/^[A-Z0-9]+$/, "Sadece büyük harf ve rakam (örn. 20DC, 40HC, 20RF)")
+    .toUpperCase(),
+  label: z.string().min(1, "Açıklama girin").max(120, "Açıklama en fazla 120 karakter"),
+  displayOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(true),
+  notes: z.string().max(500).optional().nullable(),
+})
+
 // Port form schema
 export const portFormSchema = z.object({
   name: z.string().min(1, "Liman adi girin"),

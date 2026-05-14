@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, CheckCircle2, Loader2, AlertCircle } from "lucide-react"
-import { CONTAINER_TYPE_OPTIONS } from "@/lib/constants/container-types"
+import { useContainerTypes } from "@/hooks/use-container-types"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -64,6 +64,9 @@ export function FreeTimeRuleBulkForm() {
   const [ports, setPorts] = useState<PortOption[]>([])
   const [carriers, setCarriers] = useState<CarrierOption[]>([])
   const [loading, setLoading] = useState(true)
+  // Container types now come from the DB (admin-managed). The hook
+  // returns only ACTIVE types; soft-deleted ones disappear automatically.
+  const { options: containerTypes } = useContainerTypes()
 
   // Form state — multi-selects use Sets for O(1) toggle.
   const [shippingCompanyId, setShippingCompanyId] = useState("")
@@ -372,11 +375,11 @@ export function FreeTimeRuleBulkForm() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-              {CONTAINER_TYPE_OPTIONS.map((opt) => {
-                const checked = selectedContainerTypes.has(opt.value)
+              {containerTypes.map((opt) => {
+                const checked = selectedContainerTypes.has(opt.code)
                 return (
                   <label
-                    key={opt.value}
+                    key={opt.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
                       checked
                         ? "border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30"
@@ -385,11 +388,11 @@ export function FreeTimeRuleBulkForm() {
                   >
                     <Checkbox
                       checked={checked}
-                      onCheckedChange={() => toggleType(opt.value)}
+                      onCheckedChange={() => toggleType(opt.code)}
                     />
                     <div className="min-w-0">
                       <p className="text-sm font-medium">{opt.label}</p>
-                      <p className="text-xs font-mono text-muted-foreground">{opt.value}</p>
+                      <p className="text-xs font-mono text-muted-foreground">{opt.code}</p>
                     </div>
                   </label>
                 )

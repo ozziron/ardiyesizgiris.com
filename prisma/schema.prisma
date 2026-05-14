@@ -25,12 +25,13 @@ model User {
   deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  calculations     Calculation[]
-  exports          CalculationExport[]
-  createdPorts     Port[]            @relation("PortCreatedBy")
-  createdCarriers  ShippingCompany[] @relation("CarrierCreatedBy")
-  createdFreeTime  FreeTimeRule[]    @relation("FreeTimeCreatedBy")
-  createdTariffs   TariffRule[]      @relation("TariffCreatedBy")
+  calculations          Calculation[]
+  exports               CalculationExport[]
+  createdPorts          Port[]            @relation("PortCreatedBy")
+  createdCarriers       ShippingCompany[] @relation("CarrierCreatedBy")
+  createdFreeTime       FreeTimeRule[]    @relation("FreeTimeCreatedBy")
+  createdTariffs        TariffRule[]      @relation("TariffCreatedBy")
+  createdContainerTypes ContainerType[]   @relation("ContainerTypeCreatedBy")
   role  UserRole @default(USER)
 
   @@map("users")
@@ -196,6 +197,32 @@ model CalculationExport {
   @@index([calculationId])
   @@index([userId])
   @@map("calculation_exports")
+}
+
+// CONTAINER TYPE MODEL
+// Admin-managed lookup of container/equipment types (20DC, 40DC, 40HC,
+// plus custom types like 20RF reefer, 20OT open-top, etc.). Used by the
+// calculation form, free-time rules and tariff rules.
+//
+// IMPORTANT: There is no foreign-key relation from FreeTimeRule.containerType
+// or TariffRule.containerType to this table. Those columns store the `code`
+// as a plain string. This keeps existing rules safe when an admin soft-
+// deletes (isActive=false) a type — the rules still resolve their type
+// label at display time but the type stops appearing in new-rule selects.
+model ContainerType {
+  id           String   @id @default(uuid())
+  code         String   @unique  // "20DC", "40HC", "20RF", etc.
+  label        String   // Human-readable, "20 Feet Standart (20DC)"
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdBy    String?  @map("created_by")
+
+  creator User? @relation("ContainerTypeCreatedBy", fields: [createdBy], references: [id])
+
+  @@map("container_types")
 }
 
 // FREE USAGE TRACKING MODEL
