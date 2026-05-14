@@ -3,26 +3,38 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Anchor, Ship, Zap, TrendingUp } from "lucide-react"
+import { Anchor, Ship, Zap, TrendingUp, Calculator } from "lucide-react"
+
+interface DashboardStats {
+  ports: number
+  carriers: number
+  freeTimeRules: number
+  tariffRules: number
+  calculations: number
+}
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     ports: 0,
     carriers: 0,
+    freeTimeRules: 0,
+    tariffRules: 0,
     calculations: 0,
   })
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch stats
     const fetchStats = async () => {
       try {
-        const portCount = await fetch("/api/admin/ports").then(r => r.json())
-        setStats(prev => ({
-          ...prev,
-          ports: Array.isArray(portCount.data) ? portCount.data.length : 0,
-        }))
+        const res = await fetch("/api/admin/stats")
+        if (res.ok) {
+          const data = await res.json()
+          setStats(data.data)
+        }
       } catch (error) {
         console.error("Error fetching stats:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -46,17 +58,24 @@ export default function AdminDashboard() {
     },
     {
       label: "Muafiyet Kuralları",
-      value: "-",
+      value: stats.freeTimeRules,
       icon: Zap,
       href: "/admin/muafiyet-kurallari",
       color: "bg-yellow-500",
     },
     {
       label: "Ücret Tarifeleri",
-      value: "-",
+      value: stats.tariffRules,
       icon: TrendingUp,
       href: "/admin/ucret-tarifeleri",
       color: "bg-purple-500",
+    },
+    {
+      label: "Hesaplamalar",
+      value: stats.calculations,
+      icon: Calculator,
+      href: "/admin/hesaplamalar",
+      color: "bg-emerald-500",
     },
   ]
 
@@ -72,7 +91,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
         {dashboardCards.map((card) => {
           const Icon = card.icon
           return (
@@ -89,7 +108,11 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {card.value}
+                  {isLoading ? (
+                    <span className="inline-block w-12 h-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+                  ) : (
+                    card.value
+                  )}
                 </div>
                 <Link href={card.href}>
                   <p className="text-xs text-emerald-600 hover:text-emerald-700 mt-2">
