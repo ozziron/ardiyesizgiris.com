@@ -53,6 +53,19 @@
   * {
     @apply border-border;
   }
+  /*
+    Always reserve room for the vertical scrollbar at <html> level so short
+    pages (e.g. /hesaplama, /iletisim) don't shift content right by ~15px
+    relative to taller pages (e.g. /). Without this the fixed header and
+    centered nav appear to "jump" between routes.
+
+    `scrollbar-gutter: stable` is the modern, well-supported way to do this;
+    `overflow-y: scroll` is the legacy fallback for older browsers.
+  */
+  html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+  }
   body {
     @apply bg-background text-foreground;
   }

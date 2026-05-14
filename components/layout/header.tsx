@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { Menu, X, Calculator, Sun, Moon, LogOut, User, LayoutDashboard, Settings, History, ChevronDown } from "lucide-react"
@@ -18,25 +18,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { data: session, status } = useSession()
   const isAdmin = session?.user?.role === "ADMIN"
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
   return (
     <header
+      // Static appearance — no scroll reaction. Earlier design went
+      // transparent at the top and only opaque after scroll, which made
+      // the first viewport look like "no header is present" and produced
+      // a visible visual jump when clicking in-page anchors (e.g. #sss).
+      // Keeping one consistent style removes that surprise. Backdrop blur
+      // lets the emerald hero gradient tint through softly without losing
+      // readability.
       className={cn(
-        "fixed top-0 w-full z-50 transition-all duration-300",
-        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-2" : "bg-transparent py-4",
+        "fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm py-3",
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
