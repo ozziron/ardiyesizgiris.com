@@ -13,6 +13,8 @@ export interface CalculationPDFData {
   freeDays: number
   freeUntilDate: Date | string
   totalCharge: number
+  /** ISO-4217 (TRY/USD/EUR…). Optional for back-compat; defaults to TRY. */
+  currency?: string
   totalDaysAtPort?: number
   chargeableDays?: number
   warning?: string
@@ -24,13 +26,33 @@ export interface CalculationPDFData {
   }>
 }
 
+const CURRENCY_SYMBOL: Record<string, string> = {
+  TRY: "₺",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+}
+
+const moneyFormatter = (currency: string) => (value: number) => {
+  const code = (currency || "TRY").toUpperCase()
+  const symbol = CURRENCY_SYMBOL[code]
+  const num = value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  // jsPDF default font has no €/£ glyphs; use the ISO code suffix as a safe
+  // fallback for anything outside TRY/USD. TRY/USD use their well-known sign.
+  if (symbol && (code === "TRY" || code === "USD")) {
+    return `${num} ${symbol}`
+  }
+  return `${num} ${code}`
+}
+
 const toDate = (value: Date | string | null | undefined) => {
   if (!value) return null
   return value instanceof Date ? value : new Date(value)
 }
 
-const formatTL = (value: number) =>
-  `${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺`
+// Default formatter (TRY) — kept for any legacy call sites and as a
+// fallback. Currency-aware sites use moneyFormatter(currency) instead.
+const formatTL = moneyFormatter("TRY")
 
 // ─── Brand palette (Tailwind emerald + neutrals) ─────────────────────
 const COLORS = {
@@ -256,8 +278,10 @@ const drawTierTable = (
   doc: jsPDF,
   rows: NonNullable<CalculationPDFData["chargeBreakdown"]>,
   totalCharge: number,
-  y: number
+  y: number,
+  currency: string = "TRY"
 ): number => {
+  const fmt = moneyFormatter(currency)
   const headerH = 8
   const rowH = 7
   const totalRowH = 9
@@ -300,8 +324,8 @@ const drawTierTable = (
     setText(doc, COLORS.TEXT_PRIMARY)
     doc.text(`Kademe ${row.tier}`, cols.tier.x + 4, rowY)
     doc.text(`${row.days} gün`, cols.days.x + 4, rowY)
-    doc.text(formatTL(row.price_per_day), cols.unit.x + 4, rowY)
-    doc.text(formatTL(row.subtotal), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY, { align: "right" })
+    doc.text(fmt(row.price_per_day), cols.unit.x + 4, rowY)
+    doc.text(fmt(row.subtotal), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY, { align: "right" })
     rowY += rowH
   })
 
@@ -317,7 +341,7 @@ const drawTierTable = (
   doc.setFontSize(10)
   setText(doc, COLORS.EMERALD_DARKER)
   doc.text("TOPLAM MASRAF", cols.tier.x + 4, rowY + 1)
-  doc.text(formatTL(totalCharge), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY + 1, { align: "right" })
+  doc.text(fmt(totalCharge), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY + 1, { align: "right" })
 
   return y + tableHeight + 8
 }
@@ -385,6 +409,11 @@ export function generateCalculationPDF(data: CalculationPDFData): string {
   const freeUntilDate = toDate(data.freeUntilDate)
   const isPlanning = data.calculationType === "planning"
   const containerId = data.containerId?.trim() || "Belirtilmedi"
+  const currency = data.currency || "TRY"
+  const fmt = moneyFormatter(currency)
+  const zeroLabel = `${(0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${
+    currency === "TRY" ? "₺" : currency === "USD" ? "$" : currency
+  }`
 
   drawHeaderBand(doc)
 
@@ -409,7 +438,7 @@ export function generateCalculationPDF(data: CalculationPDFData): string {
     y = drawHeroCard(
       doc,
       "Sonuç",
-      "0,00 ₺ — Ücretsiz",
+      `${zeroLabel} — Ücretsiz`,
       "Operasyonun tamamı muafiyet süresi içinde gerçekleşti.",
       y
     )
@@ -417,7 +446,7 @@ export function generateCalculationPDF(data: CalculationPDFData): string {
     y = drawHeroCard(
       doc,
       "Toplam masraf",
-      formatTL(data.totalCharge),
+      fmt(data.totalCharge),
       `${data.chargeableDays ?? 0} ücretli gün üzerinden hesaplandı.`,
       y
     )
@@ -448,7 +477,7 @@ export function generateCalculationPDF(data: CalculationPDFData): string {
   // Tier breakdown — only for cost mode with actual charges
   if (!isPlanning && data.totalCharge > 0 && data.chargeBreakdown && data.chargeBreakdown.length > 0) {
     y = drawSectionTitle(doc, "Masraf Kırılımı", y)
-    y = drawTierTable(doc, data.chargeBreakdown, data.totalCharge, y)
+    y = drawTierTable(doc, data.chargeBreakdown, data.totalCharge, y, currency)
   }
 
   // Warning (cost mode edge cases like gate-in before departure)

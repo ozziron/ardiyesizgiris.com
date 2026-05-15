@@ -17,10 +17,9 @@ export async function GET() {
   }
 
   try {
-    const [ports, carriers, freeTimeRules, tariffRules, calculations] = await Promise.all([
+    const [ports, carriers, tariffRules, calculations] = await Promise.all([
       prisma.port.count(),
       prisma.shippingCompany.count(),
-      prisma.freeTimeRule.count(),
       prisma.tariffRule.count(),
       prisma.calculation.count(),
     ])
@@ -29,7 +28,6 @@ export async function GET() {
       data: {
         ports,
         carriers,
-        freeTimeRules,
         tariffRules,
         calculations,
       },

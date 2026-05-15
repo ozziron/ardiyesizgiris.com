@@ -68,9 +68,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 /**
- * DELETE — soft delete by default (isActive=false). Existing FreeTimeRule
- * and TariffRule rows that reference this type by `code` string keep
- * working; the type just disappears from new-rule selects.
+ * DELETE — soft delete by default (isActive=false). Existing TariffRule
+ * rows that reference this type by `code` string keep working; the type
+ * just disappears from new-rule selects.
  *
  * Pass ?hard=true to permanently delete (admin discretion — only safe
  * when no rule references this code).

@@ -273,6 +273,13 @@ export function TariffRuleForm({
                 />
               </div>
 
+              <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+                <span aria-hidden className="mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/15 font-semibold">i</span>
+                <p className="leading-relaxed">
+                  <strong className="font-semibold">İpucu:</strong> Tier 1&apos;e <strong>günlük ücret 0</strong> girilirse o gün aralığı <strong>muafiyet penceresi</strong> olarak değerlendirilir.
+                </p>
+              </div>
+
               <div className="grid gap-4 rounded-2xl border border-slate-200 p-4 md:grid-cols-3 dark:border-slate-800">
                 <div className="space-y-4">
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">Tier 1</p>

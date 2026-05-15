@@ -3,11 +3,44 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { ASSIGNEES, ROLES, LEGACY_AGENT_MAP } = require("./orchestrator/constants");
 
 const STATUSES = ["backlog", "todo", "in-review", "approved", "done"];
 const PRIORITIES = ["P0", "P1", "P2", "P3"];
 const TYPES = ["feature", "fix", "refactor", "docs", "chore"];
 const REQUIRED_REVIEW_SECTIONS = ["Yapılanlar", "Etkilenen Dosyalar", "Verification"];
+
+function resolveAssigneeRole(flags) {
+  let assignee = flags.assignee || null;
+  let role = flags.role || null;
+
+  if (flags.agent && (!assignee || !role)) {
+    const legacy = LEGACY_AGENT_MAP[String(flags.agent).toLowerCase()];
+    if (legacy) {
+      console.warn(`WARN: --agent is deprecated. Mapped "${flags.agent}" → assignee=${legacy.assignee}, role=${legacy.role}.`);
+      assignee = assignee || legacy.assignee;
+      role = role || legacy.role;
+    } else {
+      console.warn(`WARN: --agent is deprecated and value "${flags.agent}" is not in the legacy map. Use --assignee and --role.`);
+    }
+  }
+
+  return { assignee, role };
+}
+
+function validateAssignee(value) {
+  if (!value) return;
+  if (!ASSIGNEES.includes(value)) {
+    fail(`invalid assignee: ${value}. Use ${ASSIGNEES.join("|")}`);
+  }
+}
+
+function validateRole(value) {
+  if (!value) return;
+  if (!ROLES.includes(value)) {
+    fail(`invalid role: ${value}. Use ${ROLES.join("|")}`);
+  }
+}
 
 const repoRoot = path.resolve(__dirname, "..", "..");
 const ticketsDir = path.join(repoRoot, "tickets");
@@ -18,14 +51,19 @@ function usage(exitCode = 0) {
 Ticket CLI
 
 Usage:
-  node agents/ticket.js new "Başlık" [--priority P1] [--type fix] [--agent developer]
-  node agents/ticket.js start TICKET-004 [--agent developer]
+  node agents/ticket.js new "Başlık" [--priority P1] [--type fix] [--assignee opus-4.7] [--role developer]
+  node agents/ticket.js start TICKET-004 [--assignee gemini] [--role developer]
   node agents/ticket.js backlog TICKET-004
   node agents/ticket.js review TICKET-004
   node agents/ticket.js done TICKET-004 --reviewer opus-4.7 [--commit abc123] [--note "Kapanış notu"]
-  node agents/ticket.js sync-roadmap main/roadmap.md [--agent developer] [--start]
-  node agents/ticket.js enrich-roadmap-tickets main/roadmap.md [--agent developer] [--force]
+  node agents/ticket.js sync-roadmap main/roadmap.md [--assignee gemini --role developer] [--start]
+  node agents/ticket.js enrich-roadmap-tickets main/roadmap.md [--assignee gemini --role developer] [--force]
   node agents/ticket.js check
+
+Assignees: ${ASSIGNEES.join(", ")}
+Roles:     ${ROLES.join(", ")}
+
+The legacy --agent flag is accepted as a deprecated alias and mapped to assignee+role.
 `);
   process.exit(exitCode);
 }
@@ -125,7 +163,7 @@ function parseFrontmatter(content) {
 }
 
 function serializeFrontmatter(data, body) {
-  const orderedKeys = ["id", "title", "date", "agent", "status", "priority", "type", "branch", "commit", "reviewer", "source", "source_hash"];
+  const orderedKeys = ["id", "title", "date", "assignee", "role", "agent", "status", "priority", "type", "branch", "commit", "reviewer", "source", "source_hash"];
   const seen = new Set();
   const lines = [];
 
@@ -234,13 +272,18 @@ function inferType(text) {
   return "feature";
 }
 
-function inferAgent(text, fallback) {
+function inferRole(text, fallback) {
   const roleMatch = text.match(/\*\*Rol:\*\*\s*([^.\n]+)/i);
   if (roleMatch) {
-    return stripMarkdown(roleMatch[1]).trim();
+    const raw = stripMarkdown(roleMatch[1]).trim().toLowerCase();
+    if (ROLES.includes(raw)) return raw;
+    if (raw.includes("i18n") || raw.includes("developer")) return "developer";
+    if (raw.includes("designer")) return "designer";
+    if (raw.includes("marketing")) return "marketing";
+    if (raw.includes("review")) return "reviewer";
+    if (raw.includes("qa") || raw.includes("test")) return "qa";
   }
-
-  return fallback;
+  return fallback || "developer";
 }
 
 function titleFromRoadmapItem(text) {
@@ -257,14 +300,14 @@ function titleFromRoadmapItem(text) {
   return cleaned.replace(/[.!?]\s*$/, "");
 }
 
-function roadmapTaskDetails(raw, fallbackAgent) {
+function roadmapTaskDetails(raw, fallbackRole) {
   return {
-    agent: inferAgent(raw, fallbackAgent),
+    role: inferRole(raw, fallbackRole),
     size: extractRoadmapField(raw, "Boyut") || "Belirtilmedi",
     cleanText: stripMarkdown(raw),
     scopeItems: inferScopeItems(raw),
     verificationItems: inferVerificationItems(raw),
-    agentInstruction: inferAgentInstruction(raw, fallbackAgent),
+    agentInstruction: inferAgentInstruction(raw, fallbackRole),
   };
 }
 
@@ -335,29 +378,31 @@ function inferVerificationItems(raw) {
   return items;
 }
 
-function inferAgentInstruction(raw, fallbackAgent) {
-  const agent = inferAgent(raw, fallbackAgent).toLowerCase();
+function inferAgentInstruction(raw, fallbackRole) {
+  const role = inferRole(raw, fallbackRole);
 
-  if (agent.includes("i18n")) {
-    return "Türkçe karakter ve ekran metni düzeltmelerinde küçük dosya gruplarıyla çalış; değişiklik sonrası direct inspection/grep ile eksik kalan string olmadığını doğrula.";
-  }
-  if (agent.includes("designer")) {
+  if (role === "designer") {
     return "UI davranışını mevcut tasarım sistemiyle uyumlu tut; görsel değişikliklerde ekranı çalıştırıp desktop/mobile taşma ve okunabilirlik kontrolü yap.";
   }
-  if (agent.includes("developer")) {
-    return "Mevcut Next.js/Prisma/agent CLI kalıplarını takip et; kapsamı ticket ile sınırlı tut ve ilgili type check veya akış doğrulamasını çalıştır.";
+  if (role === "marketing") {
+    return "Logistics audience'a yönelik kısa ve data-driven copy üret; ticket kapsamını aşma.";
   }
-
-  return "Ticket kapsamını aşmadan çalış; belirsiz kalan noktaları Sıradaki Adım veya Notlar bölümüne yaz.";
+  if (role === "reviewer") {
+    return "Worker'ın doldurduğu Verification bölümünü birebir tekrar et; aksaklık varsa back-to-todo, temizse done + commit + reviewer alanlarını doldur.";
+  }
+  if (role === "qa") {
+    return "Ticket'taki verification adımlarını birebir uygula; pass/fail kanıtla raporla; done'a alma.";
+  }
+  return "Mevcut Next.js/Prisma/agent CLI kalıplarını takip et; kapsamı ticket ile sınırlı tut ve ilgili type check veya akış doğrulamasını çalıştır.";
 }
 
-function roadmapTicketBody(task, agent) {
-  const details = roadmapTaskDetails(task.raw, agent);
+function roadmapTicketBody(task, fallbackRole) {
+  const details = roadmapTaskDetails(task.raw, fallbackRole);
 
   return `## Açıklama
 - Bu ticket self-contained çalışılmalıdır; normal geliştirme session'ında roadmap dosyasını tekrar okumaya gerek yoktur.
 - Amaç: ${details.cleanText}
-- Beklenen rol: ${details.agent}
+- Beklenen rol: ${details.role}
 - Boyut: ${details.size}
 
 ## Kapsam
@@ -426,14 +471,32 @@ function hasMeaningfulSection(content) {
   return stripped.length > 0;
 }
 
-function normalizedAgentName(value) {
+function normalizedName(value) {
   return String(value || "unassigned").trim().toLowerCase() || "unassigned";
 }
 
-function ticketAgent(ticket) {
+function ticketAssigneeRole(ticket) {
   const content = readUtf8(ticket.path);
   const parsed = parseFrontmatter(content);
-  return normalizedAgentName(parsed.data.agent);
+  let assignee = parsed.data.assignee;
+  let role = parsed.data.role;
+
+  // Backwards-compat: pre-refactor tickets only had `agent:` — map it.
+  if ((!assignee || !role) && parsed.data.agent) {
+    const legacy = LEGACY_AGENT_MAP[normalizedName(parsed.data.agent)];
+    if (legacy) {
+      assignee = assignee || legacy.assignee;
+      role = role || legacy.role;
+    }
+  }
+  return {
+    assignee: normalizedName(assignee),
+    role: normalizedName(role || "developer"),
+  };
+}
+
+function ticketAssignee(ticket) {
+  return ticketAssigneeRole(ticket).assignee;
 }
 
 function validateReviewReady(ticket) {
@@ -488,7 +551,11 @@ function commandNew(args, flags) {
 
   const priority = flags.priority || "P2";
   const type = flags.type || "feature";
-  const agent = flags.agent || "unassigned";
+  const resolved = resolveAssigneeRole(flags);
+  const assignee = resolved.assignee || "unassigned";
+  const role = resolved.role || "unassigned";
+  validateAssignee(assignee);
+  validateRole(role);
   const branch = flags.branch || "";
   const source = flags.source || "";
   const sourceHash = flags["source-hash"] || flags.source_hash || "";
@@ -530,7 +597,8 @@ function commandNew(args, flags) {
 id: ${id}
 title: ${title}
 date: ${today()}
-agent: ${agent}
+assignee: ${assignee}
+role: ${role}
 status: backlog
 priority: ${priority}
 type: ${type}
@@ -596,7 +664,11 @@ function ticketIdentitySet() {
 function commandSyncRoadmap(args, flags) {
   const roadmapArg = args[0] || path.join("main", "roadmap.md");
   const roadmapPath = path.resolve(repoRoot, roadmapArg);
-  const agent = flags.agent || "roadmap-sync";
+  const resolved = resolveAssigneeRole(flags);
+  const fallbackAssignee = resolved.assignee || "unassigned";
+  const fallbackRole = resolved.role || "developer";
+  validateAssignee(fallbackAssignee);
+  validateRole(fallbackRole);
 
   if (!fs.existsSync(roadmapPath)) {
     fail(`roadmap not found: ${roadmapPath}`);
@@ -620,10 +692,11 @@ function commandSyncRoadmap(args, flags) {
     const result = commandNew([task.title], {
       priority: task.priority,
       type: inferType(task.raw),
-      agent: inferAgent(task.raw, agent),
+      assignee: fallbackAssignee,
+      role: inferRole(task.raw, fallbackRole),
       source: `${path.relative(repoRoot, roadmapPath).replace(/\\/g, "/")}:${task.line}`,
       "source-hash": task.sourceHash,
-      body: roadmapTicketBody(task, agent),
+      body: roadmapTicketBody(task, fallbackRole),
     });
 
     identities.add(hashKey);
@@ -635,14 +708,16 @@ function commandSyncRoadmap(args, flags) {
 
   if (flags.start && created.length > 0) {
     const first = created.sort((a, b) => a.id.localeCompare(b.id))[0];
-    commandStart([first.id], { agent });
+    commandStart([first.id], { assignee: fallbackAssignee, role: fallbackRole });
   }
 }
 
 function commandEnrichRoadmapTickets(args, flags) {
   const roadmapArg = args[0] || path.join("main", "roadmap.md");
   const roadmapPath = path.resolve(repoRoot, roadmapArg);
-  const agent = flags.agent || "roadmap-sync";
+  const resolved = resolveAssigneeRole(flags);
+  const fallbackRole = resolved.role || "developer";
+  validateRole(fallbackRole);
 
   if (!fs.existsSync(roadmapPath)) {
     fail(`roadmap not found: ${roadmapPath}`);
@@ -681,7 +756,8 @@ function commandEnrichRoadmapTickets(args, flags) {
       continue;
     }
 
-    const next = serializeFrontmatter(parsed.data, roadmapTicketBody(task, parsed.data.agent || agent));
+    const existingRole = parsed.data.role || (parsed.data.agent ? (LEGACY_AGENT_MAP[normalizedName(parsed.data.agent)]?.role) : null);
+    const next = serializeFrontmatter(parsed.data, roadmapTicketBody(task, existingRole || fallbackRole));
     writeUtf8(ticket.path, next);
     updated++;
   }
@@ -698,16 +774,27 @@ function commandStart(args, flags) {
     fail(`ticket must be in backlog before start. Current status: ${ticket.status}`);
   }
 
-  const targetAgent = normalizedAgentName(flags.agent || ticketAgent(ticket));
-  const activeTickets = listTicketFiles().filter((file) => file.status === "todo" && ticketAgent(file) === targetAgent);
+  const current = ticketAssigneeRole(ticket);
+  const resolved = resolveAssigneeRole(flags);
+  const targetAssignee = normalizedName(resolved.assignee || current.assignee);
+  const targetRole = normalizedName(resolved.role || current.role);
+  validateAssignee(targetAssignee);
+  validateRole(targetRole);
+
+  const activeTickets = listTicketFiles().filter(
+    (file) => file.status === "todo" && ticketAssignee(file) === targetAssignee && targetAssignee !== "unassigned"
+  );
   if (activeTickets.length > 0) {
-    fail(`${targetAgent} already has an active todo ticket: ${activeTickets.map((file) => file.name).join(", ")}`);
+    fail(`${targetAssignee} already has an active todo ticket: ${activeTickets.map((file) => file.name).join(", ")}`);
   }
 
   const updates = {
     date: today(),
-    agent: targetAgent,
+    assignee: targetAssignee,
+    role: targetRole,
   };
+  // Clear deprecated single agent field if it lingers.
+  if (ticket.path) updates.agent = "";
 
   const moved = moveTicket(ticket, "todo", updates);
   console.log(`Started ${path.relative(repoRoot, moved.path)}`);
@@ -800,17 +887,18 @@ function commandCheck() {
   const issues = [];
   const files = listTicketFiles();
 
-  const todoTicketsByAgent = new Map();
+  const todoTicketsByAssignee = new Map();
   for (const file of files.filter((ticketFile) => ticketFile.status === "todo")) {
-    const agent = ticketAgent(file);
-    const agentTickets = todoTicketsByAgent.get(agent) || [];
-    agentTickets.push(file.name);
-    todoTicketsByAgent.set(agent, agentTickets);
+    const assignee = ticketAssignee(file);
+    if (assignee === "unassigned") continue;
+    const list = todoTicketsByAssignee.get(assignee) || [];
+    list.push(file.name);
+    todoTicketsByAssignee.set(assignee, list);
   }
 
-  for (const [agent, ticketNames] of todoTicketsByAgent.entries()) {
+  for (const [assignee, ticketNames] of todoTicketsByAssignee.entries()) {
     if (ticketNames.length > 1) {
-      issues.push(`${agent} has more than one active todo ticket: ${ticketNames.join(", ")}`);
+      issues.push(`${assignee} has more than one active todo ticket: ${ticketNames.join(", ")}`);
     }
   }
 
@@ -826,10 +914,25 @@ function commandCheck() {
       continue;
     }
 
-    for (const key of ["id", "title", "date", "agent", "status", "priority", "type"]) {
+    for (const key of ["id", "title", "date", "status", "priority", "type"]) {
       if (!parsed.data[key]) {
         issues.push(`${file.name}: missing frontmatter field "${key}"`);
       }
+    }
+
+    // assignee/role required, but legacy `agent` is accepted as a fallback so
+    // un-migrated tickets don't fail the check before migration runs.
+    if (!parsed.data.assignee && !parsed.data.agent) {
+      issues.push(`${file.name}: missing frontmatter field "assignee" (legacy "agent" also missing)`);
+    }
+    if (!parsed.data.role && !parsed.data.agent) {
+      issues.push(`${file.name}: missing frontmatter field "role" (legacy "agent" also missing)`);
+    }
+    if (parsed.data.assignee && !ASSIGNEES.includes(parsed.data.assignee)) {
+      issues.push(`${file.name}: invalid assignee "${parsed.data.assignee}"`);
+    }
+    if (parsed.data.role && !ROLES.includes(parsed.data.role)) {
+      issues.push(`${file.name}: invalid role "${parsed.data.role}"`);
     }
 
     if (parsed.data.id !== idFromName) {

@@ -3,12 +3,11 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Anchor, FileBarChart, Ship, Zap, TrendingUp } from "lucide-react"
+import { Anchor, FileBarChart, Ship, TrendingUp } from "lucide-react"
 
 interface DashboardStats {
   ports: number
   carriers: number
-  freeTimeRules: number
   tariffRules: number
   calculations: number
 }
@@ -17,7 +16,6 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     ports: 0,
     carriers: 0,
-    freeTimeRules: 0,
     tariffRules: 0,
     calculations: 0,
   })
@@ -55,13 +53,6 @@ export default function AdminDashboard() {
       icon: Ship,
       href: "/admin/gemiler",
       color: "bg-green-500",
-    },
-    {
-      label: "Muafiyet Kuralları",
-      value: stats.freeTimeRules,
-      icon: Zap,
-      href: "/admin/muafiyet-kurallari",
-      color: "bg-yellow-500",
     },
     {
       label: "Ücret Tarifeleri",
@@ -136,9 +127,6 @@ export default function AdminDashboard() {
           </Button>
           <Button asChild variant="outline">
             <Link href="/admin/gemiler?action=create">Yeni Gemi Ekle</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/admin/muafiyet-kurallari?action=create">Muafiyet Kuralı Ekle</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href="/admin/ucret-tarifeleri?action=create">Ücret Tarifesi Ekle</Link>

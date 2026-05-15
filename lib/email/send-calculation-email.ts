@@ -13,6 +13,8 @@ export interface CalculationEmailData {
   freeUntilDate: Date | string
   freeDays: number
   totalCharge: number
+  /** ISO-4217 (TRY/USD/EUR…). Defaults to TRY for back-compat. */
+  currency?: string
   totalDaysAtPort?: number
   chargeableDays?: number
   warning?: string
@@ -34,8 +36,21 @@ const toDate = (value: Date | string | null | undefined) => {
   return value instanceof Date ? value : new Date(value)
 }
 
-const formatTL = (value: number) =>
-  `${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺`
+const CURRENCY_SYMBOL: Record<string, string> = {
+  TRY: "₺",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+}
+
+const moneyFormatter = (currency: string) => (value: number) => {
+  const code = (currency || "TRY").toUpperCase()
+  const symbol = CURRENCY_SYMBOL[code]
+  const num = value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return symbol ? `${num} ${symbol}` : `${num} ${code}`
+}
+
+const formatTL = moneyFormatter("TRY")
 
 /**
  * Decides whether the configured Resend API key looks real.
@@ -65,6 +80,14 @@ const buildEmailHtml = (data: CalculationEmailData) => {
   const isPlanning = data.calculationType === "planning"
   const containerId = data.containerId?.trim() || "Belirtilmedi"
   const greetingName = data.recipientName?.trim() || "Merhaba"
+  const fmt = moneyFormatter(data.currency || "TRY")
+  const zeroLabel = `${(0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${
+    (data.currency || "TRY") === "TRY"
+      ? "₺"
+      : (data.currency || "TRY") === "USD"
+        ? "$"
+        : data.currency
+  }`
 
   const subject = isPlanning
     ? "Ardiyesiz giriş tarihi planlama sonucu"
@@ -80,12 +103,12 @@ const buildEmailHtml = (data: CalculationEmailData) => {
     : data.totalCharge === 0
       ? {
           caption: "SONUÇ",
-          big: "0,00 ₺ — Ücretsiz",
+          big: `${zeroLabel} — Ücretsiz`,
           sub: "Operasyonun tamamı muafiyet süresi içinde gerçekleşti.",
         }
       : {
           caption: "TOPLAM MASRAF",
-          big: formatTL(data.totalCharge),
+          big: fmt(data.totalCharge),
           sub: `${data.chargeableDays ?? 0} ücretli gün üzerinden hesaplandı.`,
         }
 
@@ -123,8 +146,8 @@ const buildEmailHtml = (data: CalculationEmailData) => {
         <tr style="background-color: ${idx % 2 === 0 ? "#ffffff" : "#f9fafb"};">
           <td style="padding: 10px 12px; font-size: 14px; color: #111827;">Kademe ${row.tier}</td>
           <td style="padding: 10px 12px; font-size: 14px; color: #111827;">${row.days} gün</td>
-          <td style="padding: 10px 12px; font-size: 14px; color: #111827;">${formatTL(row.price_per_day)}</td>
-          <td style="padding: 10px 12px; font-size: 14px; color: #111827; text-align: right; font-weight: 600;">${formatTL(row.subtotal)}</td>
+          <td style="padding: 10px 12px; font-size: 14px; color: #111827;">${fmt(row.price_per_day)}</td>
+          <td style="padding: 10px 12px; font-size: 14px; color: #111827; text-align: right; font-weight: 600;">${fmt(row.subtotal)}</td>
         </tr>`
         )
         .join("")
@@ -149,7 +172,7 @@ const buildEmailHtml = (data: CalculationEmailData) => {
         <tfoot>
           <tr style="background-color: #ecfdf5;">
             <td colspan="3" style="padding: 12px; font-size: 14px; font-weight: 700; color: #047857;">TOPLAM MASRAF</td>
-            <td style="padding: 12px; font-size: 14px; font-weight: 700; color: #047857; text-align: right;">${formatTL(data.totalCharge)}</td>
+            <td style="padding: 12px; font-size: 14px; font-weight: 700; color: #047857; text-align: right;">${fmt(data.totalCharge)}</td>
           </tr>
         </tfoot>
       </table>`

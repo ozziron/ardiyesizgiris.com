@@ -62,19 +62,12 @@ export const carrierFormSchema = z.object({
   isActive: z.boolean().default(true),
 })
 
-// Free time rule schema
-export const freeTimeRuleSchema = z.object({
-  portId: z.string().min(1, "Liman seciniz"),
-  shippingCompanyId: z.string().min(1, "Hat seciniz"),
-  containerType: z.string().min(1, "Ekipman tipi seciniz"),
-  freeDays: z.coerce.number().int().min(1, "Muafiyet gunu en az 1 olmali"),
-  effectiveFrom: dateField,
-  effectiveUntil: optionalDateField,
-  isActive: z.boolean().default(true),
-  notes: z.string().optional(),
-})
-
 // Tariff rule schema
+//
+// Muafiyet (free time) artık ayrı bir tablo değil — TariffRule Tier 1 ile
+// modellenir: tier1PricePerDay = 0 olduğunda tier1DaysFrom..tier1DaysTo
+// aralığı muafiyet penceresidir. Bu yüzden tier1PricePerDay positive değil,
+// nonnegative. Tier 2 ve 3 hâlâ pozitif (ücretli kademeler).
 export const tariffRuleSchema = z
   .object({
     portId: z.string().min(1, "Liman seciniz"),
@@ -82,7 +75,7 @@ export const tariffRuleSchema = z
     containerType: z.string().min(1, "Konteyner tipi seciniz"),
     tier1DaysFrom: z.coerce.number().int().min(1),
     tier1DaysTo: z.coerce.number().int().min(1),
-    tier1PricePerDay: z.coerce.number().positive("Fiyat pozitif olmali"),
+    tier1PricePerDay: z.coerce.number().nonnegative("Fiyat negatif olamaz (0 girilirse muafiyet olarak değerlendirilir)"),
     tier2DaysFrom: z.coerce.number().int().min(1),
     tier2DaysTo: z.coerce.number().int().min(1),
     tier2PricePerDay: z.coerce.number().positive(),

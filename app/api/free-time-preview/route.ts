@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma"
 
 /**
  * Lightweight read-only endpoint for the live timeline preview on the
- * hesaplama page. Returns the matching FreeTimeRule's freeDays and the
+ * hesaplama page. Returns the matching TariffRule's Tier 1 freeDays and the
  * computed freeUntilDate as soon as port + carrier + containerType +
  * departureDate are all selected — so the user sees an anticipatory
  * timeline before they hit "Hesapla".
@@ -35,10 +35,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Geçersiz tarih" }, { status: 400 })
   }
 
-  // Same lookup the main calculator does — match on the full hierarchy
-  // (carrier > port > containerType) and pick the rule active on the
-  // departure date. Most-recent effectiveFrom wins on overlap.
-  const rule = await prisma.freeTimeRule.findFirst({
+  // Muafiyet artık TariffRule Tier 1 ile modellenir; ayrı bir FreeTimeRule
+  // sorgusu yok. Aynı tarife lookup'u (carrier > port > containerType +
+  // effective date) ile çalış ve Tier 1 fiyatı 0 ise tier1DaysTo'yu
+  // freeDays olarak dön.
+  const rule = await prisma.tariffRule.findFirst({
     where: {
       portId,
       shippingCompanyId,
@@ -48,24 +49,30 @@ export async function GET(request: Request) {
       OR: [{ effectiveUntil: null }, { effectiveUntil: { gte: effectiveDate } }],
     },
     orderBy: { effectiveFrom: "desc" },
-    select: { freeDays: true },
+    select: { tier1DaysTo: true, tier1PricePerDay: true },
   })
 
   if (!rule) {
     return NextResponse.json(
-      { error: "Bu liman ve hat kombinasyonu için muafiyet kuralı bulunamadı" },
+      { error: "Bu liman ve hat kombinasyonu için tarife bulunamadı" },
+      { status: 404 }
+    )
+  }
+
+  const freeDays = Number(rule.tier1PricePerDay) === 0 ? rule.tier1DaysTo : 0
+  if (freeDays === 0) {
+    return NextResponse.json(
+      { error: "Bu kombinasyon için muafiyet penceresi tanımlı değil (Tier 1 ücretli)" },
       { status: 404 }
     )
   }
 
   // freeUntilDate = departure - freeDays + 1 (same formula as calculator).
-  // Serialise to YYYY-MM-DD so the client doesn't have to deal with
-  // timezone conversion when feeding it into <CalculationTimeline>.
   const freeUntilDate = new Date(effectiveDate)
-  freeUntilDate.setDate(freeUntilDate.getDate() - rule.freeDays + 1)
+  freeUntilDate.setDate(freeUntilDate.getDate() - freeDays + 1)
 
   return NextResponse.json({
-    freeDays: rule.freeDays,
+    freeDays,
     freeUntilDate: freeUntilDate.toISOString().slice(0, 10),
   })
 }

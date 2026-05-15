@@ -1,9 +1,3 @@
-const { AGENT_ROLES, AGENT_STATUS, SYSTEM_PROMPTS, TOKEN_LIMITS, MODEL_CONFIG } = require('./constants');
+const constants = require('./constants');
 
-module.exports = {
-  AGENT_ROLES,
-  AGENT_STATUS,
-  SYSTEM_PROMPTS,
-  TOKEN_LIMITS,
-  MODEL_CONFIG
-};
+module.exports = constants;

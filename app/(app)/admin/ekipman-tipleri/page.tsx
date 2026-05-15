@@ -42,9 +42,8 @@ export default function ContainerTypesPage() {
     fetchTypes()
   }, [])
 
-  // Soft-delete by default. Existing FreeTimeRule/TariffRule rows that
-  // reference this code keep working; the type just stops appearing in
-  // new-rule selects.
+  // Soft-delete by default. Existing TariffRule rows that reference this
+  // code keep working; the type just stops appearing in new-rule selects.
   const handleDelete = async (id: string, code: string) => {
     if (!confirm(`"${code}" tipini pasife alalım mı? Mevcut kurallar bozulmaz, sadece yeni kayıtlarda seçilemez.`)) return
     setDeleting(id)
