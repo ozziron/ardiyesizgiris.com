@@ -1,0 +1,23 @@
+{
+  "name": "ardiyesizgiris-agents",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "ticket": "node ticket.js",
+    "ticket:check": "node ticket.js check",
+    "ticket:sync-roadmap": "node ticket.js sync-roadmap ../roadmap.md",
+    "ticket:enrich-roadmap": "node ticket.js enrich-roadmap-tickets ../roadmap.md",
+    "activity:from-commits": "node activity-log-from-commits.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
