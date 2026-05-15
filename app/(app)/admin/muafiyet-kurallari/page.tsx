@@ -33,7 +33,7 @@ export default function FreeTimeRulesPage() {
     } catch (error) {
       toast({
         title: "Hata",
-        description: "Muafiyet kurallari yuklenemedi",
+        description: "Muafiyet kuralları yüklenemedi",
         variant: "destructive",
       })
     } finally {
@@ -46,16 +46,16 @@ export default function FreeTimeRulesPage() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bu kurali silmek istediginize emin misiniz?")) return
+    if (!confirm("Bu kuralı silmek istediğinize emin misiniz?")) return
 
     setDeleting(id)
     try {
       const response = await fetch(`/api/admin/free-time-rules/${id}`, { method: "DELETE" })
-      if (!response.ok) throw new Error("Silme basarisiz")
+      if (!response.ok) throw new Error("Silme başarısız")
 
       toast({
-        title: "Basarili",
-        description: "Muafiyet kurali silindi",
+        title: "Başarılı",
+        description: "Muafiyet kuralı silindi",
       })
       await fetchRules()
     } catch (error) {
@@ -73,9 +73,9 @@ export default function FreeTimeRulesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Muafiyet Kurallari</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Muafiyet Kuralları</h2>
           <p className="text-slate-600 dark:text-slate-400">
-            Siralama mantigi: Hat, liman ve ekipman tipine gore exact muafiyet kurali.
+            Sıralama mantığı: Hat, liman ve ekipman tipine göre exact muafiyet kuralı.
           </p>
         </div>
         <Button asChild>
@@ -88,7 +88,7 @@ export default function FreeTimeRulesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tum Muafiyet Kayitlari ({rules.length})</CardTitle>
+          <CardTitle>Tüm Muafiyet Kayıtları ({rules.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -96,7 +96,7 @@ export default function FreeTimeRulesPage() {
               <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
             </div>
           ) : rules.length === 0 ? (
-            <p className="py-8 text-center text-slate-600">Henuz muafiyet kurali eklenmemis</p>
+            <p className="py-8 text-center text-slate-600">Henüz muafiyet kuralı eklenmemiş</p>
           ) : (
             <Table>
               <TableHeader>
@@ -105,10 +105,10 @@ export default function FreeTimeRulesPage() {
                   <TableHead>Liman</TableHead>
                   <TableHead>Ekipman</TableHead>
                   <TableHead>Muafiyet</TableHead>
-                  <TableHead>Baslangic</TableHead>
-                  <TableHead>Bitis</TableHead>
+                  <TableHead>Başlangıç</TableHead>
+                  <TableHead>Bitiş</TableHead>
                   <TableHead>Durum</TableHead>
-                  <TableHead>Islemler</TableHead>
+                  <TableHead>İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -117,7 +117,7 @@ export default function FreeTimeRulesPage() {
                     <TableCell className="font-medium">{rule.shippingCompany.name}</TableCell>
                     <TableCell>{rule.port.name}</TableCell>
                     <TableCell>{rule.containerType}</TableCell>
-                    <TableCell>{rule.freeDays} gun</TableCell>
+                    <TableCell>{rule.freeDays} gün</TableCell>
                     <TableCell>{new Date(rule.effectiveFrom).toLocaleDateString("tr-TR")}</TableCell>
                     <TableCell>
                       {rule.effectiveUntil ? new Date(rule.effectiveUntil).toLocaleDateString("tr-TR") : "-"}
