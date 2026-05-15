@@ -25,6 +25,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useContainerTypes } from "@/hooks/use-container-types";
 import { CalculationResultCard } from "@/components/calculation/result-card";
 import { CalculationTimeline } from "@/components/calculation/timeline";
+import { CalculationResultSkeleton } from "@/components/calculation/result-skeleton";
 
 type CalculationMode = "planning" | "cost";
 
@@ -863,14 +864,20 @@ export default function HesaplamaPage() {
                     inputs are complete but no real result yet; on submit the
                     preview unmounts and the richer result card animates into
                     its place (fade + zoom for the "grow into result" feel). */}
-                {planningPreview && !planningResult && (
+                {isPlanningLoading && (
+                  <div className="animate-in fade-in duration-300">
+                    <CalculationResultSkeleton />
+                  </div>
+                )}
+
+                {planningPreview && !planningResult && !isPlanningLoading && (
                   <LivePreviewCard
                     preview={planningPreview}
                     departureDate={planningForm.departureDate}
                   />
                 )}
 
-                {planningResult && (
+                {planningResult && !isPlanningLoading && (
                   <div className="animate-in fade-in zoom-in-95 duration-500">
                     <CalculationResultCard
                       mode="planning"
@@ -1020,14 +1027,20 @@ export default function HesaplamaPage() {
                 )}
 
                 {/* Preview / Result share the same slot — see planning tab. */}
-                {costPreview && !costResult && (
+                {isCostLoading && (
+                  <div className="animate-in fade-in duration-300">
+                    <CalculationResultSkeleton />
+                  </div>
+                )}
+
+                {costPreview && !costResult && !isCostLoading && (
                   <LivePreviewCard
                     preview={costPreview}
                     departureDate={costForm.departureDate}
                   />
                 )}
 
-                {costResult && (
+                {costResult && !isCostLoading && (
                   <div className="animate-in fade-in zoom-in-95 duration-500">
                     <CalculationResultCard
                       mode="cost"
