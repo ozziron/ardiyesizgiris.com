@@ -2,11 +2,14 @@ import { prisma } from "@/lib/db/prisma"
 import { differenceInCalendarDays } from "date-fns"
 import type { CalculationInput, CalculationResult } from "@/types/calculation"
 
+// Muafiyet (free time) artık ayrı bir kavram değil; TariffRule Tier 1 ile
+// modellenir. tier1PricePerDay === 0 olduğunda tier1DaysFrom..tier1DaysTo
+// aralığı muafiyet penceresidir. Tek bir TariffRule sorgusu yeterli.
 export async function calculateArdiye(input: CalculationInput): Promise<CalculationResult> {
   const effectiveDate = new Date(input.departureDate)
 
-  // Step 1: Get free time rule from DB
-  const freeTimeRule = await prisma.freeTimeRule.findFirst({
+  // Step 1: Get tariff rule from DB (muafiyet = Tier 1 @ 0)
+  const tariff = await prisma.tariffRule.findFirst({
     where: {
       portId: input.portId,
       shippingCompanyId: input.shippingCompanyId,
@@ -17,15 +20,20 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
         { effectiveUntil: null },
         { effectiveUntil: { gte: effectiveDate } },
       ],
-    } as any,
+    },
     orderBy: { effectiveFrom: "desc" },
   })
 
-  if (!freeTimeRule) {
-    throw new Error("Bu liman ve hat kombinasyonu için muafiyet kuralı bulunamadı")
+  if (!tariff) {
+    throw new Error("Bu liman ve hat kombinasyonu için tarife bulunamadı")
   }
 
-  const free_days = freeTimeRule.freeDays
+  const tier1Price = Number(tariff.tier1PricePerDay)
+  const tier2Price = Number(tariff.tier2PricePerDay)
+  const tier3Price = Number(tariff.tier3PricePerDay)
+
+  // Free time: Tier 1 ücretsizse muafiyet penceresi tier1DaysTo gündür
+  const free_days = tier1Price === 0 ? tariff.tier1DaysTo : 0
 
   // Step 2: Calculate free until date (departure - free_days + 1)
   const free_until_date = new Date(input.departureDate)
@@ -40,6 +48,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
       chargeable_days: 0,
       free_period_days: 0,
       total_charge: 0,
+      currency: tariff.currency,
       charge_breakdown: [],
       timeline: {
         departure: input.departureDate,
@@ -59,71 +68,28 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   // Step 5: Total days at port (both dates inclusive)
   const total_days_at_port = differenceInCalendarDays(input.departureDate, actual_gate_in) + 1
 
-  // Step 6: Calculate chargeable days
-  let chargeable_days = 0
-  if (actual_gate_in >= free_until_date) {
-    chargeable_days = 0
-  } else {
-    chargeable_days = Math.max(total_days_at_port - free_days, 0)
-  }
+  // Step 6: Free vs chargeable (display amounts)
+  const free_period_days = Math.min(total_days_at_port, free_days)
+  const chargeable_days = Math.max(0, total_days_at_port - free_period_days)
 
-  const free_period_days = total_days_at_port - chargeable_days
-
-  // If no chargeable days, return early
-  if (chargeable_days === 0) {
-    return {
-      free_days,
-      free_until_date,
-      total_days_at_port,
-      chargeable_days: 0,
-      free_period_days,
-      total_charge: 0,
-      charge_breakdown: [],
-      timeline: {
-        departure: input.departureDate,
-        free_until: free_until_date,
-        gate_in: actual_gate_in,
-      },
-      warning,
-    }
-  }
-
-  // Step 7: Get tariff rule from DB
-  const tariff = await prisma.tariffRule.findFirst({
-    where: {
-      portId: input.portId,
-      shippingCompanyId: input.shippingCompanyId,
-      containerType: input.containerType,
-      isActive: true,
-      effectiveFrom: { lte: effectiveDate },
-      OR: [
-        { effectiveUntil: null },
-        { effectiveUntil: { gte: effectiveDate } },
-      ],
-    },
-    orderBy: { effectiveFrom: "desc" },
-  })
-
-  if (!tariff) {
-    throw new Error("Bu kombinasyon için ücret tarifesi bulunamadı")
-  }
-
-  // Step 8: Apply tiered pricing (Tier 1 → 2 → 3)
+  // Step 7: Tier breakdown across ALL days at port. Tier 1 subtotal is 0
+  // when it represents muafiyet, but we still surface the row so consumers
+  // (result-card, PDF, email) can display "Muafiyet Dönemi: N gün".
   let total_charge = 0
-  const charge_breakdown: any[] = []
-  let remaining_days = chargeable_days
+  const charge_breakdown: Array<{
+    tier: number
+    days: number
+    price_per_day: number
+    subtotal: number
+  }> = []
+  let remaining_days = total_days_at_port
 
-  // Tier 1
+  // Tier 1 (may be muafiyet)
   if (remaining_days > 0) {
     const days = Math.min(remaining_days, tariff.tier1DaysTo)
-    const subtotal = days * Number(tariff.tier1PricePerDay)
+    const subtotal = days * tier1Price
     total_charge += subtotal
-    charge_breakdown.push({
-      tier: 1,
-      days,
-      price_per_day: Number(tariff.tier1PricePerDay),
-      subtotal,
-    })
+    charge_breakdown.push({ tier: 1, days, price_per_day: tier1Price, subtotal })
     remaining_days -= days
   }
 
@@ -131,28 +97,18 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   if (remaining_days > 0) {
     const capacity = tariff.tier2DaysTo - tariff.tier1DaysTo
     const days = Math.min(remaining_days, capacity)
-    const subtotal = days * Number(tariff.tier2PricePerDay)
+    const subtotal = days * tier2Price
     total_charge += subtotal
-    charge_breakdown.push({
-      tier: 2,
-      days,
-      price_per_day: Number(tariff.tier2PricePerDay),
-      subtotal,
-    })
+    charge_breakdown.push({ tier: 2, days, price_per_day: tier2Price, subtotal })
     remaining_days -= days
   }
 
   // Tier 3
   if (remaining_days > 0) {
     const days = remaining_days
-    const subtotal = days * Number(tariff.tier3PricePerDay)
+    const subtotal = days * tier3Price
     total_charge += subtotal
-    charge_breakdown.push({
-      tier: 3,
-      days,
-      price_per_day: Number(tariff.tier3PricePerDay),
-      subtotal,
-    })
+    charge_breakdown.push({ tier: 3, days, price_per_day: tier3Price, subtotal })
   }
 
   return {
@@ -162,6 +118,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     chargeable_days,
     free_period_days,
     total_charge,
+    currency: tariff.currency,
     charge_breakdown,
     timeline: {
       departure: input.departureDate,

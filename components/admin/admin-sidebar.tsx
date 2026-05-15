@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Anchor, BarChart3, Box, FileBarChart, Ship, TrendingUp, Zap } from "lucide-react"
+import { Anchor, BarChart3, Box, FileBarChart, Ship, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const menuItems = [
@@ -10,7 +10,6 @@ const menuItems = [
   { label: "Limanlar", href: "/admin/limanlar", icon: Anchor },
   { label: "Hatlar", href: "/admin/gemiler", icon: Ship },
   { label: "Ekipman Tipleri", href: "/admin/ekipman-tipleri", icon: Box },
-  { label: "Muafiyet", href: "/admin/muafiyet-kurallari", icon: Zap },
   { label: "Tarifeler", href: "/admin/ucret-tarifeleri", icon: TrendingUp },
   { label: "Raporlar", href: "/admin/raporlar", icon: FileBarChart },
 ]

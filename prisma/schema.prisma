@@ -30,7 +30,6 @@ model User {
   teamMemberships       TeamMember[]
   createdPorts          Port[]              @relation("PortCreatedBy")
   createdCarriers       ShippingCompany[]   @relation("CarrierCreatedBy")
-  createdFreeTime       FreeTimeRule[]      @relation("FreeTimeCreatedBy")
   createdTariffs        TariffRule[]        @relation("TariffCreatedBy")
   createdContainerTypes ContainerType[]     @relation("ContainerTypeCreatedBy")
 
@@ -49,7 +48,6 @@ model Port {
   createdBy String?  @map("created_by")
 
   creator       User?          @relation("PortCreatedBy", fields: [createdBy], references: [id])
-  freeTimeRules FreeTimeRule[]
   tariffRules   TariffRule[]
   calculations  Calculation[]
 
@@ -68,33 +66,10 @@ model ShippingCompany {
   createdBy String?  @map("created_by")
 
   creator       User?          @relation("CarrierCreatedBy", fields: [createdBy], references: [id])
-  freeTimeRules FreeTimeRule[]
   tariffRules   TariffRule[]
   calculations  Calculation[]
 
   @@map("shipping_companies")
-}
-
-model FreeTimeRule {
-  id                String    @id @default(uuid())
-  portId            String    @map("port_id")
-  shippingCompanyId String    @map("shipping_company_id")
-  containerType     String    @map("container_type")
-  freeDays          Int
-  effectiveFrom     DateTime  @default(now()) @map("effective_from") @db.Date
-  effectiveUntil    DateTime? @map("effective_until") @db.Date
-  isActive          Boolean   @default(true) @map("is_active")
-  notes             String?
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  createdBy         String?   @map("created_by")
-
-  port            Port            @relation(fields: [portId], references: [id], onDelete: Cascade)
-  shippingCompany ShippingCompany @relation(fields: [shippingCompanyId], references: [id], onDelete: Cascade)
-  creator         User?           @relation("FreeTimeCreatedBy", fields: [createdBy], references: [id])
-
-  @@unique([portId, shippingCompanyId, containerType, effectiveFrom])
-  @@map("free_time_rules")
 }
 
 model TariffRule {

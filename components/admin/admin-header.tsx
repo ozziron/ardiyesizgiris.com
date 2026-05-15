@@ -10,7 +10,6 @@ const pageTitles: Record<string, string> = {
   "/admin": "Yonetici Paneli",
   "/admin/limanlar": "Liman Yonetimi",
   "/admin/gemiler": "Hat Yonetimi",
-  "/admin/muafiyet-kurallari": "Muafiyet Kurallari",
   "/admin/ucret-tarifeleri": "Ucret Tarifeleri",
 }
 
