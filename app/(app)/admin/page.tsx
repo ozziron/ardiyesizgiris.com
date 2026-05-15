@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Anchor, Ship, Zap, TrendingUp, Calculator } from "lucide-react"
+import { Anchor, FileBarChart, Ship, Zap, TrendingUp } from "lucide-react"
 
 interface DashboardStats {
   ports: number
@@ -71,10 +71,10 @@ export default function AdminDashboard() {
       color: "bg-purple-500",
     },
     {
-      label: "Hesaplamalar",
+      label: "Raporlar",
       value: stats.calculations,
-      icon: Calculator,
-      href: "/admin/hesaplamalar",
+      icon: FileBarChart,
+      href: "/admin/raporlar",
       color: "bg-emerald-500",
     },
   ]
