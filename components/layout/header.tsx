@@ -51,6 +51,9 @@ export default function Header() {
           <Link href="/takip" className="font-medium hover:text-emerald-600 transition-colors">
             Takip
           </Link>
+          <Link href="/kurumsal" className="font-medium hover:text-emerald-600 transition-colors">
+            Kurumsal
+          </Link>
           <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors">
             Hakkımızda
           </Link>
@@ -192,6 +195,9 @@ export default function Header() {
             </Link>
             <Link href="/takip" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
               Takip
+            </Link>
+            <Link href="/kurumsal" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
+              Kurumsal
             </Link>
             <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
               Hakkımızda
