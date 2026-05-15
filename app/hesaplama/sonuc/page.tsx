@@ -4,8 +4,9 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { CheckCircle2, AlertCircle, Loader2, SearchX, ArrowLeft } from "lucide-react"
 import { formatDate } from "@/lib/utils-date"
+import { CalculationResultSkeleton } from "@/components/calculation/result-skeleton"
 
 function ResultContent() {
   const searchParams = useSearchParams()
@@ -15,10 +16,24 @@ function ResultContent() {
 
   if (!freeUntilStr || !freeDays) {
     return (
-      <div className="container max-w-2xl py-8">
-        <Card className="border-red-200">
-          <CardContent className="p-6">
-            <p className="text-red-700">Hesaplama sonucu bulunamadı</p>
+      <div className="container max-w-2xl py-12">
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="mb-4 rounded-full bg-slate-100 p-4 dark:bg-slate-800">
+              <SearchX className="h-12 w-12 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+              Hesaplama Sonucu Bulunamadı
+            </h2>
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
+              Aradığınız hesaplama kriterlerine uygun bir sonuç kaydı bulunamadı veya link geçersiz olabilir.
+            </p>
+            <Button asChild variant="outline" className="mt-8">
+              <Link href="/hesaplama" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Hesaplama Sayfasına Dön
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -80,8 +95,8 @@ function ResultContent() {
 export default function CalculationResultPage() {
   return (
     <Suspense fallback={
-      <div className="container max-w-2xl py-8 flex justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="container max-w-2xl py-8">
+        <CalculationResultSkeleton />
       </div>
     }>
       <ResultContent />
