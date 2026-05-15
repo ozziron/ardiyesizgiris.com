@@ -47,7 +47,9 @@ cd C:\Users\ozdem\OneDrive\Desktop\ardiyesizgiris.com\ardiyesizgiris.com-main
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/ardiyesizgiris_db"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-random-secret-key-here"
-RESEND_API_KEY="your-resend-api-key-here"  # Optional for email export
+RESEND_API_KEY="re_xxxxx"  # Optional. Keep placeholder until Resend domain is verified.
+EMAIL_FROM="Ardiyesiz Giriş <noreply@ardiyesizgiris.com>"
+EMAIL_DRY_RUN="false"
 ```
 
 ### Step 3: Install Dependencies & Setup Database
@@ -130,7 +132,9 @@ After setup, verify these work:
   - Select departure date
   - See the result with free_until_date
 - [ ] Click "PDF İndir" button (downloads PDF)
-- [ ] Click "Email Gönder" button (sends email - requires RESEND_API_KEY)
+- [ ] Click "Email Gönder" button
+  - Without production Resend config, this should fail gracefully with `EMAIL_NOT_CONFIGURED`
+  - With verified Resend domain + `RESEND_API_KEY`, this should send email
 
 ### Admin Flow  
 - [ ] Login with admin user
@@ -236,9 +240,9 @@ After setup, verify these work:
 - Restart dev server after changing role
 
 ### Email not sending
-- Requires RESEND_API_KEY environment variable
-- Get API key from https://resend.com/
-- Update .env.local and restart
+- Production delivery requires a verified Resend domain and `RESEND_API_KEY`
+- See `EMAIL_PRODUCTION_SETUP.md`
+- For local template testing, set `EMAIL_DRY_RUN="true"` and restart
 
 ---
 
@@ -315,4 +319,3 @@ npx prisma migrate reset
 ---
 
 **You're all set! Follow the 5-step setup above and you'll be running in 15 minutes.** ✨
-
