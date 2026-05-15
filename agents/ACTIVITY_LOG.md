@@ -4,6 +4,25 @@
 > **TICKET-004'ten itibaren** ticket sistemi aktif: `tickets/` klasörü + `rules.md` + `agents/activitylogopener.md`
 > Detaylı ticket kayıtları için `tickets/` klasörüne bak.
 
+## 🔒 Okuma Protokolü (Token-Safe Bootstrap)
+
+**Agent normal session bootstrap'ında bu dosyanın TAMAMINI okuma.** Sadece en üstteki **1–3 session entry'sini** oku (yaklaşık ilk 50–80 satır).
+
+- Read tool kullanımı: `Read(file_path, limit=80)` veya `offset=0, limit=80`.
+- 1–3 session, son bağlamı vermek için yeterlidir; daha eski kayıtlar nadiren gerekir.
+- Daha eski bir entry'ye ihtiyaç olursa hedeflenmiş `offset` ile o noktadan oku — yine dosyanın tamamını yükleme.
+- Control panel (`control-panel/`) tüm session'ları gösterir; bu kısıt sadece agent bootstrap içindir.
+
+## 📦 Arşivleme Stratejisi
+
+Bu dosya **~30 session** veya **~500 satır**'ı aştığında en eski session'lar şu konuma taşınır:
+
+```
+main/agents/archive/ACTIVITY_LOG-YYYY-QN.md
+```
+
+(örn. `ACTIVITY_LOG-2026-Q2.md` — 2026 yılı 2. çeyrek). Arşivleme manueldir; CEO/reviewer (Opus 4.7) tetikler. Arşivlenen entry'ler aynen kopyalanır, ana dosyadan silinir, ana dosyanın altına `> 📦 Daha eski session'lar: [archive/ACTIVITY_LOG-YYYY-QN.md](archive/ACTIVITY_LOG-YYYY-QN.md)` linki bırakılır. **Veri kaybı yok**, sadece bootstrap maliyeti düşer.
+
 ---
 
 ## 2026-05-15 — Session #17 — Masraf kırılım grafiği (TICKET-010)
