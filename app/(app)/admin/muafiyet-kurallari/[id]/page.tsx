@@ -40,7 +40,7 @@ export default function FreeTimeRuleEditPage({ params }: FreeTimeRuleEditPagePro
           router.push("/admin/muafiyet-kurallari")
           return
         }
-        if (!response.ok) throw new Error("Kayit yuklenemedi")
+        if (!response.ok) throw new Error("Kayıt yüklenemedi")
 
         const payload = await response.json()
         const rule = payload.data
@@ -54,7 +54,7 @@ export default function FreeTimeRuleEditPage({ params }: FreeTimeRuleEditPagePro
       } catch (error) {
         toast({
           title: "Hata",
-          description: "Muafiyet kurali yuklenemedi",
+          description: "Muafiyet kuralı yüklenemedi",
           variant: "destructive",
         })
         router.push("/admin/muafiyet-kurallari")

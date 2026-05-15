@@ -48,7 +48,7 @@ export default function TariffRuleEditPage({ params }: TariffRuleEditPageProps) 
           router.push("/admin/ucret-tarifeleri")
           return
         }
-        if (!response.ok) throw new Error("Kayit yuklenemedi")
+        if (!response.ok) throw new Error("Kayıt yüklenemedi")
 
         const payload = await response.json()
         const rule = payload.data
@@ -65,7 +65,7 @@ export default function TariffRuleEditPage({ params }: TariffRuleEditPageProps) 
       } catch (error) {
         toast({
           title: "Hata",
-          description: "Tarife bilgisi yuklenemedi",
+          description: "Tarife bilgisi yüklenemedi",
           variant: "destructive",
         })
         router.push("/admin/ucret-tarifeleri")

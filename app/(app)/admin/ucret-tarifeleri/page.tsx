@@ -46,7 +46,7 @@ export default function TariffRulesPage() {
     } catch (error) {
       toast({
         title: "Hata",
-        description: "Ucret tarifeleri yuklenemedi",
+        description: "Ücret tarifeleri yüklenemedi",
         variant: "destructive",
       })
     } finally {
@@ -59,16 +59,16 @@ export default function TariffRulesPage() {
   }, [])
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bu tarifeyi silmek istediginize emin misiniz?")) return
+    if (!confirm("Bu tarifeyi silmek istediğinize emin misiniz?")) return
 
     setDeleting(id)
     try {
       const response = await fetch(`/api/admin/tariff-rules/${id}`, { method: "DELETE" })
-      if (!response.ok) throw new Error("Silme basarisiz")
+      if (!response.ok) throw new Error("Silme başarısız")
 
       toast({
-        title: "Basarili",
-        description: "Ucret tarifesi silindi",
+        title: "Başarılı",
+        description: "Ücret tarifesi silindi",
       })
       await fetchRules()
     } catch (error) {
@@ -86,9 +86,9 @@ export default function TariffRulesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Ucret Tarifeleri</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Ücret Tarifeleri</h2>
           <p className="text-slate-600 dark:text-slate-400">
-            Hat, liman ve ekipman bazli kademeli ardiye tarifeleri.
+            Hat, liman ve ekipman bazlı kademeli ardiye tarifeleri.
           </p>
         </div>
         <Button asChild>
@@ -101,7 +101,7 @@ export default function TariffRulesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tum Tarife Kayitlari ({rules.length})</CardTitle>
+          <CardTitle>Tüm Tarife Kayıtları ({rules.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -109,7 +109,7 @@ export default function TariffRulesPage() {
               <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
             </div>
           ) : rules.length === 0 ? (
-            <p className="py-8 text-center text-slate-600">Henuz ucret tarifesi eklenmemis</p>
+            <p className="py-8 text-center text-slate-600">Henüz ücret tarifesi eklenmemiş</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -122,7 +122,7 @@ export default function TariffRulesPage() {
                     <TableHead>Tier 2</TableHead>
                     <TableHead>Tier 3</TableHead>
                     <TableHead>Durum</TableHead>
-                    <TableHead>Islemler</TableHead>
+                    <TableHead>İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -132,13 +132,13 @@ export default function TariffRulesPage() {
                       <TableCell>{rule.port.name}</TableCell>
                       <TableCell>{rule.containerType}</TableCell>
                       <TableCell>
-                        {rule.tier1DaysFrom}-{rule.tier1DaysTo} gun @ {rule.tier1PricePerDay} {rule.currency}
+                        {rule.tier1DaysFrom}-{rule.tier1DaysTo} gün @ {rule.tier1PricePerDay} {rule.currency}
                       </TableCell>
                       <TableCell>
-                        {rule.tier2DaysFrom}-{rule.tier2DaysTo} gun @ {rule.tier2PricePerDay} {rule.currency}
+                        {rule.tier2DaysFrom}-{rule.tier2DaysTo} gün @ {rule.tier2PricePerDay} {rule.currency}
                       </TableCell>
                       <TableCell>
-                        {rule.tier3DaysFrom}+ gun @ {rule.tier3PricePerDay} {rule.currency}
+                        {rule.tier3DaysFrom}+ gün @ {rule.tier3PricePerDay} {rule.currency}
                       </TableCell>
                       <TableCell>
                         <span
