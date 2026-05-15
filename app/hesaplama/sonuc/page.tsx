@@ -4,9 +4,53 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, AlertCircle, Loader2, SearchX, ArrowLeft } from "lucide-react"
+import { CheckCircle2, AlertCircle, SearchX, ArrowLeft, CalendarPlus } from "lucide-react"
 import { formatDate } from "@/lib/utils-date"
 import { CalculationResultSkeleton } from "@/components/calculation/result-skeleton"
+
+function toIcsDate(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("")
+}
+
+function escapeIcsText(value: string) {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n")
+}
+
+function buildCalendarFile(freeUntil: Date, freeDays: number) {
+  const endDate = new Date(freeUntil)
+  endDate.setDate(endDate.getDate() + freeDays)
+
+  const createdAt = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")
+  const start = toIcsDate(freeUntil)
+  const end = toIcsDate(endDate)
+  const title = "Ardiyesiz giriş dönemi"
+  const description = `Konteyner bu tarihten itibaren ${freeDays} gün ücretsiz dolu giriş yapabilir.`
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//ardiyesizgiris.com//Calculation Result//TR",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:ardiyesiz-${start}-${createdAt}@ardiyesizgiris.com`,
+    `DTSTAMP:${createdAt}`,
+    `DTSTART;VALUE=DATE:${start}`,
+    `DTEND;VALUE=DATE:${end}`,
+    `SUMMARY:${escapeIcsText(title)}`,
+    `DESCRIPTION:${escapeIcsText(description)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n")
+}
 
 function ResultContent() {
   const searchParams = useSearchParams()
@@ -41,6 +85,24 @@ function ResultContent() {
   }
 
   const freeUntil = new Date(freeUntilStr)
+  const freeDaysNumber = Number(freeDays)
+
+  const handleCalendarDownload = () => {
+    if (!Number.isFinite(freeDaysNumber) || freeDaysNumber < 1 || Number.isNaN(freeUntil.getTime())) {
+      return
+    }
+
+    const calendar = buildCalendarFile(freeUntil, freeDaysNumber)
+    const blob = new Blob([calendar], { type: "text/calendar;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = `ardiyesiz-giris-${toIcsDate(freeUntil)}.ics`
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="container max-w-2xl py-8">
@@ -77,9 +139,13 @@ function ResultContent() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-4 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         <Button asChild variant="default">
           <Link href="/hesaplama">Yeni Hesapla</Link>
+        </Button>
+        <Button variant="outline" onClick={handleCalendarDownload} className="gap-2">
+          <CalendarPlus className="h-4 w-4" />
+          Takvime Ekle
         </Button>
         <Button variant="outline">
           PDF İndir
