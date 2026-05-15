@@ -136,12 +136,12 @@ const modeCards: ModeCardContent[] = [
   {
     value: "planning",
     badge: "Planlama",
-    title: "Ardiyesiz Giriş Tarihi",
+    title: "Planlama yapacağım",
     description:
-      "Yükleme planlamanız için ardiyesiz giriş tarihini hızlıca hesaplayın.",
+      "Gemi kalkış tarihine göre ardiyesiz giriş yapılabilecek en erken tarihi öğrenin.",
     points: [
       "Gate-in tarihi gerekli değildir.",
-      "Masraf bilgisi mevcut değildir.",
+      "Ücretsiz süre (free-time) odaklıdır.",
       "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: CalendarClock,
@@ -149,12 +149,12 @@ const modeCards: ModeCardContent[] = [
   {
     value: "cost",
     badge: "Masraf",
-    title: "Demurrage & Detention Hesaplama",
+    title: "Ücret hesaplayacağım",
     description:
-      "Gate-in tarihi ile birlikte Demurrage & Detention masraflarını hesaplayabilirsiniz.",
+      "Konteynerin limanda kaldığı süre için oluşan ardiye masrafını detaylıca hesaplayın.",
     points: [
-      "Konteyner ID bilgisi girişi yapılabilir.",
-      "Masraf kırılım bilgisi içerir.",
+      "Gate-in ve kalkış tarihleri kullanılır.",
+      "Kademeli tarife kırılımı içerir.",
       "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: Wallet,
@@ -690,12 +690,23 @@ export default function HesaplamaPage() {
 
   return (
     <div className="container mx-auto px-4 pb-10 pt-8">
-      <div className="mx-auto mt-12 w-full max-w-5xl">
+      <div className="mx-auto mt-8 w-full max-w-5xl">
+        {!activeTab && (
+          <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 text-center">
+            <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+              Nasıl ilerlemek istersiniz?
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              İhtiyacınıza uygun hesaplama modunu seçerek başlayın. Ardiyesiz giriş planlaması mı yapacaksınız yoksa oluşmuş bir masrafı mı hesaplayacaksınız?
+            </p>
+          </div>
+        )}
+
         {/* Mode selection cards. These are the only thing visible on first
             load — the form panes mount conditionally below once activeTab
             is non-null. Removes the previous problem where users saw the
             form immediately and missed the mode affordance. */}
-        <div className="mb-8 grid gap-4 md:grid-cols-2">
+        <div className={`grid gap-6 transition-all duration-500 ${activeTab ? "mb-8 md:grid-cols-2" : "mb-12 md:grid-cols-2 lg:gap-8"}`}>
           {modeCards.map((card) => {
             const Icon = card.icon;
             const isActive = activeTab === card.value;
