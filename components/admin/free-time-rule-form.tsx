@@ -88,7 +88,7 @@ export function FreeTimeRuleForm({
       } catch (error) {
         toast({
           title: "Hata",
-          description: "Form secenekleri yuklenemedi",
+          description: "Form seçenekleri yüklenemedi",
           variant: "destructive",
         })
       } finally {
@@ -124,11 +124,11 @@ export function FreeTimeRuleForm({
 
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || "Kayit islemi basarisiz")
+        throw new Error(payload?.error || "Kayıt işlemi başarısız")
       }
 
       toast({
-        title: "Basarili",
+        title: "Başarılı",
         description:
           mode === "create" ? "Muafiyet kuralı oluşturuldu" : "Muafiyet kuralı güncellendi",
       })
@@ -156,19 +156,19 @@ export function FreeTimeRuleForm({
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.push("/admin/muafiyet-kurallari")} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Geri Don
+          Geri Dön
         </Button>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-          {mode === "create" ? "Yeni Muafiyet Kurali" : "Muafiyet Kuralini Duzenle"}
+          {mode === "create" ? "Yeni Muafiyet Kuralı" : "Muafiyet Kuralını Düzenle"}
         </h1>
         <p className="text-slate-600 dark:text-slate-400">
-          Hat, liman ve ekipman tipine gore muafiyet gununu tanimlayin.
+          Hat, liman ve ekipman tipine göre muafiyet gününü tanımlayın.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Muafiyet Kurali Bilgileri</CardTitle>
+          <CardTitle>Muafiyet Kuralı Bilgileri</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -183,7 +183,7 @@ export function FreeTimeRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Bir hat secin" />
+                            <SelectValue placeholder="Bir hat seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -208,7 +208,7 @@ export function FreeTimeRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Bir liman secin" />
+                            <SelectValue placeholder="Bir liman seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -235,7 +235,7 @@ export function FreeTimeRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Ekipman tipi secin" />
+                            <SelectValue placeholder="Ekipman tipi seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -256,7 +256,7 @@ export function FreeTimeRuleForm({
                   name="freeDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Muafiyet Gunu *</FormLabel>
+                      <FormLabel>Muafiyet Günü *</FormLabel>
                       <FormControl>
                         <Input type="number" min="1" max="365" {...field} />
                       </FormControl>
@@ -272,7 +272,7 @@ export function FreeTimeRuleForm({
                   name="effectiveFrom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Baslangic Tarihi *</FormLabel>
+                      <FormLabel>Başlangıç Tarihi *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -286,7 +286,7 @@ export function FreeTimeRuleForm({
                   name="effectiveUntil"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bitis Tarihi</FormLabel>
+                      <FormLabel>Bitiş Tarihi</FormLabel>
                       <FormControl>
                         <Input type="date" value={field.value ?? ""} onChange={field.onChange} />
                       </FormControl>
@@ -305,7 +305,7 @@ export function FreeTimeRuleForm({
                     <FormControl>
                       <Textarea
                         rows={4}
-                        placeholder="Kurala ait aciklama veya operasyon notu ekleyin"
+                        placeholder="Kurala ait açıklama veya operasyon notu ekleyin"
                         value={field.value ?? ""}
                         onChange={field.onChange}
                       />
@@ -323,7 +323,7 @@ export function FreeTimeRuleForm({
                     <div>
                       <FormLabel>Aktif</FormLabel>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Pasif kayitlar hesaplamada dikkate alinmaz.
+                        Pasif kayıtlar hesaplamada dikkate alınmaz.
                       </p>
                     </div>
                     <FormControl>
@@ -336,10 +336,10 @@ export function FreeTimeRuleForm({
               <div className="flex gap-3">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {mode === "create" ? "Kaydi Olustur" : "Degisiklikleri Kaydet"}
+                  {mode === "create" ? "Kaydı Oluştur" : "Değişiklikleri Kaydet"}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.push("/admin/muafiyet-kurallari")}>
-                  Iptal
+                  İptal
                 </Button>
               </div>
             </form>
