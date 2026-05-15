@@ -104,7 +104,7 @@ export function TariffRuleForm({
       } catch (error) {
         toast({
           title: "Hata",
-          description: "Form secenekleri yuklenemedi",
+          description: "Form seçenekleri yüklenemedi",
           variant: "destructive",
         })
       } finally {
@@ -148,11 +148,11 @@ export function TariffRuleForm({
 
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || "Kayit islemi basarisiz")
+        throw new Error(payload?.error || "Kayıt işlemi başarısız")
       }
 
       toast({
-        title: "Basarili",
+        title: "Başarılı",
         description: mode === "create" ? "Tarife oluşturuldu" : "Tarife güncellendi",
       })
       router.push("/admin/ucret-tarifeleri")
@@ -179,13 +179,13 @@ export function TariffRuleForm({
       <div className="mb-6">
         <Button variant="ghost" onClick={() => router.push("/admin/ucret-tarifeleri")} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Geri Don
+          Geri Dön
         </Button>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-          {mode === "create" ? "Yeni Ucret Tarifesi" : "Ucret Tarifesini Duzenle"}
+          {mode === "create" ? "Yeni Ücret Tarifesi" : "Ücret Tarifesini Düzenle"}
         </h1>
         <p className="text-slate-600 dark:text-slate-400">
-          Hat, liman ve ekipman bazli kademeli tarife bilgilerini tanimlayin.
+          Hat, liman ve ekipman bazlı kademeli tarife bilgilerini tanımlayın.
         </p>
       </div>
 
@@ -206,7 +206,7 @@ export function TariffRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Bir hat secin" />
+                            <SelectValue placeholder="Bir hat seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -231,7 +231,7 @@ export function TariffRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Bir liman secin" />
+                            <SelectValue placeholder="Bir liman seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -256,7 +256,7 @@ export function TariffRuleForm({
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Ekipman secin" />
+                            <SelectValue placeholder="Ekipman seçin" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -281,7 +281,7 @@ export function TariffRuleForm({
                     name="tier1DaysFrom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gun Baslangici</FormLabel>
+                        <FormLabel>Gün Başlangıcı</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -294,7 +294,7 @@ export function TariffRuleForm({
                     name="tier1DaysTo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gun Bitisi</FormLabel>
+                        <FormLabel>Gün Bitişi</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -307,7 +307,7 @@ export function TariffRuleForm({
                     name="tier1PricePerDay"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gunluk Ucret</FormLabel>
+                        <FormLabel>Günlük Ücret</FormLabel>
                         <FormControl>
                           <Input type="number" min="0" step="0.01" {...field} />
                         </FormControl>
@@ -324,7 +324,7 @@ export function TariffRuleForm({
                     name="tier2DaysFrom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gun Baslangici</FormLabel>
+                        <FormLabel>Gün Başlangıcı</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -337,7 +337,7 @@ export function TariffRuleForm({
                     name="tier2DaysTo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gun Bitisi</FormLabel>
+                        <FormLabel>Gün Bitişi</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -350,7 +350,7 @@ export function TariffRuleForm({
                     name="tier2PricePerDay"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gunluk Ucret</FormLabel>
+                        <FormLabel>Günlük Ücret</FormLabel>
                         <FormControl>
                           <Input type="number" min="0" step="0.01" {...field} />
                         </FormControl>
@@ -367,7 +367,7 @@ export function TariffRuleForm({
                     name="tier3DaysFrom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gun Baslangici</FormLabel>
+                        <FormLabel>Gün Başlangıcı</FormLabel>
                         <FormControl>
                           <Input type="number" min="1" {...field} />
                         </FormControl>
@@ -380,7 +380,7 @@ export function TariffRuleForm({
                     name="tier3PricePerDay"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gunluk Ucret</FormLabel>
+                        <FormLabel>Günlük Ücret</FormLabel>
                         <FormControl>
                           <Input type="number" min="0" step="0.01" {...field} />
                         </FormControl>
@@ -410,7 +410,7 @@ export function TariffRuleForm({
                   name="effectiveFrom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Baslangic Tarihi *</FormLabel>
+                      <FormLabel>Başlangıç Tarihi *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -424,7 +424,7 @@ export function TariffRuleForm({
                   name="effectiveUntil"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bitis Tarihi</FormLabel>
+                      <FormLabel>Bitiş Tarihi</FormLabel>
                       <FormControl>
                         <Input type="date" value={field.value ?? ""} onChange={field.onChange} />
                       </FormControl>
@@ -443,7 +443,7 @@ export function TariffRuleForm({
                     <FormControl>
                       <Textarea
                         rows={4}
-                        placeholder="Tarife kaydina ait aciklama veya istisna notu"
+                        placeholder="Tarife kaydına ait açıklama veya istisna notu"
                         value={field.value ?? ""}
                         onChange={field.onChange}
                       />
@@ -461,7 +461,7 @@ export function TariffRuleForm({
                     <div>
                       <FormLabel>Aktif</FormLabel>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Pasif tarifeler yeni hesaplamalarda kullanilmaz.
+                        Pasif tarifeler yeni hesaplamalarda kullanılmaz.
                       </p>
                     </div>
                     <FormControl>
@@ -474,10 +474,10 @@ export function TariffRuleForm({
               <div className="flex gap-3">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {mode === "create" ? "Kaydi Olustur" : "Degisiklikleri Kaydet"}
+                  {mode === "create" ? "Kaydı Oluştur" : "Değişiklikleri Kaydet"}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.push("/admin/ucret-tarifeleri")}>
-                  Iptal
+                  İptal
                 </Button>
               </div>
             </form>
