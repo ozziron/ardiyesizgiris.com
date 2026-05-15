@@ -2,6 +2,12 @@
 
 # dependencies
 /node_modules
+/agents/node_modules
+/agents/agent-memories
+/agents/execution-logs
+/agents/tmp
+/agents/temp
+/agents/logs
 
 # next.js
 /.next/

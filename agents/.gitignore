@@ -1,0 +1,18 @@
+node_modules/
+.env
+.env.local
+dist/
+build/
+*.log
+logs/
+.DS_Store
+.vscode/
+
+# Agent memories
+agent-memories/
+execution-logs/
+
+# Temp
+tmp/
+temp/
+Thumbs.db
