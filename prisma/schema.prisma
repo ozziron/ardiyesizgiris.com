@@ -26,6 +26,8 @@ model User {
 
   calculations          Calculation[]
   exports               CalculationExport[]
+  ownedTeams            Team[]              @relation("TeamOwner")
+  teamMemberships       TeamMember[]
   createdPorts          Port[]              @relation("PortCreatedBy")
   createdCarriers       ShippingCompany[]   @relation("CarrierCreatedBy")
   createdFreeTime       FreeTimeRule[]      @relation("FreeTimeCreatedBy")
@@ -196,6 +198,51 @@ model FreeUsageTracking {
   @@map("free_usage_tracking")
 }
 
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String   @map("owner_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner   User              @relation("TeamOwner", fields: [ownerId], references: [id])
+  members TeamMember[]
+  apiKeys CorporateApiKey[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+model CorporateApiKey {
+  id         String    @id @default(uuid())
+  teamId     String    @map("team_id")
+  name       String
+  keyPrefix  String    @map("key_prefix")
+  keyHash    String    @unique @map("key_hash")
+  lastUsedAt DateTime? @map("last_used_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@map("corporate_api_keys")
+}
+
 enum ExportType {
   PDF
   EMAIL
@@ -210,4 +257,10 @@ enum MembershipType {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
 }
