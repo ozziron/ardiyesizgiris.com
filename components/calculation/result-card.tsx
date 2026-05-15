@@ -2,6 +2,7 @@
 
 import { ArrowRight, FileText } from "lucide-react"
 import { CalculationTimeline } from "./timeline"
+import { CostBreakdownChart } from "./cost-chart"
 
 interface SummaryRow {
   label: string
@@ -203,6 +204,9 @@ export function CalculationResultCard({
               <p className="text-sm font-semibold">Masraf Kırılımı</p>
               <span className="ml-auto h-px flex-1 bg-emerald-100 dark:bg-emerald-900/40" />
             </div>
+
+            <CostBreakdownChart data={chargeBreakdown!} />
+
             <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
               <table className="w-full text-sm">
                 <thead>
