@@ -8,6 +8,7 @@ import {
   ArrowRight,
   CalendarClock,
   CheckCircle2,
+  CreditCard,
   Download,
   FileText,
   Mail,
@@ -75,6 +76,12 @@ type ExportState = {
   isEmailLoading: boolean;
 };
 
+type CalculationErrorPayload = {
+  error?: string;
+  details?: { message?: string }[];
+  code?: string;
+};
+
 /**
  * Anticipatory result the live-preview shows BEFORE the user hits
  * "Hesapla". It only contains the data we can derive purely from
@@ -136,12 +143,12 @@ const modeCards: ModeCardContent[] = [
   {
     value: "planning",
     badge: "Planlama",
-    title: "Ardiyesiz Giriş Tarihi",
+    title: "Planlama yapacağım",
     description:
-      "Yükleme planlamanız için ardiyesiz giriş tarihini hızlıca hesaplayın.",
+      "Gemi kalkış tarihine göre ardiyesiz giriş yapılabilecek en erken tarihi öğrenin.",
     points: [
       "Gate-in tarihi gerekli değildir.",
-      "Masraf bilgisi mevcut değildir.",
+      "Ücretsiz süre (free-time) odaklıdır.",
       "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: CalendarClock,
@@ -149,12 +156,12 @@ const modeCards: ModeCardContent[] = [
   {
     value: "cost",
     badge: "Masraf",
-    title: "Demurrage & Detention Hesaplama",
+    title: "Ücret hesaplayacağım",
     description:
-      "Gate-in tarihi ile birlikte Demurrage & Detention masraflarını hesaplayabilirsiniz.",
+      "Konteynerin limanda kaldığı süre için oluşan ardiye masrafını detaylıca hesaplayın.",
     points: [
-      "Konteyner ID bilgisi girişi yapılabilir.",
-      "Masraf kırılım bilgisi içerir.",
+      "Gate-in ve kalkış tarihleri kullanılır.",
+      "Kademeli tarife kırılımı içerir.",
       "PDF ve E-mail olarak paylaşılabilir.",
     ],
     icon: Wallet,
@@ -336,6 +343,9 @@ export default function HesaplamaPage() {
   const [costExport, setCostExport] = useState<ExportState>(initialExportState);
   const [isPlanningLoading, setIsPlanningLoading] = useState(false);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  const [upgradePrompt, setUpgradePrompt] = useState<CalculationMode | null>(null);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
   // Live preview — anticipatory result rendered between the form and the
   // submit button as soon as the four lookup fields are filled.
   const [planningPreview, setPlanningPreview] = useState<LivePreview | null>(null);
@@ -438,6 +448,7 @@ export default function HesaplamaPage() {
     type: CalculationMode,
   ) => {
     resetExportFeedback(type);
+    setCheckoutError("");
 
     if (type === "planning") {
       setIsPlanningLoading(true);
@@ -459,9 +470,15 @@ export default function HesaplamaPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        const errorPayload = data as CalculationErrorPayload;
+        if (response.status === 402 || errorPayload?.code === "UPGRADE_REQUIRED") {
+          setUpgradePrompt(type);
+        }
         const message = data?.error || data?.details?.[0]?.message || "Hesaplama sırasında bir hata oluştu.";
         throw new Error(message);
       }
+
+      setUpgradePrompt(null);
 
       if (type === "planning") {
         setPlanningResult(data.data);
@@ -482,6 +499,32 @@ export default function HesaplamaPage() {
       } else {
         setIsCostLoading(false);
       }
+    }
+  };
+
+  const handleStartCheckout = async () => {
+    setCheckoutError("");
+
+    if (!session?.user?.id) {
+      window.location.href = "/giris?callbackUrl=/hesaplama";
+      return;
+    }
+
+    setIsCheckoutLoading(true);
+
+    try {
+      const response = await fetch("/api/billing/checkout", { method: "POST" });
+      const data = await response.json();
+
+      if (!response.ok || !data?.url) {
+        throw new Error(data?.error || "Premium ödeme sayfası açılamadı.");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Premium ödeme sayfası açılamadı.");
+    } finally {
+      setIsCheckoutLoading(false);
     }
   };
 
@@ -690,12 +733,23 @@ export default function HesaplamaPage() {
 
   return (
     <div className="container mx-auto px-4 pb-10 pt-8">
-      <div className="mx-auto mt-12 w-full max-w-5xl">
+      <div className="mx-auto mt-8 w-full max-w-5xl">
+        {!activeTab && (
+          <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 text-center">
+            <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+              Nasıl ilerlemek istersiniz?
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              İhtiyacınıza uygun hesaplama modunu seçerek başlayın. Ardiyesiz giriş planlaması mı yapacaksınız yoksa oluşmuş bir masrafı mı hesaplayacaksınız?
+            </p>
+          </div>
+        )}
+
         {/* Mode selection cards. These are the only thing visible on first
             load — the form panes mount conditionally below once activeTab
             is non-null. Removes the previous problem where users saw the
             form immediately and missed the mode affordance. */}
-        <div className="mb-8 grid gap-4 md:grid-cols-2">
+        <div className={`grid gap-6 transition-all duration-500 ${activeTab ? "mb-8 md:grid-cols-2" : "mb-12 md:grid-cols-2 lg:gap-8"}`}>
           {modeCards.map((card) => {
             const Icon = card.icon;
             const isActive = activeTab === card.value;
@@ -856,7 +910,24 @@ export default function HesaplamaPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Hesaplama yapılamadı</AlertTitle>
-                    <AlertDescription>{planningError}</AlertDescription>
+                    <AlertDescription className="space-y-3">
+                      <p>{planningError}</p>
+                      {upgradePrompt === "planning" && (
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="gap-2"
+                            onClick={handleStartCheckout}
+                            disabled={isCheckoutLoading}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+                          </Button>
+                          {checkoutError && <p className="text-sm">{checkoutError}</p>}
+                        </div>
+                      )}
+                    </AlertDescription>
                   </Alert>
                 )}
 
@@ -1022,7 +1093,24 @@ export default function HesaplamaPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Hesaplama yapılamadı</AlertTitle>
-                    <AlertDescription>{costError}</AlertDescription>
+                    <AlertDescription className="space-y-3">
+                      <p>{costError}</p>
+                      {upgradePrompt === "cost" && (
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="gap-2"
+                            onClick={handleStartCheckout}
+                            disabled={isCheckoutLoading}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+                          </Button>
+                          {checkoutError && <p className="text-sm">{checkoutError}</p>}
+                        </div>
+                      )}
+                    </AlertDescription>
                   </Alert>
                 )}
 
