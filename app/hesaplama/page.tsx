@@ -8,6 +8,7 @@ import {
   ArrowRight,
   CalendarClock,
   CheckCircle2,
+  CreditCard,
   Download,
   FileText,
   Mail,
@@ -73,6 +74,12 @@ type ExportState = {
   messageTone: "success" | "error" | null;
   isPdfLoading: boolean;
   isEmailLoading: boolean;
+};
+
+type CalculationErrorPayload = {
+  error?: string;
+  details?: { message?: string }[];
+  code?: string;
 };
 
 /**
@@ -336,6 +343,9 @@ export default function HesaplamaPage() {
   const [costExport, setCostExport] = useState<ExportState>(initialExportState);
   const [isPlanningLoading, setIsPlanningLoading] = useState(false);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  const [upgradePrompt, setUpgradePrompt] = useState<CalculationMode | null>(null);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
   // Live preview — anticipatory result rendered between the form and the
   // submit button as soon as the four lookup fields are filled.
   const [planningPreview, setPlanningPreview] = useState<LivePreview | null>(null);
@@ -438,6 +448,7 @@ export default function HesaplamaPage() {
     type: CalculationMode,
   ) => {
     resetExportFeedback(type);
+    setCheckoutError("");
 
     if (type === "planning") {
       setIsPlanningLoading(true);
@@ -459,9 +470,15 @@ export default function HesaplamaPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        const errorPayload = data as CalculationErrorPayload;
+        if (response.status === 402 || errorPayload?.code === "UPGRADE_REQUIRED") {
+          setUpgradePrompt(type);
+        }
         const message = data?.error || data?.details?.[0]?.message || "Hesaplama sırasında bir hata oluştu.";
         throw new Error(message);
       }
+
+      setUpgradePrompt(null);
 
       if (type === "planning") {
         setPlanningResult(data.data);
@@ -482,6 +499,32 @@ export default function HesaplamaPage() {
       } else {
         setIsCostLoading(false);
       }
+    }
+  };
+
+  const handleStartCheckout = async () => {
+    setCheckoutError("");
+
+    if (!session?.user?.id) {
+      window.location.href = "/giris?callbackUrl=/hesaplama";
+      return;
+    }
+
+    setIsCheckoutLoading(true);
+
+    try {
+      const response = await fetch("/api/billing/checkout", { method: "POST" });
+      const data = await response.json();
+
+      if (!response.ok || !data?.url) {
+        throw new Error(data?.error || "Premium ödeme sayfası açılamadı.");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Premium ödeme sayfası açılamadı.");
+    } finally {
+      setIsCheckoutLoading(false);
     }
   };
 
@@ -867,7 +910,24 @@ export default function HesaplamaPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Hesaplama yapılamadı</AlertTitle>
-                    <AlertDescription>{planningError}</AlertDescription>
+                    <AlertDescription className="space-y-3">
+                      <p>{planningError}</p>
+                      {upgradePrompt === "planning" && (
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="gap-2"
+                            onClick={handleStartCheckout}
+                            disabled={isCheckoutLoading}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+                          </Button>
+                          {checkoutError && <p className="text-sm">{checkoutError}</p>}
+                        </div>
+                      )}
+                    </AlertDescription>
                   </Alert>
                 )}
 
@@ -1033,7 +1093,24 @@ export default function HesaplamaPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Hesaplama yapılamadı</AlertTitle>
-                    <AlertDescription>{costError}</AlertDescription>
+                    <AlertDescription className="space-y-3">
+                      <p>{costError}</p>
+                      {upgradePrompt === "cost" && (
+                        <div className="space-y-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="gap-2"
+                            onClick={handleStartCheckout}
+                            disabled={isCheckoutLoading}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+                          </Button>
+                          {checkoutError && <p className="text-sm">{checkoutError}</p>}
+                        </div>
+                      )}
+                    </AlertDescription>
                   </Alert>
                 )}
 
