@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Anchor, BarChart3, Box, Ship, TrendingUp, Zap } from "lucide-react"
+import { Anchor, BarChart3, Box, FileBarChart, Ship, TrendingUp, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const menuItems = [
@@ -12,6 +12,7 @@ const menuItems = [
   { label: "Ekipman Tipleri", href: "/admin/ekipman-tipleri", icon: Box },
   { label: "Muafiyet", href: "/admin/muafiyet-kurallari", icon: Zap },
   { label: "Tarifeler", href: "/admin/ucret-tarifeleri", icon: TrendingUp },
+  { label: "Raporlar", href: "/admin/raporlar", icon: FileBarChart },
 ]
 
 export function AdminSidebar() {
@@ -25,8 +26,8 @@ export function AdminSidebar() {
             <Ship className="h-5 w-5 text-emerald-300" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Ardiyesiz Giris</p>
-            <p className="text-xs text-slate-400">Yonetim paneli</p>
+            <p className="text-sm font-semibold text-white">Ardiyesiz Giriş</p>
+            <p className="text-xs text-slate-400">Yönetim paneli</p>
           </div>
         </Link>
       </div>
@@ -56,7 +57,7 @@ export function AdminSidebar() {
 
       <div className="border-t border-white/10 px-5 py-4">
         <p className="text-xs leading-5 text-slate-400">
-          Hat, liman ve ekipman bazli kurallari buradan yonetebilirsiniz.
+          Hat, liman ve ekipman bazlı kuralları buradan yönetebilirsiniz.
         </p>
       </div>
     </aside>
