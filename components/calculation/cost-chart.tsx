@@ -20,9 +20,11 @@ interface ChargeBreakdownItem {
 
 interface CostBreakdownChartProps {
   data: ChargeBreakdownItem[];
+  /** ISO-4217 currency code (TRY, USD, EUR…). Defaults to TRY. */
+  currency?: string;
 }
 
-export function CostBreakdownChart({ data }: CostBreakdownChartProps) {
+export function CostBreakdownChart({ data, currency = "TRY" }: CostBreakdownChartProps) {
   // Transform data for Recharts: one bar representing the total breakdown
   const chartData = [
     {
@@ -41,13 +43,18 @@ export function CostBreakdownChart({ data }: CostBreakdownChartProps) {
     "Kademe 3": "#f43f5e", // Rose 500
   };
 
-  const formatTL = (value: number) =>
-    new Intl.NumberFormat("tr-TR", {
-      style: "currency",
-      currency: "TRY",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  const formatTL = (value: number) => {
+    try {
+      return new Intl.NumberFormat("tr-TR", {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(value);
+    } catch {
+      return `${value.toLocaleString("tr-TR", { maximumFractionDigits: 0 })} ${currency}`;
+    }
+  };
 
   return (
     <div className="h-[180px] w-full mt-4">

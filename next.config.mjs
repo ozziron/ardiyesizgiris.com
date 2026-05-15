@@ -24,9 +24,13 @@ const nextConfig = {
           },
           { key: "X-Frame-Options", value: "DENY" },
           {
+            // Next.js dev mode (HMR / react-refresh) needs 'unsafe-eval'.
+            // In production we keep the strict policy without it.
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; base-uri 'self'; frame-ancestors 'none'",
+              process.env.NODE_ENV === "development"
+                ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ws: https:; base-uri 'self'; frame-ancestors 'none'"
+                : "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:; base-uri 'self'; frame-ancestors 'none'",
           },
         ],
       },

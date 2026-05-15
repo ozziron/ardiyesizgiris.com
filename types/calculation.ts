@@ -21,6 +21,8 @@ export interface CalculationResult {
   chargeable_days: number
   free_period_days: number
   total_charge: number
+  /** ISO-4217 code (TRY, USD, EUR…) from the matched TariffRule. */
+  currency: string
   charge_breakdown: ChargeBreakdownItem[]
   timeline: {
     departure: Date

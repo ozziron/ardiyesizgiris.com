@@ -28,6 +28,8 @@ interface CalculationResultCardProps {
   chargeableDays?: number
   totalDaysAtPort?: number
   chargeBreakdown?: ChargeBreakdownItem[]
+  /** ISO-4217 currency code from the tariff. Defaults to TRY for back-compat. */
+  currency?: string
   warning?: string
   /** Action panel (PDF / email) rendered at the bottom of the card. */
   children?: React.ReactNode
@@ -38,8 +40,19 @@ const formatTR = (d: Date | string) => {
   return date.toLocaleDateString("tr-TR")
 }
 
-const formatTL = (n: number) =>
-  n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ₺"
+const formatMoney = (n: number, currency: string) => {
+  try {
+    return new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n)
+  } catch {
+    // Fallback for unknown currency codes — append the raw code.
+    return `${n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
+  }
+}
 
 /**
  * Big report card matching the homepage hero illustration aesthetic:
@@ -71,9 +84,11 @@ export function CalculationResultCard({
   chargeableDays = 0,
   totalDaysAtPort = 0,
   chargeBreakdown,
+  currency = "TRY",
   warning,
   children,
 }: CalculationResultCardProps) {
+  const fmt = (n: number) => formatMoney(n, currency)
   const showCostHero = mode === "cost"
   const showCostBreakdown =
     mode === "cost" && totalCharge > 0 && chargeBreakdown && chargeBreakdown.length > 0
@@ -161,7 +176,7 @@ export function CalculationResultCard({
                     : "text-amber-700 dark:text-amber-300"
                 }`}
               >
-                {totalCharge === 0 ? "Ücretsiz" : formatTL(totalCharge)}
+                {totalCharge === 0 ? "Ücretsiz" : fmt(totalCharge)}
               </p>
             </div>
           )}
@@ -205,7 +220,7 @@ export function CalculationResultCard({
               <span className="ml-auto h-px flex-1 bg-emerald-100 dark:bg-emerald-900/40" />
             </div>
 
-            <CostBreakdownChart data={chargeBreakdown!} />
+            <CostBreakdownChart data={chargeBreakdown!} currency={currency} />
 
             <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
               <table className="w-full text-sm">
@@ -238,10 +253,10 @@ export function CalculationResultCard({
                       <td className="px-3 py-2 font-medium">Kademe {row.tier}</td>
                       <td className="px-3 py-2 tabular-nums">{row.days} gün</td>
                       <td className="px-3 py-2 font-mono tabular-nums">
-                        {formatTL(row.price_per_day)}
+                        {fmt(row.price_per_day)}
                       </td>
                       <td className="px-3 py-2 text-right font-semibold tabular-nums">
-                        {formatTL(row.subtotal)}
+                        {fmt(row.subtotal)}
                       </td>
                     </tr>
                   ))}
@@ -250,7 +265,7 @@ export function CalculationResultCard({
                       Toplam Masraf
                     </td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-emerald-700 dark:text-emerald-300">
-                      {formatTL(totalCharge)}
+                      {fmt(totalCharge)}
                     </td>
                   </tr>
                 </tbody>
