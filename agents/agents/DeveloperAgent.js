@@ -3,8 +3,9 @@ const { AGENT_ROLES, SYSTEM_PROMPTS } = require('../orchestrator');
 
 /**
  * Developer Agent - Memory-Aware Version
- * Handles web and mobile app development tasks
- * Maintains persistent memory across sessions
+ * Handles web development tasks (Next.js + TypeScript + Prisma).
+ * Mobile platform strategy: see main/MOBILE_STRATEGY.md (PWA-first, no native).
+ * Maintains persistent memory across sessions.
  */
 class DeveloperAgent {
   constructor() {
@@ -182,23 +183,6 @@ ${affectedCode}
 \`\`\`
 
 Provide: Root cause, fix, why it works, how to test
-    `,
-
-    planMobileFeature: (featureName, description, userStory) => `
-Plan a feature for VisionCam AI iOS app:
-
-Feature: ${featureName}
-Description: ${description}
-User Story: ${userStory}
-
-Tech: SwiftUI + Core ML + MVVM
-
-Provide:
-1. Requirements breakdown
-2. UI/UX flow
-3. MVVM architecture
-4. Core ML integration
-5. Testing strategy
     `
   };
 }
