@@ -15,6 +15,8 @@ Yeni bir Claude Code session'ı açtığında bu dosyayı oku ve aşağıdaki ad
 ### 1. Kuralları Yükle
 `rules.md` dosyasını oku. Tüm session boyunca bu kurallara göre çalış.
 
+**Token-safe bootstrap kuralı:** `main/agents/ACTIVITY_LOG.md` dosyasının **tamamını okuma**. Sadece en üstteki **1–3 session entry'sini** oku (yaklaşık ilk 50–80 satır). Daha eski bağlam gerekirse ya hedeflenmiş `offset` ile o entry'yi oku ya da `main/agents/archive/` altındaki ilgili çeyreklik arşive bak. Aynı kural `main/roadmap.md` için de geçerlidir — normal çalışma session'ında roadmap okunmaz. Bu kısıtlar agent bootstrap maliyetini sabit tutmak içindir; control panel ise tüm geçmişi göstermeye devam eder.
+
 ### 2. Ticket Seç
 - `tickets/todo/` içinde aktif ticket varsa onu devam ettir.
 - Aktif ticket yoksa `tickets/backlog/` klasörüne bak.
