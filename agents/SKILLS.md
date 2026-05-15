@@ -198,13 +198,83 @@ Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Öz
 ## 🛠️ Git Workflow
 
 - **Default branch:** `main`
-- **Feature branch convention:** `agent/<role>/<slug>` (örn. `agent/i18n/admin-table-headers`)
-- **Commit format:** `[<role>-agent] <type>: <description>`
+- **Feature branch convention:** `feat/ticket-<NNN>-<slug>` (örn. `feat/ticket-007-mode-selection-screen`). Eski `agent/<role>/<slug>` formatı bırakıldı.
+- **Commit format:** `<type>(<scope>): <imperative description>`
   - type: feat | fix | refactor | chore | docs | style
 - **Co-Author:** `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` (Claude Code default)
-- **Gün sonu push kuralı:** Küçük commit'leri gün boyu local'de tut, gün sonu birleşik tek commit (Ümit tercihi)
-- **PR review:** Riskli değişiklikler için feature branch + PR → Ümit onay → merge. Küçük/orta için doğrudan main.
+- **Push policy:** GitHub push **yalnızca Opus 4.7** yapar. Worker agent'lar (Gemini, Codex) commit atar, push'lamaz.
+- **Batch push:** Bireysel ticket push edilmez. Tüm `tickets/approved/` birikip Push ticket'ı (her roadmap'in son task'i, `agent: opus-4.7`) altında tek seferde push edilir.
+- **PR review:** Bu projede şu an PR akışı değil, doğrudan main'e merge + push kullanılıyor.
 - **Force push:** YASAK (main'e), feature branch'e bile sorgula.
+
+---
+
+## 🔁 5-Statüülü Ticket Akışı (Multi-Agent + Push Ayrımı)
+
+```
+backlog → todo → in-review → approved → done
+                  (worker)    (Opus       (Opus
+                              review)   batch push)
+```
+
+- **`in-review` → `approved`:** Opus 4.7 review yetkisi. Her ticket onay sorulmadan değerlendirilir; kriterler tamamsa doğrudan approved'a alınır.
+- **`approved` → `done`:** Sadece batch push sonrası. Push push ticket'ı tarafından tetiklenir.
+- Worker agent'lar `in-review`'dan ileri taşıyamaz. Bu rules.md'de governance kuralı olarak yazılı.
+- Frontmatter `status` her zaman bulunduğu klasörle aynı olmalı; control-panel `ticket check` bunu doğrular.
+
+### Push Ticket Pattern
+Her roadmap iterasyonunun **son task'i** zorunlu Push ticket'ı olmalı:
+- `agent: opus-4.7`, `type: chore`, `priority: P0`
+- Kapsam runtime'da `approved/` ne içeriyorsa
+- `approved/` boşsa skip
+- Adımlar: branch'leri yerel main'e merge → conflict resolve → `git push origin main` tek seferde → `approved/` → `done/` taşı.
+
+### Merge Sıralaması (batch push)
+1. **Foundational/strüktürel** önce (örn. 022 agents/ taşıması) — sonraki branch'lerin base'i.
+2. **Bağımlı branch'ler** (foundational üzerine kurulu olanlar, örn. 020/015) hemen ardından.
+3. **Bağımsız feature/fix'ler** sırayla.
+4. **Çakışan dosyaya dokunanlar** en sona (örn. header.tsx'e nav link ekleyen iki ticket: ikincisinde conflict çıkar, yan yana koy).
+5. Schema değişikliği yapan branch'ler için `git merge-base` ile şüpheli kombinasyonları önceden kontrol et — bir branch diğerini base alıyorsa conflict olmaz.
+
+---
+
+## 🌳 Repo Boundary Gotcha (workspace ≠ git root)
+
+Bu projede `main/` klasörü tek git repo'sudur. Workspace root'ta (`ardiyesizgiris.com/`) **git tracked olmayan** dosya/klasörler bulunur: `tickets/`, `control-panel/`, `readme.md`, `rules.md`, `context.md`, `setup.md`, `GEMINI.md`.
+
+**Sonuç:** Agent'lar bu sınırı bilmezse:
+- Branch açar, dosyaları workspace root'a yazar, "commit" atar — **commit boş** kalır.
+- Verification PASS bildirir, ama git'te kayıt yok.
+- TICKET-012/013/014 bu şekilde yaşandı: Codex `agents/` klasöründe (workspace root) çalıştı, branch'leri main'e merge edilemedi.
+
+**Çözüm (TICKET-022 ile uygulandı):** `agents/` `main/agents/`'a taşındı. Yine de bu sınır mevcut — yeni iş öncesi: dosya `main/` altında mı?
+
+**Path constants tuzakları:** Taşıma sonrası `ticket.js` (`repoRoot = path.resolve(__dirname, "..")` → `..`/`..`), `activity-log-from-commits.js` ve `package.json` script path'leri güncellenmeli. Control-panel da `ticketCli` ve `ACTIVITY_LOG.md` path'lerini günceller.
+
+---
+
+## 🪢 Merge Conflict — Sık Karşılaşılan Pattern'ler
+
+**Additive list conflict (nav links, env vars):**
+Aynı insertion point'e iki branch eklediğinde git auto-merge başarısız olur. Resolution: ikisini de tut, sıralı koy. Örn:
+- `components/layout/header.tsx`: 017 `/takip` + 018 `/kurumsal` — yan yana iki Link
+- `.env.example`: 016 Stripe block + 017 Tracking block — peş peşe iki blok
+
+**🚨 Gotcha — `git add` ile çakışma markeri:**
+`git add <file>` çakışma markeri (`<<<<<<<`, `=======`, `>>>>>>>`) içerirken bile başarılı olur. Sonra `git commit` markerlerle commit yapar — gözden kaçar.
+
+**Kural:** Conflict resolve sonrası, **`git add` öncesi** mutlaka:
+```bash
+grep -c "<<<<<<" <file>   # 0 olmalı
+```
+veya
+```bash
+git diff --check
+```
+
+**Edit tool ile resolve:** Edit kullanmadan önce Read çağrılı olmalı (harness gereği). Bash ile dosya görüntüleme Edit hakkı vermez.
+
+---
 
 ---
 
@@ -247,6 +317,12 @@ node cli.js
 - **Paperclip experiment başarısız oldu** — yerine custom `ardiyesizgiris-agents` Node sistemi + Claude Code Agent tool kombinasyonu kullanılıyor.
 - **DB-driven > hardcoded.** ContainerType migration örneği başarılı (constants → Prisma + admin CRUD).
 - **i18n cleanup atlama riski yüksek.** Küçük packet + grep verify + correction round'lara hazırlıklı ol.
+- **Worker agent commit boş kalabilir** (TICKET-012/013/014). Branch + commit oluştu raporu yetmiyor — `git show --stat <sha>` ile gerçekten dosya değişti mi kontrol et. Sıfır satır = boş commit = workspace/git sınır hatası.
+- **Architecture decision ticket'ları kod değil ADR ister.** TICKET-015 (iOS) doğru cevap iOS scaffold değil, MOBILE_STRATEGY.md ADR + DeveloperAgent template temizliği oldu. "Mimari karar gerekiyor" ticket'larında önce karar/değerlendirme, gerekirse sonra implementation ticket'ı aç.
+- **Inherited agent templates dikkatlice audit edilmeli.** `DeveloperAgent.planMobileFeature` "VisionCam AI iOS app + SwiftUI + Core ML" referansı taşıyordu — başka projeden devralınmış ölü kod. Şüpheli iş çıkarmadan önce agent şablonlarını proje bağlamına göre dezenfekte et.
+- **Token-safe bootstrap kuralı redundant olmalı.** ACTIVITY_LOG read sınırını üç yerde belirttik: dosyanın kendi üst başlığı + readme.md + activitylogopener.md. Tek yerdeki kural agent tarafından kaçırılır.
+- **Status alanı eklerken iki tarafı güncelle:** Control panel hem `server.js` (`statuses` array) hem `public/app.js` (`statusLabels` object) hardcoded liste tutuyor. Yeni statü (örn. `approved`) eklendiğinde ikisi de güncellenmeli, yoksa frontend kuyruğu boş gösterir.
+- **Push merge sırası matters.** Aynı dosyaya dokunan iki branch varsa ikincisini en sona bırak — conflict her halükarda çıkar ama en az komşu commit'i etkiler.
 
 ---
 
