@@ -2,6 +2,10 @@ import { prisma } from "@/lib/db/prisma"
 import { differenceInCalendarDays } from "date-fns"
 import type { CalculationInput, CalculationResult } from "@/types/calculation"
 
+function dayRangeLength(from: number, to: number) {
+  return Math.max(0, to - from + 1)
+}
+
 // Muafiyet (free time) artık ayrı bir kavram değil; TariffRule Tier 1 ile
 // modellenir. tier1PricePerDay === 0 olduğunda tier1DaysFrom..tier1DaysTo
 // aralığı muafiyet penceresidir. Tek bir TariffRule sorgusu yeterli.
@@ -32,11 +36,14 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   const tier2Price = Number(tariff.tier2PricePerDay)
   const tier3Price = Number(tariff.tier3PricePerDay)
 
-  // Free time: Tier 1 ücretsizse muafiyet penceresi tier1DaysTo gündür
-  const free_days = tier1Price === 0 ? tariff.tier1DaysTo : 0
+  const tier1Days = dayRangeLength(tariff.tier1DaysFrom, tariff.tier1DaysTo)
+  const tier2Days = dayRangeLength(tariff.tier2DaysFrom, tariff.tier2DaysTo)
+
+  // Free time: Tier 1 ücretsizse muafiyet penceresi Tier 1 aralığının uzunluğudur.
+  const free_days = tier1Price === 0 ? tier1Days : 0
 
   // Step 2: Calculate free until date (departure - free_days + 1)
-  const free_until_date = new Date(input.departureDate)
+  const free_until_date = new Date(effectiveDate)
   free_until_date.setDate(free_until_date.getDate() - free_days + 1)
 
   // Step 3: If no gate-in date, return planning result
@@ -61,12 +68,12 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
 
   // Step 4: Check if gate-in > departure
   let warning: string | undefined
-  if (actual_gate_in > input.departureDate) {
+  if (actual_gate_in > effectiveDate) {
     warning = "Gate-in tarihi gemi kalkış tarihinden sonra!"
   }
 
   // Step 5: Total days at port (both dates inclusive)
-  const total_days_at_port = differenceInCalendarDays(input.departureDate, actual_gate_in) + 1
+  const total_days_at_port = differenceInCalendarDays(effectiveDate, actual_gate_in) + 1
 
   // Step 6: Free vs chargeable (display amounts)
   const free_period_days = Math.min(total_days_at_port, free_days)
@@ -86,7 +93,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
 
   // Tier 1 (may be muafiyet)
   if (remaining_days > 0) {
-    const days = Math.min(remaining_days, tariff.tier1DaysTo)
+    const days = Math.min(remaining_days, tier1Days)
     const subtotal = days * tier1Price
     total_charge += subtotal
     charge_breakdown.push({ tier: 1, days, price_per_day: tier1Price, subtotal })
@@ -95,8 +102,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
 
   // Tier 2
   if (remaining_days > 0) {
-    const capacity = tariff.tier2DaysTo - tariff.tier1DaysTo
-    const days = Math.min(remaining_days, capacity)
+    const days = Math.min(remaining_days, tier2Days)
     const subtotal = days * tier2Price
     total_charge += subtotal
     charge_breakdown.push({ tier: 2, days, price_per_day: tier2Price, subtotal })

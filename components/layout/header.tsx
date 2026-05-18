@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
-import { Menu, X, Calculator, Sun, Moon, LogOut, User, LayoutDashboard, Settings, History, ChevronDown } from "lucide-react"
+import { Menu, Calculator, Sun, Moon, LogOut, User, LayoutDashboard, Settings, History, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Wordmark } from "@/components/brand/wordmark"
 import { useTheme } from "next-themes"
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { data: session, status } = useSession()
   const isAdmin = session?.user?.role === "ADMIN"
@@ -36,36 +34,37 @@ export default function Header() {
         "fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm py-3",
       )}
     >
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Wordmark />
+      <div className="container mx-auto px-4 grid grid-cols-3 items-center">
+        {/* Left: Navigation Dropdown */}
+        <div className="flex items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1">
+                <Menu className="h-4 w-4" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/">Ana Sayfa</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/hesaplama">Hesaplama</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/takip">Takip</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
+        {/* Center: Brand */}
+        <div className="flex justify-center">
+          <Wordmark />
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link href="/" className="font-medium hover:text-emerald-600 transition-colors">
-            Ana Sayfa
-          </Link>
-          <Link href="/hesaplama" className="font-medium hover:text-emerald-600 transition-colors">
-            Hesaplama
-          </Link>
-          <Link href="/takip" className="font-medium hover:text-emerald-600 transition-colors">
-            Takip
-          </Link>
-          <Link href="/kurumsal" className="font-medium hover:text-emerald-600 transition-colors">
-            Kurumsal
-          </Link>
-          <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors">
-            Hakkımızda
-          </Link>
-          <Link href="/#sss" className="font-medium hover:text-emerald-600 transition-colors">
-            SSS
-          </Link>
-          <Link href="/iletisim" className="font-medium hover:text-emerald-600 transition-colors">
-            İletişim
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center space-x-3">
+        {/* Right: Actions */}
+        <div className="flex items-center justify-end space-x-3">
           {/* Theme toggle */}
           <Button
             variant="ghost"
@@ -166,99 +165,7 @@ export default function Header() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label="Tema değiştir"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Menü">
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
-        </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-900 shadow-lg py-4 px-4 z-50">
-          <nav className="flex flex-col space-y-1">
-            <Link href="/" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              Ana Sayfa
-            </Link>
-            <Link href="/hesaplama" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              Hesaplama
-            </Link>
-            <Link href="/takip" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              Takip
-            </Link>
-            <Link href="/kurumsal" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              Kurumsal
-            </Link>
-            <Link href="/hakkimizda" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              Hakkımızda
-            </Link>
-            <Link href="/#sss" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              SSS
-            </Link>
-            <Link href="/iletisim" className="font-medium hover:text-emerald-600 transition-colors py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" onClick={() => setIsMenuOpen(false)}>
-              İletişim
-            </Link>
-
-            <div className="pt-3 mt-2 border-t flex flex-col gap-2">
-              {session ? (
-                <>
-                  <div className="px-2 py-2 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-emerald-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate">{session.user?.name || "Kullanıcı"}</p>
-                      <p className="text-xs text-muted-foreground truncate">{session.user?.email}</p>
-                    </div>
-                  </div>
-                  <Link href="/profil" className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium" onClick={() => setIsMenuOpen(false)}>
-                    <User className="h-4 w-4" /> Profilim
-                  </Link>
-                  <Link href="/hesaplamalarim" className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium" onClick={() => setIsMenuOpen(false)}>
-                    <History className="h-4 w-4" /> Hesaplamalarım
-                  </Link>
-                  <Link href="/ayarlar" className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium" onClick={() => setIsMenuOpen(false)}>
-                    <Settings className="h-4 w-4" /> Ayarlar
-                  </Link>
-                  {isAdmin && (
-                    <Link href="/admin" className="flex items-center gap-2 py-2 px-2 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-sm font-medium text-emerald-600" onClick={() => setIsMenuOpen(false)}>
-                      <LayoutDashboard className="h-4 w-4" /> Yönetici Paneli
-                    </Link>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600 border-red-200 hover:bg-red-50 mt-1"
-                    onClick={() => { signOut({ callbackUrl: "/" }); setIsMenuOpen(false) }}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Çıkış Yap
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button asChild variant="outline" size="sm" onClick={() => setIsMenuOpen(false)}>
-                    <Link href="/giris">Giriş Yap</Link>
-                  </Button>
-                  <Button asChild size="sm" onClick={() => setIsMenuOpen(false)}>
-                    <Link href="/kayit">Kayıt Ol</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { CheckCircle2, Ship } from "lucide-react"
+import { formatTR } from "@/lib/format"
 
 interface CalculationTimelineProps {
   departureDate: Date | string
@@ -10,9 +11,6 @@ interface CalculationTimelineProps {
 
 const toDate = (v: Date | string | null | undefined) =>
   !v ? null : v instanceof Date ? v : new Date(v)
-
-const formatTR = (d: Date | null) =>
-  !d ? "-" : d.toLocaleDateString("tr-TR")
 
 /**
  * Visual timeline of a calculation, mirroring the hero illustration on

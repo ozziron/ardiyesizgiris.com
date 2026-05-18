@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth/auth"
 import { prisma } from "@/lib/db/prisma"
 import { tariffRuleSchema } from "@/lib/validation/schemas"
+import type { Prisma } from "@prisma/client"
 
 async function checkAdmin() {
   const session = await auth()
@@ -12,14 +13,29 @@ async function checkAdmin() {
   return session
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await checkAdmin()
+    const { searchParams } = new URL(request.url)
+    const shippingCompanyId = searchParams.get("shippingCompanyId")
+    const city = searchParams.get("city")
+    const portId = searchParams.get("portId")
+    const where: Prisma.TariffRuleWhereInput = { isActive: true }
+
+    if (shippingCompanyId) {
+      where.shippingCompanyId = shippingCompanyId
+    }
+
+    if (portId) {
+      where.portId = portId
+    } else if (city) {
+      where.port = { city }
+    }
 
     const rules = await prisma.tariffRule.findMany({
-      where: { isActive: true },
+      where,
       include: {
-        port: { select: { id: true, name: true, code: true } },
+        port: { select: { id: true, name: true, code: true, city: true } },
         shippingCompany: { select: { id: true, name: true, code: true } },
       },
       orderBy: [

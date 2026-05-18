@@ -8,7 +8,7 @@
     "ticket:sync-roadmap": "node ticket.js sync-roadmap ../roadmap.md",
     "ticket:enrich-roadmap": "node ticket.js enrich-roadmap-tickets ../roadmap.md",
     "activity:from-commits": "node activity-log-from-commits.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test lib/text.test.js lib/frontmatter.test.js lib/roadmap.test.js lib/session.test.js lib/request.test.js"
   },
   "keywords": [],
   "author": "",

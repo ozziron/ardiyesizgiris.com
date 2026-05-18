@@ -1,12 +1,21 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   AlertCircle,
   CreditCard,
   Download,
   Mail,
+  ChevronsUpDown,
+  Check,
+  Lock,
+  Unlock,
+  CheckCircle2,
+  Sparkles,
+  LogIn,
+  UserPlus,
+  Crown,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -14,74 +23,132 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useContainerTypes } from "@/hooks/use-container-types";
-import { CalculationResultCard } from "@/components/calculation/result-card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { BILLING_ENABLED } from "@/lib/billing/config";
+import { CostResultCard, PlanningResultCard } from "@/components/calculation/result-card";
 import { CalculationTimeline } from "@/components/calculation/timeline";
 import { CalculationResultSkeleton } from "@/components/calculation/result-skeleton";
+import {
+  useCalculationForm,
+  type CalculationMode,
+  type LivePreview,
+  type SelectOption,
+} from "@/hooks/use-calculation-form";
 
-// Single-mode page. Gate-in is optional: when empty the user gets a planning
-// result (free_until_date only); when filled they get a cost result (tier
-// breakdown + total_charge). The two-card mode picker has been removed.
-type CalculationMode = "planning" | "cost";
+// ---------------------------------------------------------------------------
+// Tip yardımcıları
+// ---------------------------------------------------------------------------
 
-type SelectOption = {
+type AutocompleteOption = {
   id: string;
   name: string;
 };
 
-type ChargeBreakdownItem = {
-  tier: number;
-  days: number;
-  price_per_day: number;
-  subtotal: number;
+type AutocompleteProps = {
+  options: AutocompleteOption[];
+  value: string;
+  onSelect: (id: string) => void;
+  placeholder: string;
+  disabled?: boolean;
+  emptyText?: string;
+  triggerClassName?: string;
+  ariaInvalid?: boolean;
 };
 
-type CalculationResult = {
-  free_days: number;
-  free_until_date: string | Date;
-  total_days_at_port: number;
-  chargeable_days: number;
-  total_charge: number;
-  /** ISO-4217 (TRY/USD/EUR…) from the matched tariff. */
-  currency?: string;
-  charge_breakdown?: ChargeBreakdownItem[];
-  warning?: string;
-  // Server returns this only for cost-mode calculations that get persisted
-  // to the DB. Used downstream to attach export history to the right row.
-  calculationId?: string | null;
-};
+// ---------------------------------------------------------------------------
+// AutocompleteField - Popover + Command ile autocomplete bileşeni
+// ---------------------------------------------------------------------------
 
-type FormState = {
-  portId: string;
-  shippingCompanyId: string;
-  containerType: string;
-  departureDate: string;
-  // Optional cost-mode fields. When gateInDate is empty the request is sent
-  // as planning (null containerId, null gateInDate); the same form/result
-  // pair holds both modes.
-  containerId: string;
-  gateInDate: string;
-};
+function AutocompleteField({
+  options,
+  value,
+  onSelect,
+  placeholder,
+  disabled = false,
+  emptyText = "Sonuç bulunamadı.",
+  triggerClassName,
+  ariaInvalid = false,
+}: AutocompleteProps) {
+  const [open, setOpen] = useState(false);
 
-type ExportState = {
-  recipientEmail: string;
-  message: string;
-  messageTone: "success" | "error" | null;
-  isPdfLoading: boolean;
-  isEmailLoading: boolean;
-};
+  const selectedLabel = options.find((opt) => opt.id === value)?.name ?? "";
 
-type CalculationErrorPayload = {
-  error?: string;
-  details?: { message?: string }[];
-  code?: string;
-};
+  return (
+    <Popover open={open} onOpenChange={disabled ? undefined : setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          aria-invalid={ariaInvalid}
+          disabled={disabled}
+          className={cn(
+            "w-full justify-between font-normal",
+            !selectedLabel && "text-muted-foreground",
+            triggerClassName
+          )}
+        >
+          <span className="truncate">{selectedLabel || placeholder}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" style={{ minWidth: "var(--radix-popover-trigger-width)" }}>
+        <Command>
+          <CommandInput placeholder={`${placeholder} ara...`} />
+          <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
+              {options.map((opt) => (
+                <CommandItem
+                  key={opt.id}
+                  value={opt.name}
+                  onSelect={() => {
+                    onSelect(opt.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === opt.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {opt.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-type LivePreview = {
-  freeDays: number;
-  freeUntilDate: string;
-};
+// ---------------------------------------------------------------------------
+// Yardımcı alt bileşenler
+// ---------------------------------------------------------------------------
 
 type ResultActionsPanelProps = {
   mode: CalculationMode;
@@ -94,49 +161,6 @@ type ResultActionsPanelProps = {
   isEmailLoading: boolean;
   message: string;
   messageTone: "success" | "error" | null;
-};
-
-const initialForm: FormState = {
-  portId: "",
-  shippingCompanyId: "",
-  containerType: "20DC",
-  departureDate: "",
-  containerId: "",
-  gateInDate: "",
-};
-
-const initialExportState: ExportState = {
-  recipientEmail: "",
-  message: "",
-  messageTone: null,
-  isPdfLoading: false,
-  isEmailLoading: false,
-};
-
-const formatLocalDate = (isoDate: string | Date | undefined) => {
-  if (!isoDate) return "-";
-  const dateObj = isoDate instanceof Date ? isoDate : new Date(isoDate);
-  return dateObj.toLocaleDateString("tr-TR");
-};
-
-const getOptionName = (options: SelectOption[], id: string) =>
-  options.find((option) => option.id === id)?.name ?? "-";
-
-const buildFileName = (mode: CalculationMode, containerId?: string) => {
-  const dateStamp = new Date().toISOString().slice(0, 10);
-  if (mode === "planning") return `ardiyesiz-planlama-${dateStamp}.pdf`;
-
-  const safeContainerId = (containerId || "rapor").replace(/[^a-zA-Z0-9-_]/g, "-");
-  return `ardiyesiz-masraf-${safeContainerId}-${dateStamp}.pdf`;
-};
-
-const downloadPdfDataUri = (pdfDataUri: string, filename: string) => {
-  const link = document.createElement("a");
-  link.href = pdfDataUri;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
 
 function LivePreviewCard({
@@ -246,478 +270,453 @@ function ResultActionsPanel({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Ana sayfa
+// ---------------------------------------------------------------------------
+
 export default function HesaplamaPage() {
-  const { data: session } = useSession();
-  const [ports, setPorts] = useState<SelectOption[]>([]);
-  const [carriers, setCarriers] = useState<SelectOption[]>([]);
-  const { options: containerTypes } = useContainerTypes();
-  const getContainerTypeLabel = (code: string) =>
-    containerTypes.find((c) => c.code === code)?.label ?? code;
+  const {
+    session,
+    ports,
+    carriers,
+    containerTypes,
+    form,
+    updateForm,
+    mode,
+    submittedMode,
+    result,
+    error,
+    fieldErrors,
+    upgradePrompt,
+    isLoading,
+    isCheckoutLoading,
+    checkoutError,
+    preview,
+    exportState,
+    setRecipientEmail,
+    summaryRows,
+    handleSubmit,
+    handleStartCheckout,
+    handleBuyCredits,
+    handleDownloadPdf,
+    handleSendEmail,
+    isBuyingCredits,
+    usage,
+  } = useCalculationForm();
 
-  const [form, setForm] = useState<FormState>(initialForm);
-  const [result, setResult] = useState<CalculationResult | null>(null);
-  const [submittedMode, setSubmittedMode] = useState<CalculationMode | null>(null);
-  const [error, setError] = useState("");
-  const [exportState, setExportState] = useState<ExportState>(initialExportState);
-  const [isLoading, setIsLoading] = useState(false);
-  const [upgradePrompt, setUpgradePrompt] = useState(false);
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState("");
-  const [preview, setPreview] = useState<LivePreview | null>(null);
+  // "Masraf hesapla" checkbox durumu - conditional gate-in/container alanlarını açar
+  const [masrafHesaplaAcik, setMasrafHesaplaAcik] = useState(false);
 
-  // Mode is derived from gateInDate, not from a separate toggle. submittedMode
-  // pins the mode used for the most recent successful calculation so the
-  // result card doesn't flicker if the user starts editing gate-in after.
-  const mode: CalculationMode = form.gateInDate ? "cost" : "planning";
+  // Erişim kontrolü dialog'ları
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [premiumDialogOpen, setPremiumDialogOpen] = useState(false);
+  const [resultDialogOpen, setResultDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [portsRes, carriersRes] = await Promise.all([fetch("/api/ports"), fetch("/api/carriers")]);
-        const portsData = await portsRes.json();
-        const carriersData = await carriersRes.json();
+  // Üyelik durumu (session callback'inde set ediliyor)
+  const isLoggedIn = Boolean(session?.user?.id);
+  const isPremium = !BILLING_ENABLED || (
+    session?.user?.role === "ADMIN" ||
+    session?.user?.membershipType === "CORPORATE" ||
+    (session?.user?.membershipType === "PREMIUM" &&
+      session?.user?.subscriptionActive === true)
+  );
 
-        setPorts(portsData.data || []);
-        setCarriers(carriersData.data || []);
-      } catch (err) {
-        console.error("Veri yükleme hatası:", err);
-      }
-    };
-
-    fetchOptions();
-  }, []);
-
-  // Debounced free-time preview. Fires as soon as the 4 lookup fields are
-  // filled, regardless of whether gate-in is also filled.
-  useEffect(() => {
-    const { portId, shippingCompanyId, containerType, departureDate } = form;
-    if (!portId || !shippingCompanyId || !containerType || !departureDate) {
-      setPreview(null);
-      return;
-    }
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ portId, shippingCompanyId, containerType, departureDate });
-        const res = await fetch(`/api/free-time-preview?${params}`, { signal: controller.signal });
-        if (!res.ok) {
-          setPreview(null);
-          return;
-        }
-        const data = await res.json();
-        setPreview({ freeDays: data.freeDays, freeUntilDate: data.freeUntilDate });
-      } catch (err) {
-        if ((err as { name?: string })?.name === "AbortError") return;
-        setPreview(null);
-      }
-    }, 250);
-    return () => {
-      controller.abort();
-      clearTimeout(timer);
-    };
-  }, [form.portId, form.shippingCompanyId, form.containerType, form.departureDate]);
-
-  const resetExportFeedback = () => {
-    setExportState((current) => ({ ...current, message: "", messageTone: null }));
-  };
-
-  const validateForm = (): string | null => {
-    if (!form.portId) return "Liman seçiniz.";
-    if (!form.shippingCompanyId) return "Hat seçiniz.";
-    if (!form.containerType) return "Ekipman tipi seçiniz.";
-    if (!form.departureDate) return "Gemi kalkış tarihini giriniz.";
-    if (form.gateInDate && !form.containerId.trim()) {
-      return "Masraf hesabı için konteyner ID giriniz.";
-    }
-    return null;
-  };
-
-  const handleSubmit = async () => {
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      setResult(null);
-      return;
-    }
-
-    resetExportFeedback();
-    setCheckoutError("");
-    setIsLoading(true);
-    setError("");
-    setResult(null);
-
-    const submissionMode: CalculationMode = form.gateInDate ? "cost" : "planning";
-    const payload = {
-      portId: form.portId,
-      shippingCompanyId: form.shippingCompanyId,
-      containerType: form.containerType,
-      departureDate: form.departureDate,
-      containerId: form.gateInDate ? form.containerId : null,
-      gateInDate: form.gateInDate || null,
-    };
-
-    try {
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorPayload = data as CalculationErrorPayload;
-        if (response.status === 402 || errorPayload?.code === "UPGRADE_REQUIRED") {
-          setUpgradePrompt(true);
-        }
-        const message = data?.error || data?.details?.[0]?.message || "Hesaplama sırasında bir hata oluştu.";
-        throw new Error(message);
-      }
-
-      setUpgradePrompt(false);
-      setResult(data.data);
-      setSubmittedMode(submissionMode);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Hesaplama sırasında bir hata oluştu.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleStartCheckout = async () => {
-    setCheckoutError("");
-
-    if (!session?.user?.id) {
-      window.location.href = "/giris?callbackUrl=/hesaplama";
-      return;
-    }
-
-    setIsCheckoutLoading(true);
-
-    try {
-      const response = await fetch("/api/billing/checkout", { method: "POST" });
-      const data = await response.json();
-
-      if (!response.ok || !data?.url) {
-        throw new Error(data?.error || "Premium ödeme sayfası açılamadı.");
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : "Premium ödeme sayfası açılamadı.");
-    } finally {
-      setIsCheckoutLoading(false);
-    }
-  };
-
-  const getExportPayload = () => {
-    if (!result || !submittedMode) return null;
-    const isCost = submittedMode === "cost";
-
-    return {
-      calculationType: submittedMode,
-      // Only cost-mode results have a persisted DB row.
-      calculationId: isCost ? result.calculationId ?? null : null,
-      portalName: getOptionName(ports, form.portId),
-      carrierName: getOptionName(carriers, form.shippingCompanyId),
-      containerId: isCost ? form.containerId : null,
-      containerType: getContainerTypeLabel(form.containerType),
-      departureDate: form.departureDate,
-      gateInDate: isCost ? form.gateInDate : null,
-      freeDays: result.free_days,
-      freeUntilDate: result.free_until_date,
-      totalCharge: isCost ? result.total_charge : 0,
-      currency: result.currency || "TRY",
-      totalDaysAtPort: result.total_days_at_port,
-      chargeableDays: result.chargeable_days,
-      warning: result.warning,
-      chargeBreakdown: result.charge_breakdown,
-    };
-  };
-
-  const handleDownloadPdf = async () => {
-    const payload = getExportPayload();
-    if (!payload || !submittedMode) return;
-
-    setExportState((current) => ({ ...current, isPdfLoading: true, message: "", messageTone: null }));
-
-    try {
-      const response = await fetch("/api/export/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "PDF oluşturulamadı.");
-
-      downloadPdfDataUri(data.pdfDataUri, buildFileName(submittedMode, payload.containerId ?? undefined));
-
-      setExportState((current) => ({
-        ...current,
-        isPdfLoading: false,
-        message: "PDF raporu indirildi.",
-        messageTone: "success",
-      }));
-    } catch (err) {
-      setExportState((current) => ({
-        ...current,
-        isPdfLoading: false,
-        message: err instanceof Error ? err.message : "PDF oluşturulamadı.",
-        messageTone: "error",
-      }));
-    }
-  };
-
-  const handleSendEmail = async () => {
-    const payload = getExportPayload();
-    const recipientEmail = exportState.recipientEmail.trim();
-    if (!payload) return;
-
-    if (!session?.user?.email && !recipientEmail) {
-      setExportState((current) => ({
-        ...current,
-        message: "Email göndermek için bir alıcı adresi girin.",
-        messageTone: "error",
-      }));
-      return;
-    }
-
-    setExportState((current) => ({ ...current, isEmailLoading: true, message: "", messageTone: null }));
-
-    try {
-      const response = await fetch("/api/export/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, recipientEmail: recipientEmail || undefined }),
-      });
-      const data = await response.json();
-
-      // Email service intentionally not wired up yet (no real RESEND_API_KEY).
-      if (response.status === 503 && data?.code === "EMAIL_NOT_CONFIGURED") {
-        setExportState((current) => ({
-          ...current,
-          isEmailLoading: false,
-          message: "E-posta hizmeti henüz aktif değil. Sonucu şimdilik PDF olarak indirebilirsiniz.",
-          messageTone: "error",
-        }));
+  // Premium tikini değiştirmek isteyince erişim kontrolü
+  const handleMasrafHesaplaToggle = (checked: boolean) => {
+    if (checked && BILLING_ENABLED) {
+      if (!isLoggedIn) {
+        setLoginDialogOpen(true);
         return;
       }
-
-      if (!response.ok) throw new Error(data?.error || "Email gönderilemedi.");
-
-      const successDetail = data?.dryRun ? " (test modu)" : "";
-      setExportState((current) => ({
-        ...current,
-        isEmailLoading: false,
-        message: `Sonuç ${recipientEmail || session?.user?.email} adresine gönderildi${successDetail}.`,
-        messageTone: "success",
-      }));
-    } catch (err) {
-      setExportState((current) => ({
-        ...current,
-        isEmailLoading: false,
-        message: err instanceof Error ? err.message : "Email gönderilemedi.",
-        messageTone: "error",
-      }));
+      if (!isPremium) {
+        setPremiumDialogOpen(true);
+        return;
+      }
+    }
+    setMasrafHesaplaAcik(checked);
+    if (!checked) {
+      updateForm({ gateInDate: "", containerId: "" });
     }
   };
 
-  // Result-card summary rows. Cost-mode adds Container ID + Gate-in.
-  const isCostResult = submittedMode === "cost";
-  const summaryRows = [
-    { label: "Liman", value: getOptionName(ports, form.portId) },
-    { label: "Hat", value: getOptionName(carriers, form.shippingCompanyId) },
-    { label: "Konteyner", value: getContainerTypeLabel(form.containerType) },
-    ...(isCostResult ? [{ label: "Konteyner ID", value: form.containerId, mono: true }] : []),
-    { label: "Kalkış", value: formatLocalDate(form.departureDate), mono: true },
-    ...(isCostResult ? [{ label: "Gate-in", value: formatLocalDate(form.gateInDate), mono: true }] : []),
-  ];
+  // Hesapla butonu: önce erişim kontrolü, sonra mevcut handleSubmit
+  const handleSubmitGated = () => {
+    if (BILLING_ENABLED) {
+      if (!isLoggedIn) {
+        setLoginDialogOpen(true);
+        return;
+      }
+      if (masrafHesaplaAcik && !isPremium) {
+        setPremiumDialogOpen(true);
+        return;
+      }
+    }
+    handleSubmit();
+  };
+
+  useEffect(() => {
+    if (result && submittedMode && !isLoading) {
+      setResultDialogOpen(true);
+    }
+  }, [result, submittedMode, isLoading]);
+
+  // Carrier listesini AutocompleteField formatına dönüştür
+  const carrierOptions: AutocompleteOption[] = (carriers as SelectOption[]).map((c) => ({
+    id: c.id,
+    name: c.name,
+  }));
+
+  // Port listesini AutocompleteField formatına dönüştür
+  const portOptions: AutocompleteOption[] = (ports as SelectOption[]).map((p) => ({
+    id: p.id,
+    name: p.name,
+  }));
+
+  // Ekipman tipi listesini AutocompleteField formatına dönüştür
+  const equipmentOptions: AutocompleteOption[] = containerTypes.map((ct) => ({
+    id: ct.code,
+    name: ct.label,
+  }));
 
   return (
     <div className="container mx-auto px-4 pb-10 pt-8">
-      <div className="mx-auto mt-8 w-full max-w-3xl">
-        <div className="mb-8 text-center">
-          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-            Ardiyesiz Giriş Hesaplama
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Liman, hat, ekipman ve tarihleri girin. Gate-in tarihi <strong>opsiyoneldir</strong> —
-            boş bırakırsanız muafiyet başlangıcını gösteririz, doldurursanız oluşan masrafı da hesaplarız.
-          </p>
-        </div>
+      <div className="mx-auto mt-12 w-full max-w-3xl md:mt-16">
+        <h1 className="sr-only">Ardiyesiz Giriş ve Ardiye Masrafı Hesaplama</h1>
 
         <Card>
           <CardHeader>
-            <CardTitle>Hesaplama Bilgileri</CardTitle>
+            <CardTitle>Sefer Bilgileri</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Hat, POL, ekipman ve ETD bilgilerini girin; ardiyesiz giriş tarihini
+              anında hesaplayın.
+            </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Liman</Label>
-                <Select
-                  value={form.portId}
-                  onValueChange={(value) => setForm((current) => ({ ...current, portId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Liman seçiniz" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ports.map((port) => (
-                      <SelectItem key={port.id} value={port.id}>
-                        {port.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <CardContent>
+            {/* Kredi durumu göstergesi */}
+            {isLoggedIn && !isPremium && usage && (
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-3">
+                <CreditCard className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm">
+                  Kalan kredi:{' '}
+                  <span className="font-semibold tabular-nums">
+                    {usage.remaining !== null ? usage.remaining : '—'}
+                  </span>
+                  <span className="text-muted-foreground"> / {usage.limit}</span>
+                </span>
               </div>
+            )}
 
-              <div>
-                <Label>Hat (Carrier)</Label>
-                <Select
+            {/* ---- Dikey form layout ---- */}
+            <div className="flex flex-col gap-4">
+
+              {/* Hat */}
+              <div className="flex flex-col gap-1.5">
+                <Label>Hat</Label>
+                <AutocompleteField
+                  options={carrierOptions}
                   value={form.shippingCompanyId}
-                  onValueChange={(value) =>
-                    setForm((current) => ({ ...current, shippingCompanyId: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Hat seçiniz" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {carriers.map((carrier) => (
-                      <SelectItem key={carrier.id} value={carrier.id}>
-                        {carrier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onSelect={(id) => updateForm({ shippingCompanyId: id })}
+                  placeholder="Maersk, MSC, CMA CGM..."
+                  emptyText="Bu hat sistemde tanımlı değil."
+                  ariaInvalid={Boolean(fieldErrors.shippingCompanyId)}
+                  triggerClassName={fieldErrors.shippingCompanyId ? "border-destructive text-foreground" : undefined}
+                />
+                {fieldErrors.shippingCompanyId && (
+                  <p className="text-sm text-destructive">{fieldErrors.shippingCompanyId}</p>
+                )}
               </div>
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
+              {/* POL - Yükleme Limanı */}
+              <div className="flex flex-col gap-1.5">
+                <Label>Yükleme Limanı (POL)</Label>
+                <AutocompleteField
+                  options={portOptions}
+                  value={form.portId}
+                  onSelect={(id) => updateForm({ portId: id })}
+                  placeholder="Ambarlı, Mersin, İzmir..."
+                  emptyText="Bu liman sistemde tanımlı değil."
+                  ariaInvalid={Boolean(fieldErrors.portId)}
+                  triggerClassName={fieldErrors.portId ? "border-destructive text-foreground" : undefined}
+                />
+                {fieldErrors.portId && (
+                  <p className="text-sm text-destructive">{fieldErrors.portId}</p>
+                )}
+              </div>
+
+              {/* Ekipman Tipi */}
+              <div className="flex flex-col gap-1.5">
                 <Label>Ekipman Tipi</Label>
-                <Select
+                <AutocompleteField
+                  options={equipmentOptions}
                   value={form.containerType}
-                  onValueChange={(value) => setForm((current) => ({ ...current, containerType: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Ekipman tipi seçiniz" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {containerTypes.map((option) => (
-                      <SelectItem key={option.id} value={option.code}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onSelect={(code) => updateForm({ containerType: code })}
+                  placeholder="20DC, 40HC, 20RF..."
+                  emptyText="Bu ekipman tipi sistemde tanımlı değil."
+                  ariaInvalid={Boolean(fieldErrors.containerType)}
+                  triggerClassName={fieldErrors.containerType ? "border-destructive text-foreground" : undefined}
+                />
+                {fieldErrors.containerType && (
+                  <p className="text-sm text-destructive">{fieldErrors.containerType}</p>
+                )}
               </div>
 
-              <div>
-                <Label>Gemi Kalkış Tarihi</Label>
+              {/* ETD - Gemi Kalkış Tarihi */}
+              <div className="flex flex-col gap-1.5">
+                <Label>Gemi Kalkış Tarihi (ETD)</Label>
                 <Input
                   type="date"
                   value={form.departureDate}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, departureDate: event.target.value }))
-                  }
+                  onChange={(event) => updateForm({ departureDate: event.target.value })}
+                                  aria-invalid={Boolean(fieldErrors.departureDate)}
+                  className={cn(fieldErrors.departureDate && "border-destructive focus-visible:ring-destructive")}
                 />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>
-                  Gate-in Tarihi <span className="text-xs text-muted-foreground">(opsiyonel — masraf için)</span>
-                </Label>
-                <Input
-                  type="date"
-                  value={form.gateInDate}
-                  onChange={(event) => setForm((current) => ({ ...current, gateInDate: event.target.value }))}
-                />
+                {fieldErrors.departureDate && (
+                  <p className="text-sm text-destructive">{fieldErrors.departureDate}</p>
+                )}
               </div>
 
-              <div>
-                <Label>
-                  Konteyner ID{" "}
-                  <span className="text-xs text-muted-foreground">
-                    {form.gateInDate ? "(masraf için zorunlu)" : "(gate-in girilirse zorunlu)"}
-                  </span>
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="Örn: CONT123456789"
-                  value={form.containerId}
-                  onChange={(event) => setForm((current) => ({ ...current, containerId: event.target.value }))}
-                  disabled={!form.gateInDate}
-                />
-              </div>
-            </div>
-
-            <Button onClick={handleSubmit} className="w-full" disabled={isLoading}>
-              {isLoading
-                ? "Hesaplanıyor..."
-                : mode === "cost"
-                  ? "Masrafı Hesapla"
-                  : "Ardiyesiz Giriş Tarihini Hesapla"}
-            </Button>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Hesaplama yapılamadı</AlertTitle>
-                <AlertDescription className="space-y-3">
-                  <p>{error}</p>
-                  {upgradePrompt && (
-                    <div className="space-y-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="gap-2"
-                        onClick={handleStartCheckout}
-                        disabled={isCheckoutLoading}
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
-                      </Button>
-                      {checkoutError && <p className="text-sm">{checkoutError}</p>}
+              {/* -----------------------------------------------------------------------
+                  PREMIUM: gate-in & container number - bu blok ileride feature flag ile
+                  gate'lenecek. Şu an tüm kullanıcılara açık; premium mimariye hazırlık
+                  için ayrı bir bölüm olarak işaretlendi.
+                  ----------------------------------------------------------------------- */}
+              <div
+                className={cn(
+                  "relative rounded-xl border p-5 flex flex-col gap-4 transition-colors",
+                  masrafHesaplaAcik
+                    ? "border-primary/40 bg-primary/[0.03]"
+                    : "border-border bg-muted/30",
+                )}
+              >
+                {/* Başlık satırı: Lock/Unlock ikonu + başlık + Premium rozeti */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                        masrafHesaplaAcik
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {masrafHesaplaAcik ? (
+                        <Unlock className="h-4 w-4" />
+                      ) : (
+                        <Lock className="h-4 w-4" />
+                      )}
                     </div>
+                    <div className="flex flex-col">
+                      <h3 className="text-sm font-semibold leading-tight">
+                        Ardiye Masrafı Analizi
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        Gate-in bazlı kademeli tarife · konteyner başına net tutar
+                      </span>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="gap-1 border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Premium
+                  </Badge>
+                </div>
+
+                {/* Checkbox satırı */}
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="masraf-hesapla"
+                    checked={masrafHesaplaAcik}
+                    onCheckedChange={(checked) => handleMasrafHesaplaToggle(Boolean(checked))}
+                    className="mt-0.5"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <Label
+                      htmlFor="masraf-hesapla"
+                      className="cursor-pointer text-sm font-medium leading-tight"
+                    >
+                      Masraf analizini aç
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Gate-in ve konteyner alanları aktifleşir.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Premium value-prop listesi */}
+                <div className="rounded-lg border border-dashed border-amber-300/60 bg-amber-50/40 p-3 dark:border-amber-700/40 dark:bg-amber-950/20">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                    Premium içeriğinde
+                  </p>
+                  <ul className="flex flex-col gap-1.5 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span>Konteyner başına net ardiye tutarı</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span>Tier 1 / 2 / 3 kademeli tarife dökümü</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span>Free time ile gate-in karşılaştırması</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span>PDF rapor ve e-posta paylaşımı</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span>Konteyner numarasıyla masraf geçmişi</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Gate-in Tarihi */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="gate-in-tarihi"
+                      className={cn(!masrafHesaplaAcik && "text-muted-foreground")}
+                    >
+                      Gate-in Tarihi
+                    </Label>
+                    {!masrafHesaplaAcik && (
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground/60" aria-hidden />
+                    )}
+                  </div>
+                  <Input
+                    id="gate-in-tarihi"
+                    type="date"
+                    value={form.gateInDate}
+                    onChange={(event) => updateForm({ gateInDate: event.target.value })}
+                    disabled={!masrafHesaplaAcik}
+                    className={cn(!masrafHesaplaAcik && "cursor-not-allowed opacity-60")}
+                  />
+                </div>
+
+                {/* Konteyner No */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="konteyner-id"
+                      className={cn(!masrafHesaplaAcik && "text-muted-foreground")}
+                    >
+                      Konteyner No{" "}
+                      {masrafHesaplaAcik && form.gateInDate && (
+                        <span className="text-xs font-normal text-muted-foreground">
+                          (zorunlu)
+                        </span>
+                      )}
+                    </Label>
+                    {!masrafHesaplaAcik && (
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground/60" aria-hidden />
+                    )}
+                  </div>
+                  <Input
+                    id="konteyner-id"
+                    type="text"
+                    placeholder="MSCU1234567"
+                    value={form.containerId}
+                    onChange={(event) => updateForm({ containerId: event.target.value })}
+                    disabled={!masrafHesaplaAcik}
+                    aria-invalid={Boolean(fieldErrors.containerId)}
+                    className={cn(
+                      !masrafHesaplaAcik && "cursor-not-allowed opacity-60",
+                      fieldErrors.containerId && "border-destructive focus-visible:ring-destructive"
+                    )}
+                  />
+                  {fieldErrors.containerId && (
+                    <p className="text-sm text-destructive">{fieldErrors.containerId}</p>
                   )}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {isLoading && (
-              <div className="animate-in fade-in duration-300">
-                <CalculationResultSkeleton />
+                </div>
               </div>
-            )}
+              {/* END PREMIUM BLOCK */}
 
-            {preview && !result && !isLoading && (
-              <LivePreviewCard preview={preview} departureDate={form.departureDate} />
-            )}
+              {/* Hesapla butonu */}
+              <Button onClick={handleSubmitGated} className="w-full" disabled={isLoading}>
+                {isLoading
+                  ? "Hesaplama yapılıyor..."
+                  : mode === "cost"
+                    ? "Ardiye Masrafını Hesapla"
+                    : "Ardiyesiz Giriş Tarihini Hesapla"}
+              </Button>
 
-            {result && submittedMode && !isLoading && (
-              <div className="animate-in fade-in zoom-in-95 duration-500">
-                <CalculationResultCard
-                  mode={submittedMode}
-                  summary={summaryRows}
-                  freeDays={result.free_days}
-                  freeUntilDate={result.free_until_date}
-                  departureDate={form.departureDate}
-                  totalCharge={result.total_charge}
-                  chargeableDays={result.chargeable_days}
-                  totalDaysAtPort={result.total_days_at_port}
-                  chargeBreakdown={result.charge_breakdown}
-                  currency={result.currency || "TRY"}
-                  warning={result.warning}
-                >
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Hesaplama tamamlanamadı</AlertTitle>
+                  <AlertDescription className="space-y-3">
+                    <p>{error}</p>
+                    {upgradePrompt && (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                          Kredi satın alarak hesaplamaya devam edebilir veya sınırsız erişim için Premium'a geçebilirsiniz.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="gap-2"
+                            onClick={handleBuyCredits}
+                            disabled={isBuyingCredits || isCheckoutLoading}
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            {isBuyingCredits ? "Stripe açılıyor..." : "Kredi Satın Al"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="gap-2"
+                            onClick={handleStartCheckout}
+                            disabled={isCheckoutLoading || isBuyingCredits}
+                          >
+                            <Crown className="h-4 w-4" />
+                            {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+                          </Button>
+                        </div>
+                        {checkoutError && <p className="text-sm">{checkoutError}</p>}
+                      </div>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {isLoading && (
+                <div className="animate-in fade-in duration-300">
+                  <CalculationResultSkeleton />
+                </div>
+              )}
+
+              {preview && !result && !isLoading && (
+                <LivePreviewCard preview={preview} departureDate={form.departureDate} />
+              )}
+
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ---- Hesaplama sonucu dialog ---- */}
+      <Dialog open={resultDialogOpen} onOpenChange={setResultDialogOpen}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto p-4 sm:max-w-4xl sm:p-6">
+          <DialogHeader>
+            <DialogTitle>Hesaplama Sonucu</DialogTitle>
+            <DialogDescription>
+              Sonucunuz aşağıdaki formatta hazırlandı.
+            </DialogDescription>
+          </DialogHeader>
+
+          {result && submittedMode && !isLoading && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              {(() => {
+                const actions = (
                   <ResultActionsPanel
                     mode={submittedMode}
                     sessionEmail={session?.user?.email}
                     recipientEmail={exportState.recipientEmail}
-                    onRecipientEmailChange={(value) =>
-                      setExportState((current) => ({ ...current, recipientEmail: value }))
-                    }
+                    onRecipientEmailChange={setRecipientEmail}
                     onDownloadPdf={handleDownloadPdf}
                     onSendEmail={handleSendEmail}
                     isPdfLoading={exportState.isPdfLoading}
@@ -725,12 +724,158 @@ export default function HesaplamaPage() {
                     message={exportState.message}
                     messageTone={exportState.messageTone}
                   />
-                </CalculationResultCard>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                );
+                return submittedMode === "cost" ? (
+                  <CostResultCard
+                    summary={summaryRows}
+                    freeDays={result.free_days}
+                    freeUntilDate={result.free_until_date}
+                    departureDate={form.departureDate}
+                    totalCharge={result.total_charge}
+                    chargeableDays={result.chargeable_days}
+                    totalDaysAtPort={result.total_days_at_port}
+                    chargeBreakdown={result.charge_breakdown}
+                    currency={result.currency || "TRY"}
+                    warning={result.warning}
+                  >
+                    {actions}
+                  </CostResultCard>
+                ) : (
+                  <PlanningResultCard
+                    summary={summaryRows}
+                    freeDays={result.free_days}
+                    freeUntilDate={result.free_until_date}
+                    departureDate={form.departureDate}
+                    warning={result.warning}
+                  >
+                    {actions}
+                  </PlanningResultCard>
+                );
+              })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ---- Login gerekli dialog ---- */}
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <LogIn className="h-6 w-6" />
+            </div>
+            <DialogTitle>Hesaplama için giriş yapın</DialogTitle>
+            <DialogDescription>
+              Ardiyesiz giriş hesaplamasını kullanabilmek için ücretsiz hesabınızla
+              giriş yapın. Henüz üye değilseniz birkaç saniyede kayıt olabilirsiniz.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg border border-dashed border-border/70 bg-muted/40 p-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Üyelik avantajları
+            </p>
+            <ul className="flex flex-col gap-1.5 text-sm">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Sınırsız ardiyesiz giriş hesaplaması</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Geçmiş hesaplamaları kaydetme</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>PDF ve e-posta paylaşımı</span>
+              </li>
+            </ul>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" asChild className="gap-2">
+              <Link href="/giris">
+                <LogIn className="h-4 w-4" />
+                Giriş Yap
+              </Link>
+            </Button>
+            <Button asChild className="gap-2">
+              <Link href="/kayit">
+                <UserPlus className="h-4 w-4" />
+                Ücretsiz Üye Ol
+              </Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ---- Premium gerekli dialog ---- */}
+      <Dialog open={premiumDialogOpen} onOpenChange={setPremiumDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
+              <Crown className="h-6 w-6" />
+            </div>
+            <DialogTitle>Bu özellik Premium üyelere özel</DialogTitle>
+            <DialogDescription>
+              Ardiye masrafı analizi; gate-in tarihinize göre tam kademeli ücret
+              hesabını ve konteyner bazlı raporu içerir. Premium üyeliğe geçerek
+              tüm masraf araçlarına erişin.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg border border-dashed border-amber-300/60 bg-amber-50/40 p-3 dark:border-amber-700/40 dark:bg-amber-950/20">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+              Premium ile elde edersiniz
+            </p>
+            <ul className="flex flex-col gap-1.5 text-sm">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Konteyner başına net ardiye tutarı</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Tier 1 / 2 / 3 kademeli tarife dökümü</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Free time ile gate-in karşılaştırması</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>PDF rapor ve e-posta paylaşımı</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <span>Konteyner numarasıyla masraf geçmişi</span>
+              </li>
+            </ul>
+          </div>
+
+          {checkoutError && (
+            <p className="text-sm text-red-600 dark:text-red-400">{checkoutError}</p>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPremiumDialogOpen(false)}
+            >
+              Vazgeç
+            </Button>
+            <Button
+              onClick={handleStartCheckout}
+              disabled={isCheckoutLoading}
+              className="gap-2 bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
+            >
+              <Sparkles className="h-4 w-4" />
+              {isCheckoutLoading ? "Stripe açılıyor..." : "Premium'a Geç"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+
+

@@ -6,10 +6,9 @@
 
 ---
 
-## 🤖 Agent Atama / Gemini CLI Workflow
+## 🤖 Worker Agent Atama Workflow
 
-Gemini CLI worker talimatı (auto-loaded): `GEMINI.md` (repo kökü).
-Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Özet:
+Tüm worker CLI'lar (Claude Haiku, Gemini, Codex) için ortak risk matrisi. CLI-spesifik notlar yerine tüm worker'lar için aynı kural uygulanır; CLI farkları `BOOTSTRAP.md` §5–6'da.
 
 **Risk matrisi (renk = atama):**
 
@@ -19,11 +18,11 @@ Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Öz
 | Modül (birkaç dosya) | 🟢 | 🟡 | 🔴 |
 | Çapraz (schema/auth/payment/calc) | 🟡 | 🔴 | 🔴 |
 
-- 🟢 → Gemini CLI (standart prompt + verifier checklist)
-- 🟡 → Gemini close-supervised (her commit reviewer git diff + visual smoke)
-- 🔴 → Codex / Claude / kullanıcı
+- 🟢 → Worker (standart prompt + verifier checklist)
+- 🟡 → Close-supervised (her commit reviewer git diff + visual smoke)
+- 🔴 → CEO (Opus) / kullanıcı
 
-**Override (her zaman 🔴, renkten bağımsız) — Gemini'ye verme:**
+**Override (her zaman 🔴, renkten bağımsız) — worker'a verme:**
 - `prisma/schema.prisma`, `prisma/migrations/**`
 - `lib/calculations/**` (sabit hesaplama kuralları)
 - `lib/auth/**`, `middleware.ts`, `app/api/auth/**`
@@ -32,7 +31,7 @@ Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Öz
 - iOS / yeni stack başlangıçları
 - Mimari karar gerektiren ticket'lar
 
-**Whitelist (Gemini-uygun tipik işler):**
+**Whitelist (worker-uygun tipik işler):**
 - i18n / copy / Türkçe karakter cleanup
 - Tek dosya UI polish (skeleton, empty state, hover)
 - Pure utility / helper script
@@ -40,25 +39,25 @@ Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Öz
 - Doc güncellemeleri, mevcut davranışı pin'leyen testler
 
 **Önce-doğrula (2dk triage, ticket başına):**
-1. Kapsam zaten yapıldı mı? (son 5–10 commit)
-2. Self-contained mi? (Açıklama/Kapsam/Kabul/Talimat/Verification dolu mu)
+1. Kapsam zaten yapıldı mı? (son 5–10 commit veya `session list`)
+2. Self-contained mi? (v2 body: `Ne ve Neden` + `Nasıl Yapılır` dolu mu)
 3. Renk + override kontrolü.
 
 **Reviewer verifier checklist (her ticket sonu):**
-1. `node agents/ticket.js check` → 0 uyarı
-2. Frontmatter `status: in-review` + `branch:` + `commit:` dolu
-3. Yapılanlar/Etkilenen Dosyalar/Verification boş değil
+1. `node main/agents/ticket.js check` → 0 uyarı
+2. Frontmatter `status: in-review`, `sessions: [...]` dolu (session start ile otomatik)
+3. v2 body: `Sonuç` + `Etkilenen Dosyalar` boş değil
 4. **Grep verify** (gpt-oss dersi) — iddia edilen değişiklikler gerçekten yapılmış mı
-5. `cd main && npx tsc --noEmit` exit 0
+5. `cd main && npm run typecheck` exit 0
 6. UI etkisi varsa `npm run build` veya görsel smoke (🟡'da zorunlu)
-7. `git log -1 --stat <commit>` Etkilenen Dosyalar listesiyle uyum
-8. `node agents/ticket.js done TICKET-XXX --commit <hash> --reviewer opus-4.7`
+7. İlgili session dosyasında commit hash + verification çıktısı yer alıyor
+8. `node main/agents/ticket.js done TICKET-XXX --commit <hash> --reviewer opus`
 
 **Disiplin:**
-- `todo/` max 1 ticket. Paralel yok.
-- `in-review`'a almadan önce branch + commit zorunlu (T002/T003 "uncommitted" gotcha tekrar etmesin).
-- Her 3 ticket'ta mini-retro; ders varsa bu kategoriye eklenir.
-- Gemini 2. iterasyonda da bitiremezse → eskale (Codex/Claude).
+- `todo/` max 1 ticket per assignee. Paralel yok.
+- Session başında `ticket.js session start --tickets ...`, sonunda `session end`. Tek ACTIVITY_LOG'a yazma yasak.
+- `in-review`'a almadan önce commit zorunlu ("uncommitted" gotcha tekrar etmesin).
+- Worker 2. iterasyonda da bitiremezse → eskale (CEO (Opus)).
 
 ---
 
@@ -201,33 +200,31 @@ Detaylı plan: `~/.claude/plans/codex-ile-yapt-m-z-son-sparkling-hearth.md`. Öz
 - **Feature branch convention:** `feat/ticket-<NNN>-<slug>` (örn. `feat/ticket-007-mode-selection-screen`). Eski `agent/<role>/<slug>` formatı bırakıldı.
 - **Commit format:** `<type>(<scope>): <imperative description>`
   - type: feat | fix | refactor | chore | docs | style
-- **Co-Author:** `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` (Claude Code default)
-- **Push policy:** GitHub push **yalnızca Opus 4.7** yapar. Worker agent'lar (Gemini, Codex) commit atar, push'lamaz.
-- **Batch push:** Bireysel ticket push edilmez. Tüm `tickets/approved/` birikip Push ticket'ı (her roadmap'in son task'i, `agent: opus-4.7`) altında tek seferde push edilir.
+- **Co-Author:** `Co-Authored-By: Claude CEO (Opus) <noreply@anthropic.com>` (Claude Code default)
+- **Push policy:** GitHub push **yalnızca CEO (Opus)** yapar. Worker agent'lar (Gemini, Codex, Claude Haiku) commit atar, push'lamaz.
+- **Batch push:** Bireysel ticket push edilmez. Tüm `tickets/in-review/` birikip Push ticket'ı (her roadmap'in son task'i, `assignee: opus`) altında tek seferde push edilir; ticket'lar `in-review → done` doğrudan atlanır (v2'de `approved` ara durumu kaldırıldı).
 - **PR review:** Bu projede şu an PR akışı değil, doğrudan main'e merge + push kullanılıyor.
 - **Force push:** YASAK (main'e), feature branch'e bile sorgula.
 
 ---
 
-## 🔁 5-Statüülü Ticket Akışı (Multi-Agent + Push Ayrımı)
+## 🔁 4-Statüülü Ticket Akışı (Multi-Agent + Push Ayrımı)
 
 ```
-backlog → todo → in-review → approved → done
-                  (worker)    (Opus       (Opus
-                              review)   batch push)
+backlog → todo → in-review → done
+                  (worker)    (Opus review + batch push)
 ```
 
-- **`in-review` → `approved`:** Opus 4.7 review yetkisi. Her ticket onay sorulmadan değerlendirilir; kriterler tamamsa doğrudan approved'a alınır.
-- **`approved` → `done`:** Sadece batch push sonrası. Push push ticket'ı tarafından tetiklenir.
-- Worker agent'lar `in-review`'dan ileri taşıyamaz. Bu rules.md'de governance kuralı olarak yazılı.
-- Frontmatter `status` her zaman bulunduğu klasörle aynı olmalı; control-panel `ticket check` bunu doğrular.
+- **`in-review` → `done`:** CEO (Opus) yetkisi. Her ticket onay sorulmadan değerlendirilir; kriterler tamamsa batch push edilip done'a alınır. (v2'de `approved` ara durumu kaldırıldı — pratikte hiç kullanılmıyordu.)
+- Worker agent'lar `in-review`'dan ileri taşıyamaz. Bu `rules.md`'de governance kuralı olarak yazılı.
+- Frontmatter `status` her zaman bulunduğu klasörle aynı olmalı; `ticket check` bunu doğrular.
 
 ### Push Ticket Pattern
 Her roadmap iterasyonunun **son task'i** zorunlu Push ticket'ı olmalı:
-- `agent: opus-4.7`, `type: chore`, `priority: P0`
-- Kapsam runtime'da `approved/` ne içeriyorsa
-- `approved/` boşsa skip
-- Adımlar: branch'leri yerel main'e merge → conflict resolve → `git push origin main` tek seferde → `approved/` → `done/` taşı.
+- `assignee: opus`, `type: chore`, `priority: P0`
+- Kapsam runtime'da `in-review/` ne içeriyorsa
+- `in-review/` boşsa skip
+- Adımlar: branch'leri yerel main'e merge → conflict resolve → `git push origin main` tek seferde → ticket'ları `in-review/` → `done/` taşı + frontmatter `commit` + `Kapanış`.
 
 ### Merge Sıralaması (batch push)
 1. **Foundational/strüktürel** önce (örn. 022 agents/ taşıması) — sonraki branch'lerin base'i.
@@ -312,7 +309,7 @@ node cli.js
 
 ## 📝 Lessons Learned (Cross-cutting)
 
-- **Tek session = bağımlılık.** Context-bloat → /compact → kayıp. Çözüm: her görev yeni session + ACTIVITY_LOG.
+- **Tek session = bağımlılık.** Context-bloat → /compact → kayıp. Çözüm: her görev için `ticket.js session start/end`; iz session dosyasında kalır (`main/agents/sessions/`).
 - **gpt-oss raporu ≠ gerçek.** Her zaman direct file inspection ile verify.
 - **Paperclip experiment başarısız oldu** — yerine custom `ardiyesizgiris-agents` Node sistemi + Claude Code Agent tool kombinasyonu kullanılıyor.
 - **DB-driven > hardcoded.** ContainerType migration örneği başarılı (constants → Prisma + admin CRUD).
@@ -320,8 +317,8 @@ node cli.js
 - **Worker agent commit boş kalabilir** (TICKET-012/013/014). Branch + commit oluştu raporu yetmiyor — `git show --stat <sha>` ile gerçekten dosya değişti mi kontrol et. Sıfır satır = boş commit = workspace/git sınır hatası.
 - **Architecture decision ticket'ları kod değil ADR ister.** TICKET-015 (iOS) doğru cevap iOS scaffold değil, MOBILE_STRATEGY.md ADR + DeveloperAgent template temizliği oldu. "Mimari karar gerekiyor" ticket'larında önce karar/değerlendirme, gerekirse sonra implementation ticket'ı aç.
 - **Inherited agent templates dikkatlice audit edilmeli.** `DeveloperAgent.planMobileFeature` "VisionCam AI iOS app + SwiftUI + Core ML" referansı taşıyordu — başka projeden devralınmış ölü kod. Şüpheli iş çıkarmadan önce agent şablonlarını proje bağlamına göre dezenfekte et.
-- **Token-safe bootstrap kuralı redundant olmalı.** ACTIVITY_LOG read sınırını üç yerde belirttik: dosyanın kendi üst başlığı + readme.md + activitylogopener.md. Tek yerdeki kural agent tarafından kaçırılır.
-- **Status alanı eklerken iki tarafı güncelle:** Control panel hem `server.js` (`statuses` array) hem `public/app.js` (`statusLabels` object) hardcoded liste tutuyor. Yeni statü (örn. `approved`) eklendiğinde ikisi de güncellenmeli, yoksa frontend kuyruğu boş gösterir.
+- **Token-safe bootstrap kuralı redundant olmalı (çözüldü).** ACTIVITY_LOG read sınırı eskiden üç yerde belirtiliyordu (dosyanın kendi üst başlığı + readme.md + activitylogopener.md), tek yerdeki kural kaçırılıyordu. v2'de ACTIVITY_LOG.md kaldırıldı, kural tek kaynakta: `BOOTSTRAP.md` §4 → `sessions/INDEX.md` okuma sınırı.
+- **Status alanı eklerken iki tarafı güncelle:** Control panel hem `server.js` (`statuses` array) hem `public/app.js` (`statusLabels` object) hardcoded liste tutuyor. v2'de `approved` kaldırıldığında bu iki tarafın da elle güncellenmesi gerekiyor (henüz yapılmadı; ayrı bir ticket'ta ele alınacak). Yeni statü eklerken de aynı kural geçerli.
 - **Push merge sırası matters.** Aynı dosyaya dokunan iki branch varsa ikincisini en sona bırak — conflict her halükarda çıkar ama en az komşu commit'i etkiler.
 
 ---

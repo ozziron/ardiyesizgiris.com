@@ -2,10 +2,11 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   Calculator,
   Ship,
@@ -17,6 +18,9 @@ import {
   CheckCircle2,
   AlertCircle,
   TestTube2,
+  Container,
+  Search,
+  X,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -35,6 +39,7 @@ interface CalculationItem {
   id: string
   portName: string
   carrierName: string
+  containerId: string
   departureDate: string
   gateInDate: string | null
   freeUntilDate: string
@@ -154,6 +159,17 @@ export default function HesaplamalarimPage() {
   const router = useRouter()
   const [calculations, setCalculations] = useState<CalculationItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [containerSearchInput, setContainerSearchInput] = useState("")
+  const [containerSearch, setContainerSearch] = useState("")
+
+  const filteredCostCalculations = useMemo(() => {
+    const query = containerSearch.trim().toLocaleUpperCase("tr-TR")
+    if (!query) return calculations
+
+    return calculations.filter((calc) =>
+      calc.containerId.toLocaleUpperCase("tr-TR").includes(query)
+    )
+  }, [containerSearch, calculations])
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -181,6 +197,129 @@ export default function HesaplamalarimPage() {
     }
   }
 
+  const handleContainerSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setContainerSearch(containerSearchInput.trim())
+  }
+
+  const clearContainerSearch = () => {
+    setContainerSearchInput("")
+    setContainerSearch("")
+  }
+
+  const renderEmptyState = (title: string, description: string) => (
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+          <Calculator className="h-8 w-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <p className="text-muted-foreground mb-6 max-w-sm">{description}</p>
+        <Button asChild>
+          <Link href="/hesaplama">
+            <Calculator className="mr-2 h-4 w-4" />
+            Hesaplama Yap
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  )
+
+  const renderCostCards = () => {
+    if (calculations.length === 0) {
+      return renderEmptyState(
+        "Masraf hesaplama kaydı yok",
+        "Gate-in ve konteyner numarasıyla yaptığınız masraf hesaplamaları burada listelenecek."
+      )
+    }
+
+    return (
+      <div className="space-y-4">
+        <form onSubmit={handleContainerSearch} className="flex flex-col gap-2 rounded-lg border bg-card p-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={containerSearchInput}
+              onChange={(event) => setContainerSearchInput(event.target.value)}
+              placeholder="Konteyner numarası ile ara"
+              className="pl-9 font-mono"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit">
+              <Search className="h-4 w-4" />
+              Ara
+            </Button>
+            {containerSearch && (
+              <Button type="button" variant="outline" onClick={clearContainerSearch}>
+                <X className="h-4 w-4" />
+                Temizle
+              </Button>
+            )}
+          </div>
+        </form>
+
+        {filteredCostCalculations.length === 0 ? (
+          <Card>
+            <CardContent className="py-10 text-center">
+              <p className="font-medium">Aramanızla eşleşen konteyner bulunamadı.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Kopyaladığınız konteyner numarasını kontrol edip tekrar deneyin.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredCostCalculations.map((calc) => (
+            <Link key={calc.id} href={`/hesaplamalarim/${calc.id}`}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
+                        <Container className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="font-semibold font-mono">{calc.containerId}</p>
+                          <Badge variant="secondary" className="text-xs">
+                            {calc.containerType}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Ship className="h-3 w-3" />
+                            {calc.portName}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Ship className="h-3 w-3" />
+                            {calc.carrierName}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Gate-in: {calc.gateInDate ? formatDate(calc.gateInDate) : "-"}
+                          </span>
+                          <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                            <Clock className="h-3 w-3" />
+                            Ücretli gün: {calc.chargeableDays}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground flex-shrink-0 hidden sm:block">
+                      {formatDate(calc.createdAt)}
+                    </p>
+                  </div>
+
+                  <ExportHistory calc={calc} />
+                </CardContent>
+              </Card>
+            </Link>
+          ))
+        )}
+      </div>
+    )
+  }
+
   if (status === "loading") {
     return (
       <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
@@ -199,7 +338,7 @@ export default function HesaplamalarimPage() {
           <div>
             <h1 className="text-3xl font-bold">Hesaplamalarım</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Geçmiş ardiyesiz giriş hesaplamalarınız ve dışa aktarma geçmişi
+              Gate-in ve konteyner numarasıyla yaptığınız masraf hesaplamaları
             </p>
           </div>
           <Button asChild>
@@ -223,9 +362,9 @@ export default function HesaplamalarimPage() {
               <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                 <Calculator className="h-8 w-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Henüz hesaplama yapmadınız</h3>
+              <h3 className="text-lg font-semibold mb-2">Henüz masraf hesaplaması yapmadınız</h3>
               <p className="text-muted-foreground mb-6 max-w-sm">
-                Ardiyesiz giriş tarihinizi hesaplamak için aşağıdaki butona tıklayın.
+                Kayıt oluşması için gate-in tarihi ve konteyner numarasıyla masraf hesaplaması yapın.
               </p>
               <Button asChild>
                 <Link href="/hesaplama">
@@ -236,52 +375,7 @@ export default function HesaplamalarimPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {calculations.map((calc) => (
-              <Link key={calc.id} href={`/hesaplamalarim/${calc.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4">
-                    {/* Top: header row */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
-                          <Ship className="h-5 w-5 text-emerald-600" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <p className="font-semibold">{calc.portName}</p>
-                            <Badge variant="secondary" className="text-xs">
-                              {calc.containerType}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Ship className="h-3 w-3" />
-                              {calc.carrierName}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              Kalkış: {formatDate(calc.departureDate)}
-                            </span>
-                            <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                              <Clock className="h-3 w-3" />
-                              Ardiyesiz: {formatDate(calc.freeUntilDate)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground flex-shrink-0 hidden sm:block">
-                        {formatDate(calc.createdAt)}
-                      </p>
-                    </div>
-
-                    {/* Bottom: export history block */}
-                    <ExportHistory calc={calc} />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          renderCostCards()
         )}
       </div>
     </div>

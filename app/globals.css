@@ -69,6 +69,32 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /*
+    Radix UI (DropdownMenu, Dialog, Popover, Select) açıldığında body'ye
+    `react-remove-scroll` üzerinden inline olarak
+    `overflow: hidden; padding-right: <scrollbar-width>px` uygulanır. Scrollbar
+    `html` üzerinde `scrollbar-gutter: stable` ile zaten rezerve olduğu için
+    bu kompanzasyon merkezli içeriği birkaç piksel sola kaydırıyor.
+
+    Bu projedeki Radix sürümleri (dropdown-menu 2.0.6, dialog 1.1.1) body'ye
+    `data-scroll-locked` attribute'u eklemiyor; sadece inline style yazıyor.
+    Bu yüzden inline `padding-right` veya `margin-right` taşıyan body'leri
+    `style*=` ile yakalayıp `!important` ile nötrleştiriyoruz. Yeni sürümler
+    için `data-scroll-locked` selector'ü de korunuyor.
+  */
+  html body,
+  html body[style*="padding-right"],
+  html body[style*="margin-right"],
+  html body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+  html body[style*="padding-right"],
+  html body[style*="margin-right"],
+  html body[data-scroll-locked] {
+    overflow: visible !important;
+  }
 }
 
 /* Hero section animations */
@@ -109,4 +135,24 @@
 /* Form focus styles */
 .form-focus-within:focus-within {
   @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/*
+  Override Radix UI / react-remove-scroll body scroll lock side effects.
+  html already has overflow-y: scroll + scrollbar-gutter: stable, so the
+  vertical scrollbar is always rendered and its gutter is reserved.
+  When Radix opens a dropdown/select/popover/dialog, react-remove-scroll
+  sets inline style on <body> (padding-right + margin-right + overflow:hidden)
+  to compensate for native scrollbar removal — but our scrollbar never
+  disappears, so this inline padding produces a 1–2px content shift.
+
+  Target inline style additions directly via attribute selectors so we
+  catch both legacy data-scroll-locked attribute and inline style variants.
+*/
+body[data-scroll-locked],
+body[data-scroll-locked="true"],
+body[style*="padding-right"],
+body[style*="margin-right"] {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
 }

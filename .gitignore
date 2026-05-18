@@ -9,6 +9,12 @@
 /agents/temp
 /agents/logs
 
+# Internal CEO/worker session logs — never push to remote
+/agents/sessions/
+
+# Internal setup/strategy docs — kept local only, not for public repo
+/docs/
+
 # next.js
 /.next/
 /out/
@@ -46,4 +52,4 @@ Thumbs.db
 !lib/pdf/fonts/*.ttf
 test-*.json
 e2e-*.json
-dev.log
+*.log

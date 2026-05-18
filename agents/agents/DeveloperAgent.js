@@ -1,34 +1,11 @@
-const { AgentMemory } = require('../memory');
+const AgentBase = require('./AgentBase');
 const { AGENT_ROLES, SYSTEM_PROMPTS } = require('../orchestrator');
 
-/**
- * Developer Agent - Memory-Aware Version
- * Handles web development tasks (Next.js + TypeScript + Prisma).
- * Mobile platform strategy: see main/MOBILE_STRATEGY.md (PWA-first, no native).
- * Maintains persistent memory across sessions.
- */
-class DeveloperAgent {
-  constructor() {
-    this.id = 'developer';
-    this.role = AGENT_ROLES.DEVELOPER;
-    this.memory = new AgentMemory(this.id);
-    this.systemPrompt = SYSTEM_PROMPTS.DEVELOPER;
-  }
+// Developer Agent - Memory-Aware Version.
+// Handles web development tasks (Next.js + TypeScript + Prisma).
+// Mobile platform strategy: see main/MOBILE_STRATEGY.md (PWA-first, no native).
 
-  /**
-   * Assign a task to the developer agent
-   * Returns task instructions with context
-   */
-  assignTask(taskDescription, context = {}) {
-    const memoryContext = this.memory.getContextForPrompt();
-    
-    const fullContext = {
-      ...context,
-      agentMemory: memoryContext,
-      timestamp: new Date().toISOString()
-    };
-
-    const taskInstruction = `
+const buildPrompt = (taskDescription, memoryContext) => `
 You are a Senior Full-Stack Developer Agent for ardiyesizgiris.com.
 
 TASK: ${taskDescription}
@@ -58,82 +35,8 @@ INSTRUCTIONS:
 Be thorough, reference past successes, and continuously improve.
     `;
 
-    return {
-      agentId: this.id,
-      task: taskInstruction,
-      memoryContext,
-      fullContext
-    };
-  }
-
-  /**
-   * Record the completion of a task
-   */
-  recordTaskCompletion(taskDescription, result, duration = 0) {
-    const success = result?.thinking ? true : false;
-    
-    this.memory.recordExecution(taskDescription, { success }, duration);
-
-    // Add learnings if provided
-    if (result?.learnings && Array.isArray(result.learnings)) {
-      result.learnings.forEach(learning => {
-        this.memory.addLearning(
-          learning.title,
-          learning.description,
-          learning.category
-        );
-      });
-    }
-
-    // Add knowledge
-    if (result?.technologies) {
-      result.technologies.forEach(tech => {
-        this.memory.addKnowledge('technologies', tech);
-      });
-    }
-
-    return this.memory.getSummary();
-  }
-
-  /**
-   * Get agent status
-   */
-  getStatus() {
-    return this.memory.getSummary();
-  }
-
-  /**
-   * Get full memory
-   */
-  getMemory() {
-    return this.memory.getSnapshot();
-  }
-
-  /**
-   * Clear execution history (but keep learnings)
-   */
-  clearHistory() {
-    this.memory.clearHistory();
-    return { message: 'History cleared', summary: this.memory.getSummary() };
-  }
-
-  /**
-   * Update preferences
-   */
-  updatePreferences(prefs) {
-    this.memory.data.preferences = {
-      ...this.memory.data.preferences,
-      ...prefs
-    };
-    this.memory.save();
-    return this.memory.data.preferences;
-  }
-
-  /**
-   * Task templates (for convenience)
-   */
-  static taskTemplates = {
-    codeReview: (code, context) => `
+const taskTemplates = {
+  codeReview: (code, context) => `
 Review the following code for quality, performance, and best practices:
 
 \`\`\`
@@ -150,7 +53,7 @@ Analyze:
 5. Improvement suggestions
     `,
 
-    implementFeature: (featureName, requirements, techStack) => `
+  implementFeature: (featureName, requirements, techStack) => `
 Implement a new feature for ardiyesizgiris.com:
 
 Feature: ${featureName}
@@ -167,7 +70,7 @@ Provide:
 5. Testing strategy
     `,
 
-    fixBug: (bugDescription, errorLogs, affectedCode) => `
+  fixBug: (bugDescription, errorLogs, affectedCode) => `
 Fix the following bug:
 
 Bug: ${bugDescription}
@@ -183,9 +86,14 @@ ${affectedCode}
 \`\`\`
 
 Provide: Root cause, fix, why it works, how to test
-    `
-  };
-}
+    `,
+};
 
-// Export as singleton
-module.exports = new DeveloperAgent();
+module.exports = new AgentBase({
+  id: 'developer',
+  role: AGENT_ROLES.DEVELOPER,
+  systemPrompt: SYSTEM_PROMPTS.DEVELOPER,
+  knowledgeField: 'technologies',
+  buildPrompt,
+  taskTemplates,
+});

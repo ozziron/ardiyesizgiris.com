@@ -6,6 +6,8 @@ declare module "next-auth" {
     role?: string
     passwordHash?: string
     createdAt?: string
+    membershipType?: string
+    subscriptionActive?: boolean
   }
 
   interface Session {
@@ -13,6 +15,8 @@ declare module "next-auth" {
       id: string
       role?: string
       createdAt?: string
+      membershipType?: string
+      subscriptionActive?: boolean
       name?: string | null
       email?: string | null
       image?: string | null
@@ -24,5 +28,7 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id?: string
     role?: string
+    membershipType?: string
+    subscriptionActive?: boolean
   }
 }

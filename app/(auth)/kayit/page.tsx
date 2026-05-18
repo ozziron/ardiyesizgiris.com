@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Ship } from "lucide-react"
 
 export default function RegisterPage() {
@@ -16,25 +17,34 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
   const [companyName, setCompanyName] = useState("")
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
+    if (!termsAccepted) {
+      setError("Devam etmek için Hizmet Sözleşmesi ve KVKK Aydınlatma Metni'ni kabul etmeniz gerekir.")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, companyName }),
+        body: JSON.stringify({ email, password, name, companyName, termsAccepted }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
         throw new Error(data.error || "Kayıt başarısız")
       }
 
-      router.push("/giris?success=true")
+      // Redirect to "email pending" page — pass email as query param
+      router.push(`/eposta-onay-bekleniyor?email=${encodeURIComponent(email)}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata oluştu")
     } finally {
@@ -123,7 +133,35 @@ export default function RegisterPage() {
               />
             </div>
 
-            <Button disabled={isLoading} className="w-full">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                disabled={isLoading}
+                className="mt-0.5"
+              />
+              <Label htmlFor="terms" className="text-sm font-normal leading-snug cursor-pointer">
+                <Link
+                  href="/sozlesme"
+                  target="_blank"
+                  className="underline underline-offset-4 hover:text-primary"
+                >
+                  Hizmet Sözleşmesi
+                </Link>
+                {" "}ve{" "}
+                <Link
+                  href="/kvkk"
+                  target="_blank"
+                  className="underline underline-offset-4 hover:text-primary"
+                >
+                  KVKK Aydınlatma Metni
+                </Link>
+                &apos;ni okudum ve kabul ediyorum.
+              </Label>
+            </div>
+
+            <Button disabled={isLoading || !termsAccepted} className="w-full">
               {isLoading ? "Oluşturuluyor..." : "Hesap Oluştur"}
             </Button>
           </form>

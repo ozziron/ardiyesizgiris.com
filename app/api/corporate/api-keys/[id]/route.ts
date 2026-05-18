@@ -2,11 +2,16 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth/auth"
 import { prisma } from "@/lib/db/prisma"
 import { requireCorporateTeam } from "@/lib/corporate/team"
+import { BILLING_ENABLED } from "@/lib/billing/config"
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json({ error: "Kurumsal API devre dışı." }, { status: 503 })
+  }
+
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Giriş gerekli." }, { status: 401 })

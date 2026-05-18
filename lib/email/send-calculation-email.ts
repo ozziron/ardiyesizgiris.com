@@ -1,4 +1,5 @@
 import { Resend } from "resend"
+import type { ChargeBreakdownItem } from "@/types/calculation"
 
 export interface CalculationEmailData {
   recipientEmail: string
@@ -18,12 +19,7 @@ export interface CalculationEmailData {
   totalDaysAtPort?: number
   chargeableDays?: number
   warning?: string
-  chargeBreakdown?: Array<{
-    tier: number
-    days: number
-    price_per_day: number
-    subtotal: number
-  }>
+  chargeBreakdown?: ChargeBreakdownItem[]
 }
 
 export type SendEmailResult =

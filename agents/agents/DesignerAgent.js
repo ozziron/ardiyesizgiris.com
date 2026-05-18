@@ -1,28 +1,10 @@
-const { AgentMemory } = require('../memory');
+const AgentBase = require('./AgentBase');
 const { AGENT_ROLES, SYSTEM_PROMPTS } = require('../orchestrator');
 
-/**
- * Designer Agent - Memory-Aware Version
- * Handles UI/UX, visual QA, and design system tasks.
- */
-class DesignerAgent {
-  constructor() {
-    this.id = 'designer';
-    this.role = AGENT_ROLES.DESIGNER;
-    this.memory = new AgentMemory(this.id);
-    this.systemPrompt = SYSTEM_PROMPTS.DESIGNER;
-  }
+// Designer Agent - Memory-Aware Version.
+// Handles UI/UX, visual QA, and design system tasks.
 
-  assignTask(taskDescription, context = {}) {
-    const memoryContext = this.memory.getContextForPrompt();
-
-    const fullContext = {
-      ...context,
-      agentMemory: memoryContext,
-      timestamp: new Date().toISOString()
-    };
-
-    const taskInstruction = `
+const buildPrompt = (taskDescription, memoryContext) => `
 You are a Senior UI/UX Designer Agent for ardiyesizgiris.com.
 
 TASK: ${taskDescription}
@@ -52,61 +34,8 @@ INSTRUCTIONS:
 Keep the interface practical, accessible, and consistent with the existing product.
     `;
 
-    return {
-      agentId: this.id,
-      task: taskInstruction,
-      memoryContext,
-      fullContext
-    };
-  }
-
-  recordTaskCompletion(taskDescription, result, duration = 0) {
-    const success = result?.thinking ? true : false;
-    this.memory.recordExecution(taskDescription, { success }, duration);
-
-    if (result?.learnings && Array.isArray(result.learnings)) {
-      result.learnings.forEach(learning => {
-        this.memory.addLearning(
-          learning.title,
-          learning.description,
-          learning.category
-        );
-      });
-    }
-
-    if (result?.technologies) {
-      result.technologies.forEach(tech => {
-        this.memory.addKnowledge('technologies', tech);
-      });
-    }
-
-    return this.memory.getSummary();
-  }
-
-  getStatus() {
-    return this.memory.getSummary();
-  }
-
-  getMemory() {
-    return this.memory.getSnapshot();
-  }
-
-  clearHistory() {
-    this.memory.clearHistory();
-    return { message: 'History cleared', summary: this.memory.getSummary() };
-  }
-
-  updatePreferences(prefs) {
-    this.memory.data.preferences = {
-      ...this.memory.data.preferences,
-      ...prefs
-    };
-    this.memory.save();
-    return this.memory.data.preferences;
-  }
-
-  static taskTemplates = {
-    reviewScreen: (screenName, currentIssues) => `
+const taskTemplates = {
+  reviewScreen: (screenName, currentIssues) => `
 Review this screen for usability, hierarchy, accessibility, and visual polish:
 
 Screen: ${screenName}
@@ -121,7 +50,7 @@ Provide:
 5. Prioritized implementation checklist
     `,
 
-    designFlow: (flowName, userGoal, constraints) => `
+  designFlow: (flowName, userGoal, constraints) => `
 Design a user flow for ardiyesizgiris.com:
 
 Flow: ${flowName}
@@ -135,8 +64,14 @@ Provide:
 3. Empty/error/loading states
 4. Copy guidance
 5. QA checklist
-    `
-  };
-}
+    `,
+};
 
-module.exports = new DesignerAgent();
+module.exports = new AgentBase({
+  id: 'designer',
+  role: AGENT_ROLES.DESIGNER,
+  systemPrompt: SYSTEM_PROMPTS.DESIGNER,
+  knowledgeField: 'technologies',
+  buildPrompt,
+  taskTemplates,
+});
