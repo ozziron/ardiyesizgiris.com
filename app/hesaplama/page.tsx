@@ -737,6 +737,7 @@ export default function HesaplamaPage() {
                     chargeBreakdown={result.charge_breakdown}
                     currency={result.currency || "TRY"}
                     warning={result.warning}
+                    surcharges={result.surcharges}
                   >
                     {actions}
                   </CostResultCard>
@@ -747,6 +748,7 @@ export default function HesaplamaPage() {
                     freeUntilDate={result.free_until_date}
                     departureDate={form.departureDate}
                     warning={result.warning}
+                    surcharges={result.surcharges}
                   >
                     {actions}
                   </PlanningResultCard>
