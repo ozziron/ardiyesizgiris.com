@@ -19,6 +19,7 @@ export async function GET(request: Request) {
   const portId = url.searchParams.get("portId")
   const shippingCompanyId = url.searchParams.get("shippingCompanyId")
   const containerType = url.searchParams.get("containerType")
+  const imoCargo = url.searchParams.get("imoCargo") === "true"
   const departureDate = url.searchParams.get("departureDate")
 
   // Be strict: any missing param → 400. The client only calls this once
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
       portId,
       shippingCompanyId,
       containerType,
+      imoCargo,
       isActive: true,
       effectiveFrom: { lte: effectiveDate },
       OR: [{ effectiveUntil: null }, { effectiveUntil: { gte: effectiveDate } }],

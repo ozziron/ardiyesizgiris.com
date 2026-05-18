@@ -100,14 +100,17 @@ model TariffRule {
   portId            String    @map("port_id")
   shippingCompanyId String    @map("shipping_company_id")
   containerType     String    @map("container_type")
+  imoCargo          Boolean   @default(false) @map("imo_cargo")
   tier1DaysFrom     Int       @default(1) @map("tier_1_days_from")
   tier1DaysTo       Int       @default(5) @map("tier_1_days_to")
   tier1PricePerDay  Decimal   @map("tier_1_price_per_day") @db.Decimal(10, 2)
   tier2DaysFrom     Int       @default(6) @map("tier_2_days_from")
   tier2DaysTo       Int       @default(10) @map("tier_2_days_to")
   tier2PricePerDay  Decimal   @map("tier_2_price_per_day") @db.Decimal(10, 2)
+  tier2Enabled      Boolean   @default(true) @map("tier_2_enabled")
   tier3DaysFrom     Int       @default(11) @map("tier_3_days_from")
   tier3PricePerDay  Decimal   @map("tier_3_price_per_day") @db.Decimal(10, 2)
+  tier3Enabled      Boolean   @default(true) @map("tier_3_enabled")
   currency          String    @default("TRY")
   effectiveFrom     DateTime  @default(now()) @map("effective_from") @db.Date
   effectiveUntil    DateTime? @map("effective_until") @db.Date
@@ -121,7 +124,7 @@ model TariffRule {
   shippingCompany ShippingCompany @relation(fields: [shippingCompanyId], references: [id], onDelete: Cascade)
   creator         User?           @relation("TariffCreatedBy", fields: [createdBy], references: [id])
 
-  @@unique([portId, shippingCompanyId, containerType, effectiveFrom])
+  @@unique([portId, shippingCompanyId, containerType, imoCargo, effectiveFrom])
   @@map("tariff_rules")
 }
 

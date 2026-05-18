@@ -3,6 +3,7 @@ export interface CalculationInput {
   shippingCompanyId: string
   containerId?: string | null
   containerType: string
+  imoCargo?: boolean
   departureDate: Date
   gateInDate?: Date | null
 }
