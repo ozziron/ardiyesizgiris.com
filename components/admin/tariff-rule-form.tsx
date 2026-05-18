@@ -150,6 +150,35 @@ export function TariffRuleForm({
     })
   }, [form, initialData])
 
+  const onInvalid = (errors: Record<string, { message?: string } | undefined>) => {
+    const fieldLabels: Record<string, string> = {
+      portId: "Liman",
+      shippingCompanyId: "Hat",
+      containerType: "Ekipman Tipi",
+      tier1DaysFrom: "Tier 1 başlangıç",
+      tier1DaysTo: "Tier 1 bitiş",
+      tier1PricePerDay: "Tier 1 ücret",
+      tier2DaysFrom: "Tier 2 başlangıç",
+      tier2DaysTo: "Tier 2 bitiş",
+      tier2PricePerDay: "Tier 2 ücret",
+      tier3DaysFrom: "Tier 3 başlangıç",
+      tier3PricePerDay: "Tier 3 ücret",
+      tier3Enabled: "Tier 3",
+      effectiveFrom: "Başlangıç tarihi",
+    }
+    const messages = Object.entries(errors)
+      .filter(([, v]) => v?.message)
+      .map(([k, v]) => `${fieldLabels[k] ?? k}: ${v?.message}`)
+      .slice(0, 3)
+    toast({
+      title: "Form eksik veya hatalı",
+      description: messages.length
+        ? messages.join(" • ")
+        : "Lütfen alanları kontrol edin.",
+      variant: "destructive",
+    })
+  }
+
   const onSubmit = async (values: TariffRuleFormValues) => {
     try {
       const response = await fetch(submitUrl, {
@@ -207,7 +236,7 @@ export function TariffRuleForm({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-3">
                 <FormField
                   control={form.control}
