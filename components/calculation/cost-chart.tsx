@@ -10,13 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-interface ChargeBreakdownItem {
-  tier: number;
-  days: number;
-  price_per_day: number;
-  subtotal: number;
-}
+import type { ChargeBreakdownItem } from "@/types/calculation";
 
 interface CostBreakdownChartProps {
   data: ChargeBreakdownItem[];

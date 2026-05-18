@@ -19,7 +19,11 @@ export async function GET() {
   }
 
   const calculations = await prisma.calculation.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      gateInDate: { not: null },
+      containerId: { not: "" },
+    },
     include: {
       port: { select: { name: true } },
       shippingCompany: { select: { name: true } },
@@ -43,6 +47,7 @@ export async function GET() {
       id: calc.id,
       portName: calc.port.name,
       carrierName: calc.shippingCompany.name,
+      containerId: calc.containerId,
       departureDate: calc.departureDate,
       gateInDate: calc.gateInDate,
       freeUntilDate: calc.freeUntilDate,

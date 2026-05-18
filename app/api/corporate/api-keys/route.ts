@@ -4,12 +4,17 @@ import { auth } from "@/lib/auth/auth"
 import { prisma } from "@/lib/db/prisma"
 import { createPlainApiKey, getApiKeyPrefix, hashApiKey } from "@/lib/corporate/api-keys"
 import { requireCorporateTeam } from "@/lib/corporate/team"
+import { BILLING_ENABLED } from "@/lib/billing/config"
 
 const createKeySchema = z.object({
   name: z.string().trim().min(1, "Anahtar adı girin").max(80, "Anahtar adı çok uzun"),
 })
 
 export async function GET() {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json({ error: "Kurumsal API devre dışı." }, { status: 503 })
+  }
+
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Giriş gerekli." }, { status: 401 })
@@ -30,6 +35,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json({ error: "Kurumsal API devre dışı." }, { status: 503 })
+  }
+
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Giriş gerekli." }, { status: 401 })

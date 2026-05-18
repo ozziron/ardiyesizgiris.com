@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db/prisma"
 import { getStripeConfig, verifyStripeSignature } from "@/lib/billing/stripe"
+import { BILLING_ENABLED } from "@/lib/billing/config"
 
 export const runtime = "nodejs"
 
 type StripeCheckoutSession = {
   id: string
+  mode?: string
   client_reference_id?: string | null
   metadata?: {
     userId?: string
+    type?: string
+    credits?: string
   }
 }
 
@@ -20,6 +24,13 @@ type StripeEvent = {
 }
 
 export async function POST(request: Request) {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json(
+      { error: "Ödeme sistemi şu anda devre dışı." },
+      { status: 503 },
+    )
+  }
+
   const config = getStripeConfig()
 
   if (!config.webhookSecret) {
@@ -42,7 +53,20 @@ export async function POST(request: Request) {
     const checkoutSession = event.data.object
     const userId = checkoutSession.client_reference_id || checkoutSession.metadata?.userId
 
-    if (userId) {
+    if (!userId) return NextResponse.json({ received: true })
+
+    const isCreditPurchase =
+      checkoutSession.metadata?.type === "credit_pack" || checkoutSession.mode === "payment"
+
+    if (isCreditPurchase) {
+      const credits = parseInt(checkoutSession.metadata?.credits || "10", 10)
+      await prisma.user.updateMany({
+        where: { id: userId },
+        data: {
+          freeUsageRemaining: { increment: credits },
+        },
+      })
+    } else {
       await prisma.user.updateMany({
         where: { id: userId },
         data: {

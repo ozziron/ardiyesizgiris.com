@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth/auth"
 import { createPremiumCheckoutSession } from "@/lib/billing/stripe"
+import { BILLING_ENABLED } from "@/lib/billing/config"
 
 export const runtime = "nodejs"
 
 export async function POST() {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json(
+      { error: "Ödeme sistemi şu anda devre dışı." },
+      { status: 503 },
+    )
+  }
+
   const session = await auth()
 
   if (!session?.user?.id) {

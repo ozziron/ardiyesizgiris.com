@@ -37,8 +37,8 @@ export async function GET(request: Request) {
 
   // Muafiyet artık TariffRule Tier 1 ile modellenir; ayrı bir FreeTimeRule
   // sorgusu yok. Aynı tarife lookup'u (carrier > port > containerType +
-  // effective date) ile çalış ve Tier 1 fiyatı 0 ise tier1DaysTo'yu
-  // freeDays olarak dön.
+  // effective date) ile çalış ve Tier 1 fiyatı 0 ise Tier 1 aralığının
+  // uzunluğunu freeDays olarak dön.
   const rule = await prisma.tariffRule.findFirst({
     where: {
       portId,
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       OR: [{ effectiveUntil: null }, { effectiveUntil: { gte: effectiveDate } }],
     },
     orderBy: { effectiveFrom: "desc" },
-    select: { tier1DaysTo: true, tier1PricePerDay: true },
+    select: { tier1DaysFrom: true, tier1DaysTo: true, tier1PricePerDay: true },
   })
 
   if (!rule) {
@@ -59,7 +59,8 @@ export async function GET(request: Request) {
     )
   }
 
-  const freeDays = Number(rule.tier1PricePerDay) === 0 ? rule.tier1DaysTo : 0
+  const tier1Days = Math.max(0, rule.tier1DaysTo - rule.tier1DaysFrom + 1)
+  const freeDays = Number(rule.tier1PricePerDay) === 0 ? tier1Days : 0
   if (freeDays === 0) {
     return NextResponse.json(
       { error: "Bu kombinasyon için muafiyet penceresi tanımlı değil (Tier 1 ücretli)" },

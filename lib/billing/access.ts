@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client"
+import { BILLING_ENABLED } from "./config"
 
 const FREE_CALCULATION_LIMIT = 3
 const FREE_WINDOW_DAYS = 90
@@ -20,7 +21,7 @@ export class UpgradeRequiredError extends Error {
   access: CalculationAccess
 
   constructor(access: CalculationAccess) {
-    super("Ücretsiz hesaplama hakkınız doldu. Devam etmek için Premium'a geçin.")
+    super("Ücretsiz hesaplama hakkınız doldu. Kredi satın alabilir veya Premium'a geçebilirsiniz.")
     this.name = "UpgradeRequiredError"
     this.access = access
   }
@@ -94,6 +95,16 @@ export async function getCalculationAccess(
   identity: UsageIdentity,
   userId?: string,
 ): Promise<CalculationAccess> {
+  if (!BILLING_ENABLED) {
+    return {
+      allowed: true,
+      isPremium: true,
+      remaining: Number.POSITIVE_INFINITY,
+      limit: FREE_CALCULATION_LIMIT,
+      resetAt: null,
+    }
+  }
+
   if (userId) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -101,10 +112,13 @@ export async function getCalculationAccess(
         membershipType: true,
         subscriptionActive: true,
         subscriptionEndDate: true,
+        freeUsageRemaining: true,
       },
     })
 
-    if (user && isPremiumUser(user)) {
+    if (!user) {
+      // User not found — fall through to anonymous tracking
+    } else if (isPremiumUser(user)) {
       return {
         allowed: true,
         isPremium: true,
@@ -112,9 +126,19 @@ export async function getCalculationAccess(
         limit: FREE_CALCULATION_LIMIT,
         resetAt: null,
       }
+    } else {
+      // Authenticated free user — use freeUsageRemaining as primary counter
+      return {
+        allowed: user.freeUsageRemaining > 0,
+        isPremium: false,
+        remaining: user.freeUsageRemaining,
+        limit: FREE_CALCULATION_LIMIT,
+        resetAt: null,
+      }
     }
   }
 
+  // Anonymous (no userId) — fall back to IP-based tracking
   const usage = await getActiveUsage(prisma, identity)
   const usageCount = usage?.usageCount ?? 0
   const remaining = Math.max(FREE_CALCULATION_LIMIT - usageCount, 0)
@@ -133,6 +157,16 @@ export async function consumeFreeCalculation(
   identity: UsageIdentity,
   userId?: string,
 ): Promise<CalculationAccess> {
+  if (!BILLING_ENABLED) {
+    return {
+      allowed: true,
+      isPremium: true,
+      remaining: Number.POSITIVE_INFINITY,
+      limit: FREE_CALCULATION_LIMIT,
+      resetAt: null,
+    }
+  }
+
   return prisma.$transaction(async (tx) => {
     const access = await getCalculationAccess(tx, identity, userId)
 
@@ -140,36 +174,39 @@ export async function consumeFreeCalculation(
     if (!access.allowed) throw new UpgradeRequiredError(access)
 
     const now = new Date()
-    const usage = await getActiveUsage(tx, identity, now)
 
-    if (!usage) {
-      await tx.freeUsageTracking.create({
-        data: {
-          identifier: identity.identifier,
-          identifierType: identity.identifierType,
-          usageCount: 1,
-          lastUsedAt: now,
-          expiresAt: addDays(now, FREE_WINDOW_DAYS),
-        },
-      })
-    } else {
-      await tx.freeUsageTracking.update({
-        where: { id: usage.id },
-        data: {
-          usageCount: usage.usageCount + 1,
-          lastUsedAt: now,
-        },
-      })
-    }
-
-    if (userId) {
+    if (userId && identity.identifierType === "user") {
+      // Authenticated free user — decrement from personal credit pool
       await tx.user.update({
         where: { id: userId },
         data: {
           calculationsCount: { increment: 1 },
-          freeUsageRemaining: Math.max(access.remaining - 1, 0),
+          freeUsageRemaining: { decrement: 1 },
         },
       })
+    } else {
+      // Anonymous (IP-based) — increment FreeUsageTracking
+      const usage = await getActiveUsage(tx, identity, now)
+
+      if (!usage) {
+        await tx.freeUsageTracking.create({
+          data: {
+            identifier: identity.identifier,
+            identifierType: identity.identifierType,
+            usageCount: 1,
+            lastUsedAt: now,
+            expiresAt: addDays(now, FREE_WINDOW_DAYS),
+          },
+        })
+      } else {
+        await tx.freeUsageTracking.update({
+          where: { id: usage.id },
+          data: {
+            usageCount: usage.usageCount + 1,
+            lastUsedAt: now,
+          },
+        })
+      }
     }
 
     return {

@@ -2,63 +2,80 @@
 
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
-const { ASSIGNEES, ROLES, LEGACY_AGENT_MAP } = require("./orchestrator/constants");
+const { ASSIGNEES, ROLES } = require("./orchestrator/constants");
+const { fail, today, parseArgs } = require("./lib/cli-helpers");
+const { slugify, normalizeText, normalizedName } = require("./lib/text");
+const {
+  readUtf8,
+  writeUtf8,
+  parseFrontmatter,
+  serializeFrontmatter,
+  updateFrontmatter,
+  sectionContent,
+  hasMeaningfulSection,
+} = require("./lib/frontmatter");
+const {
+  inferType,
+  inferRole,
+  parseRoadmapTasks,
+  roadmapTicketBody,
+} = require("./lib/roadmap");
+const {
+  REQUIRED_REVIEW_SECTIONS,
+  REQUIRED_REVIEW_SECTIONS_V1,
+  REQUIRED_REVIEW_SECTIONS_V2,
+  validateAssignee,
+  validateRole,
+  validateReviewReady,
+  validateDoneReady,
+  ticketAssigneeRole,
+  ticketAssignee,
+} = require("./lib/validation");
+const sessionLib = require("./lib/session");
+const requestLib = require("./lib/request");
 
-const STATUSES = ["backlog", "todo", "in-review", "approved", "done"];
+// v2: `approved` removed (was unused in practice). Worker → todo → in-review →
+// done is the only path; Opus-only `done` gate is enforced by convention.
+const STATUSES = ["backlog", "todo", "in-review", "done"];
 const PRIORITIES = ["P0", "P1", "P2", "P3"];
 const TYPES = ["feature", "fix", "refactor", "docs", "chore"];
-const REQUIRED_REVIEW_SECTIONS = ["Yapılanlar", "Etkilenen Dosyalar", "Verification"];
-
-function resolveAssigneeRole(flags) {
-  let assignee = flags.assignee || null;
-  let role = flags.role || null;
-
-  if (flags.agent && (!assignee || !role)) {
-    const legacy = LEGACY_AGENT_MAP[String(flags.agent).toLowerCase()];
-    if (legacy) {
-      console.warn(`WARN: --agent is deprecated. Mapped "${flags.agent}" → assignee=${legacy.assignee}, role=${legacy.role}.`);
-      assignee = assignee || legacy.assignee;
-      role = role || legacy.role;
-    } else {
-      console.warn(`WARN: --agent is deprecated and value "${flags.agent}" is not in the legacy map. Use --assignee and --role.`);
-    }
-  }
-
-  return { assignee, role };
-}
-
-function validateAssignee(value) {
-  if (!value) return;
-  if (!ASSIGNEES.includes(value)) {
-    fail(`invalid assignee: ${value}. Use ${ASSIGNEES.join("|")}`);
-  }
-}
-
-function validateRole(value) {
-  if (!value) return;
-  if (!ROLES.includes(value)) {
-    fail(`invalid role: ${value}. Use ${ROLES.join("|")}`);
-  }
-}
 
 const repoRoot = path.resolve(__dirname, "..", "..");
 const ticketsDir = path.join(repoRoot, "tickets");
 const activityLogPath = path.join(repoRoot, "main", "agents", "ACTIVITY_LOG.md");
 
+function resolveAssigneeRole(flags) {
+  if (flags.agent) {
+    console.warn("WARN: --agent is removed in v2; use --assignee and --role instead.");
+  }
+  return { assignee: flags.assignee || null, role: flags.role || null };
+}
+
 function usage(exitCode = 0) {
   console.log(`
-Ticket CLI
+Ticket & Session CLI
 
-Usage:
-  node agents/ticket.js new "Başlık" [--priority P1] [--type fix] [--assignee opus-4.7] [--role developer]
+Tickets:
+  node agents/ticket.js new "Başlık" [--priority P1] [--type fix] [--assignee opus] [--role developer]
   node agents/ticket.js start TICKET-004 [--assignee gemini] [--role developer]
   node agents/ticket.js backlog TICKET-004
   node agents/ticket.js review TICKET-004
-  node agents/ticket.js done TICKET-004 --reviewer opus-4.7 [--commit abc123] [--note "Kapanış notu"]
+  node agents/ticket.js done TICKET-004 --reviewer opus [--commit abc123] [--note "Kapanış notu"]
   node agents/ticket.js sync-roadmap main/roadmap.md [--assignee gemini --role developer] [--start]
   node agents/ticket.js enrich-roadmap-tickets main/roadmap.md [--assignee gemini --role developer] [--force]
   node agents/ticket.js check
+
+Sessions:
+  node agents/ticket.js session start "Session Başlığı" [--tickets TICKET-001,TICKET-002] [--assignee gemini] [--role developer] [--branch name]
+  node agents/ticket.js session end [--commit abc123] [--status done|in-review]
+  node agents/ticket.js session list
+  node agents/ticket.js session current
+
+Requests (kullanıcı talepleri):
+  node agents/ticket.js request new "Başlık" --body "Talep metni" [--body-file path.txt]
+  node agents/ticket.js request list [--status pending|promoted|rejected]
+  node agents/ticket.js request promote REQ-001 [--title override] --priority P1 --type fix --assignee opus --role developer
+  node agents/ticket.js request reject REQ-001 --reason "Kapsam dışı"
 
 Assignees: ${ASSIGNEES.join(", ")}
 Roles:     ${ROLES.join(", ")}
@@ -66,38 +83,6 @@ Roles:     ${ROLES.join(", ")}
 The legacy --agent flag is accepted as a deprecated alias and mapped to assignee+role.
 `);
   process.exit(exitCode);
-}
-
-function fail(message) {
-  console.error(`ERROR: ${message}`);
-  process.exit(1);
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function parseArgs(argv) {
-  const args = [];
-  const flags = {};
-
-  for (let i = 0; i < argv.length; i++) {
-    const value = argv[i];
-    if (value.startsWith("--")) {
-      const key = value.slice(2);
-      const next = argv[i + 1];
-      if (!next || next.startsWith("--")) {
-        flags[key] = true;
-      } else {
-        flags[key] = next;
-        i++;
-      }
-    } else {
-      args.push(value);
-    }
-  }
-
-  return { args, flags };
 }
 
 function ensureStructure() {
@@ -113,14 +98,6 @@ function ensureStructure() {
   }
 }
 
-function readUtf8(filePath) {
-  return fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
-}
-
-function writeUtf8(filePath, content) {
-  fs.writeFileSync(filePath, content, "utf8");
-}
-
 function listTicketFiles() {
   ensureStructure();
   const files = [];
@@ -129,11 +106,7 @@ function listTicketFiles() {
     const dir = path.join(ticketsDir, status);
     for (const name of fs.readdirSync(dir)) {
       if (/^TICKET-\d{3}-.+\.md$/.test(name)) {
-        files.push({
-          status,
-          name,
-          path: path.join(dir, name),
-        });
+        files.push({ status, name, path: path.join(dir, name) });
       }
     }
   }
@@ -141,65 +114,12 @@ function listTicketFiles() {
   return files.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-  if (!match) {
-    return { data: {}, body: content, raw: "" };
-  }
-
-  const data = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (kv) {
-      data[kv[1]] = kv[2];
-    }
-  }
-
-  return {
-    data,
-    body: content.slice(match[0].length),
-    raw: match[0],
-  };
-}
-
-function serializeFrontmatter(data, body) {
-  const orderedKeys = ["id", "title", "date", "assignee", "role", "agent", "status", "priority", "type", "branch", "commit", "reviewer", "source", "source_hash"];
-  const seen = new Set();
-  const lines = [];
-
-  for (const key of orderedKeys) {
-    if (data[key] !== undefined && data[key] !== "") {
-      lines.push(`${key}: ${data[key]}`);
-      seen.add(key);
-    }
-  }
-
-  for (const [key, value] of Object.entries(data)) {
-    if (!seen.has(key) && value !== undefined && value !== "") {
-      lines.push(`${key}: ${value}`);
-    }
-  }
-
-  return `---\n${lines.join("\n")}\n---\n\n${body.replace(/^\s+/, "")}`;
-}
-
-function updateFrontmatter(filePath, updates) {
-  const content = readUtf8(filePath);
-  const parsed = parseFrontmatter(content);
-  const next = serializeFrontmatter({ ...parsed.data, ...updates }, parsed.body);
-  writeUtf8(filePath, next);
-}
-
 function findTicket(ticketId) {
   const normalized = ticketId.toUpperCase();
   const matches = listTicketFiles().filter((file) => file.name.startsWith(`${normalized}-`));
 
-  if (matches.length === 0) {
-    fail(`ticket not found: ${ticketId}`);
-  }
-  if (matches.length > 1) {
-    fail(`multiple tickets matched ${ticketId}`);
-  }
+  if (matches.length === 0) fail(`ticket not found: ${ticketId}`);
+  if (matches.length > 1) fail(`multiple tickets matched ${ticketId}`);
 
   return matches[0];
 }
@@ -208,326 +128,10 @@ function nextTicketId() {
   let max = 0;
   for (const file of listTicketFiles()) {
     const match = file.name.match(/^TICKET-(\d{3})-/);
-    if (match) {
-      max = Math.max(max, Number(match[1]));
-    }
+    if (match) max = Math.max(max, Number(match[1]));
   }
 
   return `TICKET-${String(max + 1).padStart(3, "0")}`;
-}
-
-function slugify(title) {
-  return title
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ı/g, "i")
-    .replace(/İ/g, "I")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60) || "ticket";
-}
-
-function stripMarkdown(value) {
-  return value
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeText(value) {
-  return stripMarkdown(value)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ı/g, "i")
-    .replace(/İ/g, "I")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function hashText(value) {
-  return crypto.createHash("sha1").update(value.trim()).digest("hex").slice(0, 12);
-}
-
-function inferType(text) {
-  const normalized = normalizeText(text);
-
-  if (/\bfix|bug|hata|cleanup|duzelt|iyilestir|konfigurasyon|config\b/.test(normalized)) {
-    return "fix";
-  }
-  if (/\brefactor|rewire|migration|migrate|tasima\b/.test(normalized)) {
-    return "refactor";
-  }
-  if (/\bdoc|docs|roadmap|activity log|skills|dokuman\b/.test(normalized)) {
-    return "docs";
-  }
-  if (/\bpush|commit|agent|cli|otomasyon|script|setup\b/.test(normalized)) {
-    return "chore";
-  }
-
-  return "feature";
-}
-
-function inferRole(text, fallback) {
-  const roleMatch = text.match(/\*\*Rol:\*\*\s*([^.\n]+)/i);
-  if (roleMatch) {
-    const raw = stripMarkdown(roleMatch[1]).trim().toLowerCase();
-    if (ROLES.includes(raw)) return raw;
-    if (raw.includes("i18n") || raw.includes("developer")) return "developer";
-    if (raw.includes("designer")) return "designer";
-    if (raw.includes("marketing")) return "marketing";
-    if (raw.includes("review")) return "reviewer";
-    if (raw.includes("qa") || raw.includes("test")) return "qa";
-  }
-  return fallback || "developer";
-}
-
-function titleFromRoadmapItem(text) {
-  const cleaned = stripMarkdown(text)
-    .replace(/\s*Rol:\s*[^.]+\.?/i, "")
-    .replace(/\s*Boyut:\s*[^.]+\.?/i, "")
-    .trim();
-  const taskMatch = cleaned.match(/^(Task\s+#?[A-Za-z0-9.-]+):\s*(.+)$/i);
-
-  if (taskMatch) {
-    return `${taskMatch[1]} ${taskMatch[2]}`.trim();
-  }
-
-  return cleaned.replace(/[.!?]\s*$/, "");
-}
-
-function roadmapTaskDetails(raw, fallbackRole) {
-  return {
-    role: inferRole(raw, fallbackRole),
-    size: extractRoadmapField(raw, "Boyut") || "Belirtilmedi",
-    cleanText: stripMarkdown(raw),
-    scopeItems: inferScopeItems(raw),
-    verificationItems: inferVerificationItems(raw),
-    agentInstruction: inferAgentInstruction(raw, fallbackRole),
-  };
-}
-
-function extractRoadmapField(raw, field) {
-  const pattern = new RegExp(`\\*\\*${field}:\\*\\*\\s*([^.\n]+)`, "i");
-  const match = raw.match(pattern);
-  return match ? stripMarkdown(match[1]).trim() : "";
-}
-
-function inferScopeItems(raw) {
-  const scope = [];
-  const fileMatches = raw.match(/`([^`]+)`/g) || [];
-
-  for (const match of fileMatches) {
-    const value = match.replace(/`/g, "").trim();
-    if (value.includes("/") || value.includes("\\") || /\.[a-z0-9]+$/i.test(value)) {
-      scope.push(`\`${value}\``);
-    }
-  }
-
-  const rawWithoutInlineCode = raw.replace(/`[^`]+`/g, "");
-  const routeMatches = rawWithoutInlineCode.match(/(?:^|[\s("'])\/[a-zA-Z0-9/_-]+/g) || [];
-  for (const route of routeMatches) {
-    const cleanRoute = route.trim().replace(/^["'(]+/, "");
-    if (!scope.includes(`\`${cleanRoute}\``)) {
-      scope.push(`\`${cleanRoute}\``);
-    }
-  }
-
-  if (/admin/i.test(raw) && !scope.some((item) => item.includes("admin"))) {
-    scope.push("İlgili admin ekranı ve bağlı component/API akışı");
-  }
-  if (/PDF|CSV|Excel|export/i.test(raw)) {
-    scope.push("Export üretim akışı ve kullanıcıya görünen sonuç");
-  }
-  if (/email|Resend|domain|API key/i.test(raw)) {
-    scope.push("Email/Resend konfigürasyonu ve graceful failure davranışı");
-  }
-  if (/CLI|Agent|activity log|script/i.test(raw)) {
-    scope.push("Agent CLI, memory veya activity-log iş akışı");
-  }
-
-  return scope.length > 0 ? scope : ["Roadmap maddesinde adı geçen ilgili ekran, component, API veya dokümantasyon alanı"];
-}
-
-function inferVerificationItems(raw) {
-  const normalized = normalizeText(raw);
-  const items = ["`node agents/ticket.js check`"];
-
-  if (/\bi18n|turkce|string|cleanup|toast\b/.test(normalized)) {
-    items.push("İlgili dosyalarda hedef metinleri doğrudan grep/inspection ile kontrol et");
-    items.push("`npx tsc --noEmit`");
-  } else if (/\bdesigner|ui|screen|loader|chart|empty state|mod secim\b/.test(normalized)) {
-    items.push("İlgili ekranı tarayıcıda görsel olarak kontrol et");
-    items.push("Responsive taşma/overlap kontrolü yap");
-    items.push("`npx tsc --noEmit`");
-  } else if (/\bapi|resend|email|export|ics|csv|excel|pdf\b/.test(normalized)) {
-    items.push("Mutlu yol ve hata yolu için ilgili API/flow kontrolü yap");
-    items.push("`npx tsc --noEmit`");
-  } else if (/\bcli|agent|activity log|script|roadmap|docs\b/.test(normalized)) {
-    items.push("İlgili CLI/script komutunu çalıştır");
-    items.push("Oluşan/güncellenen markdown çıktısını doğrudan oku");
-  } else {
-    items.push("Değişiklik kapsamına uygun en küçük doğrulama komutunu çalıştır");
-    items.push("Gerekirse `npx tsc --noEmit`");
-  }
-
-  return items;
-}
-
-function inferAgentInstruction(raw, fallbackRole) {
-  const role = inferRole(raw, fallbackRole);
-
-  if (role === "designer") {
-    return "UI davranışını mevcut tasarım sistemiyle uyumlu tut; görsel değişikliklerde ekranı çalıştırıp desktop/mobile taşma ve okunabilirlik kontrolü yap.";
-  }
-  if (role === "marketing") {
-    return "Logistics audience'a yönelik kısa ve data-driven copy üret; ticket kapsamını aşma.";
-  }
-  if (role === "reviewer") {
-    return "Worker'ın doldurduğu Verification bölümünü birebir tekrar et; aksaklık varsa back-to-todo, temizse done + commit + reviewer alanlarını doldur.";
-  }
-  if (role === "qa") {
-    return "Ticket'taki verification adımlarını birebir uygula; pass/fail kanıtla raporla; done'a alma.";
-  }
-  return "Mevcut Next.js/Prisma/agent CLI kalıplarını takip et; kapsamı ticket ile sınırlı tut ve ilgili type check veya akış doğrulamasını çalıştır.";
-}
-
-function roadmapTicketBody(task, fallbackRole) {
-  const details = roadmapTaskDetails(task.raw, fallbackRole);
-
-  return `## Açıklama
-- Bu ticket self-contained çalışılmalıdır; normal geliştirme session'ında roadmap dosyasını tekrar okumaya gerek yoktur.
-- Amaç: ${details.cleanText}
-- Beklenen rol: ${details.role}
-- Boyut: ${details.size}
-
-## Kapsam
-${details.scopeItems.map((item) => `- ${item}`).join("\n")}
-
-## Kabul Kriterleri
-- Amaç bölümünde tarif edilen davranış veya düzenleme tamamlanmış olmalı.
-- Etkilenen dosyalar ticket içinde A/M/D etiketiyle listelenmeli.
-- Verification bölümüne çalıştırılan komutlar ve sonuçları yazılmalı.
-- Kapsam dışı veya ertelenen işler Sıradaki Adım bölümünde açıkça belirtilmeli.
-
-## Agent Talimatı
-- ${details.agentInstruction}
-
-## Verification Önerisi
-${details.verificationItems.map((item) => `- ${item}`).join("\n")}
-
-## Yapılanlar
--
-
-## Etkilenen Dosyalar
--
-
-## Verification
--
-
-## Sıradaki Adım
--
-
-## Notlar / Gotcha
--
-
-## Roadmap Kaynağı
-- ${task.raw}
-`;
-}
-
-function sectionContent(markdown, heading) {
-  const lines = markdown.split(/\r?\n/);
-  const headingLine = `## ${heading}`;
-  const start = lines.findIndex((line) => line.trim() === headingLine);
-
-  if (start === -1) {
-    return "";
-  }
-
-  const body = [];
-  for (let i = start + 1; i < lines.length; i++) {
-    if (/^##\s+/.test(lines[i])) {
-      break;
-    }
-    body.push(lines[i]);
-  }
-
-  return body.join("\n").trim();
-}
-
-function hasMeaningfulSection(content) {
-  const stripped = content
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => line !== "-")
-    .filter((line) => !/^-\s*$/.test(line));
-
-  return stripped.length > 0;
-}
-
-function normalizedName(value) {
-  return String(value || "unassigned").trim().toLowerCase() || "unassigned";
-}
-
-function ticketAssigneeRole(ticket) {
-  const content = readUtf8(ticket.path);
-  const parsed = parseFrontmatter(content);
-  let assignee = parsed.data.assignee;
-  let role = parsed.data.role;
-
-  // Backwards-compat: pre-refactor tickets only had `agent:` — map it.
-  if ((!assignee || !role) && parsed.data.agent) {
-    const legacy = LEGACY_AGENT_MAP[normalizedName(parsed.data.agent)];
-    if (legacy) {
-      assignee = assignee || legacy.assignee;
-      role = role || legacy.role;
-    }
-  }
-  return {
-    assignee: normalizedName(assignee),
-    role: normalizedName(role || "developer"),
-  };
-}
-
-function ticketAssignee(ticket) {
-  return ticketAssigneeRole(ticket).assignee;
-}
-
-function validateReviewReady(ticket) {
-  const content = readUtf8(ticket.path);
-  const missing = [];
-
-  for (const section of REQUIRED_REVIEW_SECTIONS) {
-    if (!hasMeaningfulSection(sectionContent(content, section))) {
-      missing.push(section);
-    }
-  }
-
-  if (missing.length > 0) {
-    fail(`ticket is not review-ready. Fill these sections first: ${missing.join(", ")}`);
-  }
-}
-
-function validateDoneReady(ticket, flags) {
-  const content = readUtf8(ticket.path);
-  const parsed = parseFrontmatter(content);
-  const note = flags.note || sectionContent(content, "Kapanış Notu");
-  const commit = flags.commit || parsed.data.commit;
-  const reviewer = flags.reviewer || parsed.data.reviewer;
-
-  if (!reviewer) {
-    fail("done requires --reviewer <reviewer-name>. Worker agents may only move tickets to in-review.");
-  }
-
-  if (!commit && !hasMeaningfulSection(note || "")) {
-    fail("done requires --commit <hash> or --note \"Kapanış notu\"");
-  }
 }
 
 function moveTicket(ticket, targetStatus, updates = {}) {
@@ -545,6 +149,16 @@ function moveTicket(ticket, targetStatus, updates = {}) {
   return { ...ticket, status: targetStatus, path: destination };
 }
 
+function appendSection(filePath, heading, line) {
+  const content = readUtf8(filePath);
+  if (content.includes(`## ${heading}`)) {
+    writeUtf8(filePath, `${content.trimEnd()}\n${line}\n`);
+    return;
+  }
+
+  writeUtf8(filePath, `${content.trimEnd()}\n\n## ${heading}\n${line}\n`);
+}
+
 function commandNew(args, flags) {
   const title = args.join(" ").trim();
   if (!title) usage(1);
@@ -559,22 +173,26 @@ function commandNew(args, flags) {
   const branch = flags.branch || "";
   const source = flags.source || "";
   const sourceHash = flags["source-hash"] || flags.source_hash || "";
-  const body = flags.body || `## Açıklama
--
+  const body = flags.body || `## Ne ve Neden
+- **Amaç:**
+- **Kapsam:**
+- **Tamam sayılır:**
 
-## Yapılanlar
--
+## Nasıl Yapılır
+- **Yaklaşım:**
+- **Doğrulama önerisi:**
+
+## Sonuç
+- **Yapıldı:**
+- **Doğrulandı:**
 
 ## Etkilenen Dosyalar
--
-
-## Verification
 -
 
 ## Sıradaki Adım
 -
 
-## Notlar / Gotcha
+## Kapanış
 -
 `;
 
@@ -612,36 +230,6 @@ ${body}`;
   writeUtf8(filePath, content);
   console.log(`Created ${path.relative(repoRoot, filePath)}`);
   return { id, filePath, title };
-}
-
-function parseRoadmapTasks(roadmapPath) {
-  const content = readUtf8(roadmapPath);
-  const lines = content.split(/\r?\n/);
-  const tasks = [];
-  let priority = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const priorityMatch = line.match(/^###\s+(P[0-3])\b/);
-    if (priorityMatch) {
-      priority = priorityMatch[1];
-      continue;
-    }
-
-    const taskMatch = line.match(/^\s*-\s+\[\s\]\s+(.+)$/);
-    if (taskMatch && priority) {
-      const raw = taskMatch[1].trim();
-      tasks.push({
-        raw,
-        line: i + 1,
-        priority,
-        title: titleFromRoadmapItem(raw),
-        sourceHash: hashText(raw),
-      });
-    }
-  }
-
-  return tasks;
 }
 
 function ticketIdentitySet() {
@@ -756,7 +344,7 @@ function commandEnrichRoadmapTickets(args, flags) {
       continue;
     }
 
-    const existingRole = parsed.data.role || (parsed.data.agent ? (LEGACY_AGENT_MAP[normalizedName(parsed.data.agent)]?.role) : null);
+    const existingRole = parsed.data.role || null;
     const next = serializeFrontmatter(parsed.data, roadmapTicketBody(task, existingRole || fallbackRole));
     writeUtf8(ticket.path, next);
     updated++;
@@ -792,9 +380,8 @@ function commandStart(args, flags) {
     date: today(),
     assignee: targetAssignee,
     role: targetRole,
+    agent: "",
   };
-  // Clear deprecated single agent field if it lingers.
-  if (ticket.path) updates.agent = "";
 
   const moved = moveTicket(ticket, "todo", updates);
   console.log(`Started ${path.relative(repoRoot, moved.path)}`);
@@ -843,32 +430,16 @@ function commandDone(args, flags) {
   }
 
   const updates = {};
-  if (flags.commit) {
-    updates.commit = flags.commit;
-  }
-  if (flags.reviewer) {
-    updates.reviewer = flags.reviewer;
-  }
+  if (flags.commit) updates.commit = flags.commit;
+  if (flags.reviewer) updates.reviewer = flags.reviewer;
 
   const moved = moveTicket(ticket, "done", updates);
   updateActivityLogDone(moved, flags);
   console.log(`Closed ${path.relative(repoRoot, moved.path)}`);
 }
 
-function appendSection(filePath, heading, line) {
-  const content = readUtf8(filePath);
-  if (content.includes(`## ${heading}`)) {
-    writeUtf8(filePath, `${content.trimEnd()}\n${line}\n`);
-    return;
-  }
-
-  writeUtf8(filePath, `${content.trimEnd()}\n\n## ${heading}\n${line}\n`);
-}
-
 function updateActivityLogDone(ticket, flags) {
-  if (!fs.existsSync(activityLogPath)) {
-    return;
-  }
+  if (!fs.existsSync(activityLogPath)) return;
 
   const content = readUtf8(activityLogPath);
   const parsed = parseFrontmatter(readUtf8(ticket.path));
@@ -876,9 +447,7 @@ function updateActivityLogDone(ticket, flags) {
   const note = flags.note ? ` (${flags.note})` : "";
   const entry = `\n- ${today()} - ${marker} done${flags.commit ? ` commit: ${flags.commit}` : ""}${note}\n`;
 
-  if (content.includes(`${marker} done`)) {
-    return;
-  }
+  if (content.includes(`${marker} done`)) return;
 
   writeUtf8(activityLogPath, `${content.trimEnd()}\n${entry}`);
 }
@@ -920,13 +489,11 @@ function commandCheck() {
       }
     }
 
-    // assignee/role required, but legacy `agent` is accepted as a fallback so
-    // un-migrated tickets don't fail the check before migration runs.
-    if (!parsed.data.assignee && !parsed.data.agent) {
-      issues.push(`${file.name}: missing frontmatter field "assignee" (legacy "agent" also missing)`);
+    if (!parsed.data.assignee) {
+      issues.push(`${file.name}: missing frontmatter field "assignee"`);
     }
-    if (!parsed.data.role && !parsed.data.agent) {
-      issues.push(`${file.name}: missing frontmatter field "role" (legacy "agent" also missing)`);
+    if (!parsed.data.role) {
+      issues.push(`${file.name}: missing frontmatter field "role"`);
     }
     if (parsed.data.assignee && !ASSIGNEES.includes(parsed.data.assignee)) {
       issues.push(`${file.name}: invalid assignee "${parsed.data.assignee}"`);
@@ -969,11 +536,39 @@ function commandCheck() {
 
     if (file.status === "done") {
       const hasCommit = Boolean(parsed.data.commit);
-      const hasClosingNote = hasMeaningfulSection(sectionContent(content, "Kapanış Notu"));
+      const hasClosingV2 = hasMeaningfulSection(sectionContent(content, "Kapanış"));
+      const hasClosingV1 = hasMeaningfulSection(sectionContent(content, "Kapanış Notu"));
       const hasLegacyCommitNote = /Commit:\s*`?[\w.-]+`?/i.test(content);
-      if (!hasCommit && !hasClosingNote && !hasLegacyCommitNote) {
-        issues.push(`${file.name}: done requires commit field, commit note, or "Kapanış Notu"`);
+      if (!hasCommit && !hasClosingV2 && !hasClosingV1 && !hasLegacyCommitNote) {
+        issues.push(`${file.name}: done requires commit field or "Kapanış" section content`);
       }
+    }
+  }
+
+  // Requests: lightweight schema checks (id/status/folder match, frontmatter present)
+  const requestFiles = requestLib.listRequestFiles(repoRoot);
+  for (const file of requestFiles) {
+    const content = readUtf8(file.path);
+    const parsed = parseFrontmatter(content);
+    if (!parsed.raw) {
+      issues.push(`${file.name}: missing frontmatter`);
+      continue;
+    }
+    const idFromName = file.name.match(/^(REQ-\d{3})-/)?.[1];
+    if (parsed.data.id !== idFromName) {
+      issues.push(`${file.name}: frontmatter id (${parsed.data.id || "missing"}) does not match filename (${idFromName})`);
+    }
+    if (parsed.data.status !== file.status) {
+      issues.push(`${file.name}: frontmatter status (${parsed.data.status || "missing"}) does not match folder (${file.status})`);
+    }
+    if (!parsed.data.title) {
+      issues.push(`${file.name}: missing frontmatter field "title"`);
+    }
+    if (file.status === "promoted" && !parsed.data.promoted_to) {
+      issues.push(`${file.name}: promoted request missing "promoted_to"`);
+    }
+    if (file.status === "rejected" && !parsed.data.rejected_reason) {
+      issues.push(`${file.name}: rejected request missing "rejected_reason"`);
     }
   }
 
@@ -985,7 +580,228 @@ function commandCheck() {
     process.exit(1);
   }
 
-  console.log(`Ticket check passed (${files.length} ticket${files.length === 1 ? "" : "s"})`);
+  const reqSummary = requestFiles.length ? `, ${requestFiles.length} request${requestFiles.length === 1 ? "" : "s"}` : "";
+  console.log(`Ticket check passed (${files.length} ticket${files.length === 1 ? "" : "s"}${reqSummary})`);
+}
+
+// ---- session subcommands ---------------------------------------------------
+
+function parseTicketsList(value) {
+  if (!value || typeof value !== "string") return [];
+  return value
+    .split(",")
+    .map((t) => t.trim().toUpperCase())
+    .filter(Boolean);
+}
+
+function commandSessionStart(args, flags) {
+  const title = args.join(" ").trim();
+  if (!title) fail('session start needs a title: ticket.js session start "Title" [--tickets TICKET-001,TICKET-002]');
+
+  const existing = sessionLib.findCurrentSession(repoRoot);
+  if (existing) {
+    fail(`a session is already in-review (#${existing.data.session}). End it first: ticket.js session end [--commit HASH]`);
+  }
+
+  const tickets = parseTicketsList(flags.tickets);
+  for (const t of tickets) {
+    // Verify each ticket exists; surface bad input early.
+    findTicket(t);
+  }
+
+  const resolved = resolveAssigneeRole(flags);
+  const agent = resolved.assignee || "unassigned";
+  const role = resolved.role || "developer";
+  validateAssignee(agent);
+  validateRole(role);
+
+  const result = sessionLib.createSession(repoRoot, {
+    title,
+    tickets,
+    agent,
+    role,
+    branch: flags.branch || "",
+  });
+
+  // Link the session into each ticket's frontmatter.sessions array.
+  const sessionId = `${result.date}-${String(result.number).padStart(3, "0")}`;
+  for (const t of tickets) {
+    const ticket = findTicket(t);
+    const content = readUtf8(ticket.path);
+    const parsed = parseFrontmatter(content);
+    const sessions = Array.isArray(parsed.data.sessions) ? parsed.data.sessions : [];
+    if (!sessions.includes(sessionId)) sessions.push(sessionId);
+    updateFrontmatter(ticket.path, { sessions });
+  }
+
+  sessionLib.rebuildIndexes(repoRoot);
+  console.log(`Started session #${result.number} → ${path.relative(repoRoot, result.path)}`);
+}
+
+function commandSessionEnd(args, flags) {
+  const ended = sessionLib.endSession(repoRoot, {
+    commit: flags.commit,
+    status: flags.status || "done",
+  });
+  sessionLib.rebuildIndexes(repoRoot);
+  console.log(`Ended session #${ended.data.session} → ${path.relative(repoRoot, ended.path)}`);
+}
+
+function commandSessionList() {
+  const files = sessionLib.listSessionFiles(repoRoot);
+  if (files.length === 0) {
+    console.log("No sessions yet.");
+    return;
+  }
+  for (const file of files.slice(-30)) {
+    const parsed = parseFrontmatter(readUtf8(file.path));
+    const tickets = Array.isArray(parsed.data.tickets) && parsed.data.tickets.length
+      ? parsed.data.tickets.join(",")
+      : "—";
+    console.log(
+      `${parsed.data.date} #${String(parsed.data.session).padStart(3, "0")} [${parsed.data.status}] ${parsed.data.agent}/${parsed.data.role} ${tickets} ${file.name}`
+    );
+  }
+}
+
+function commandSessionCurrent() {
+  const current = sessionLib.findCurrentSession(repoRoot);
+  if (!current) {
+    console.log("No active session.");
+    process.exit(0);
+  }
+  console.log(`Active: #${current.data.session} ${current.name} (tickets: ${(current.data.tickets || []).join(",") || "—"})`);
+}
+
+function commandSession(args, flags) {
+  const [subcommand, ...rest] = args;
+  switch (subcommand) {
+    case "start": commandSessionStart(rest, flags); break;
+    case "end": commandSessionEnd(rest, flags); break;
+    case "list": commandSessionList(); break;
+    case "current": commandSessionCurrent(); break;
+    default:
+      fail(`unknown session subcommand: ${subcommand || "(none)"}. Use start|end|list|current`);
+  }
+}
+
+// ---- request subcommands --------------------------------------------------
+
+function readBodyFromFlags(flags) {
+  if (flags["body-file"]) {
+    const filePath = path.resolve(repoRoot, flags["body-file"]);
+    if (!fs.existsSync(filePath)) fail(`body-file not found: ${filePath}`);
+    return readUtf8(filePath);
+  }
+  return flags.body || "";
+}
+
+function commandRequestNew(args, flags) {
+  const title = args.join(" ").trim();
+  if (!title) fail('request new needs a title: ticket.js request new "Title" --body "..."');
+  const body = readBodyFromFlags(flags);
+  const result = requestLib.createRequest(repoRoot, {
+    title,
+    body,
+    submittedBy: flags["submitted-by"] || "user",
+  });
+  console.log(`Created ${result.id} → ${path.relative(repoRoot, result.path)}`);
+}
+
+function commandRequestList(args, flags) {
+  const status = flags.status || null;
+  if (status && !requestLib.REQUEST_STATUSES.includes(status)) {
+    fail(`invalid --status: ${status}. Use ${requestLib.REQUEST_STATUSES.join("|")}`);
+  }
+  const files = requestLib.listRequestFiles(repoRoot, status);
+  if (files.length === 0) {
+    console.log("No requests yet.");
+    return;
+  }
+  for (const file of files) {
+    const parsed = parseFrontmatter(readUtf8(file.path));
+    const extra = parsed.data.promoted_to ? ` → ${parsed.data.promoted_to}` : "";
+    const reason = parsed.data.rejected_reason ? ` (${parsed.data.rejected_reason})` : "";
+    console.log(
+      `${parsed.data.date} ${parsed.data.id} [${parsed.data.status}] ${parsed.data.title}${extra}${reason}`
+    );
+  }
+}
+
+function commandRequestPromote(args, flags) {
+  const requestId = args[0];
+  if (!requestId) fail("request promote needs a REQ-NNN id");
+
+  const { data: requestData, body: requestBody } = requestLib.readRequest(repoRoot, requestId);
+  if (requestData.status !== "pending") {
+    fail(`request must be pending to promote. Current: ${requestData.status}`);
+  }
+
+  const title = (flags.title || requestData.title).trim();
+  const priority = flags.priority || "P2";
+  const type = flags.type || "feature";
+  const resolved = resolveAssigneeRole(flags);
+  const assignee = resolved.assignee || "unassigned";
+  const role = resolved.role || "developer";
+
+  // Build v2 body: surface the raw request text under "Ne ve Neden".
+  const requestText = requestBody.replace(/^#\s+Talep\s*\n+/m, "").trim();
+  const body = `## Ne ve Neden
+- **Amaç:** ${title}
+- **Kapsam:**
+- **Tamam sayılır:**
+
+### Talep Metni
+${requestText || "-"}
+
+## Nasıl Yapılır
+- **Yaklaşım:**
+- **Doğrulama önerisi:**
+
+## Sonuç
+- **Yapıldı:**
+- **Doğrulandı:**
+
+## Etkilenen Dosyalar
+-
+
+## Sıradaki Adım
+-
+
+## Kapanış
+- Promoted from ${requestData.id} on ${today()}
+`;
+
+  const created = commandNew([title], {
+    priority,
+    type,
+    assignee,
+    role,
+    body,
+  });
+
+  requestLib.markPromoted(repoRoot, requestId, created.id);
+  console.log(`Promoted ${requestId} → ${created.id}`);
+}
+
+function commandRequestReject(args, flags) {
+  const requestId = args[0];
+  if (!requestId) fail("request reject needs a REQ-NNN id");
+  if (!flags.reason) fail('request reject needs --reason "..."');
+  const moved = requestLib.rejectRequest(repoRoot, requestId, { reason: flags.reason });
+  console.log(`Rejected ${requestId} → ${path.relative(repoRoot, moved.path)}`);
+}
+
+function commandRequest(args, flags) {
+  const [subcommand, ...rest] = args;
+  switch (subcommand) {
+    case "new": commandRequestNew(rest, flags); break;
+    case "list": commandRequestList(rest, flags); break;
+    case "promote": commandRequestPromote(rest, flags); break;
+    case "reject": commandRequestReject(rest, flags); break;
+    default:
+      fail(`unknown request subcommand: ${subcommand || "(none)"}. Use new|list|promote|reject`);
+  }
 }
 
 function main() {
@@ -995,37 +811,20 @@ function main() {
   ensureStructure();
 
   switch (command) {
-    case "new":
-      commandNew(args, flags);
-      break;
-    case "start":
-      commandStart(args, flags);
-      break;
-    case "backlog":
-      commandBacklog(args);
-      break;
-    case "review":
-      commandReview(args, flags);
-      break;
-    case "done":
-      commandDone(args, flags);
-      break;
-    case "sync-roadmap":
-      commandSyncRoadmap(args, flags);
-      break;
-    case "enrich-roadmap-tickets":
-      commandEnrichRoadmapTickets(args, flags);
-      break;
-    case "check":
-      commandCheck();
-      break;
+    case "new": commandNew(args, flags); break;
+    case "start": commandStart(args, flags); break;
+    case "backlog": commandBacklog(args); break;
+    case "review": commandReview(args, flags); break;
+    case "done": commandDone(args, flags); break;
+    case "sync-roadmap": commandSyncRoadmap(args, flags); break;
+    case "enrich-roadmap-tickets": commandEnrichRoadmapTickets(args, flags); break;
+    case "session": commandSession(args, flags); break;
+    case "request": commandRequest(args, flags); break;
+    case "check": commandCheck(); break;
     case "help":
     case "--help":
-    case "-h":
-      usage(0);
-      break;
-    default:
-      usage(1);
+    case "-h": usage(0); break;
+    default: usage(1);
   }
 }
 

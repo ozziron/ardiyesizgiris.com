@@ -31,3 +31,22 @@ export interface CalculationResult {
   }
   warning?: string
 }
+
+/**
+ * Wire/UI shape of a calculation response: same payload after JSON
+ * serialization (Date → string), with optional fields the UI consumes.
+ * Use this in client components / hooks; use {@link CalculationResult}
+ * in the server-side engine.
+ */
+export interface CalculationApiResult {
+  free_days: number
+  free_until_date: string | Date
+  total_days_at_port: number
+  chargeable_days: number
+  total_charge: number
+  currency?: string
+  charge_breakdown?: ChargeBreakdownItem[]
+  warning?: string
+  /** Only present for cost-mode runs that get persisted. */
+  calculationId?: string | null
+}

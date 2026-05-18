@@ -3,11 +3,11 @@
 
 // Who actually executes the ticket (model / CLI / human)
 const ASSIGNEES = [
-  "opus-4.7",
-  "claude-sonnet-4-6",
-  "claude-haiku-4-5",
+  "opus",
+  "claude",
   "gemini",
   "codex",
+  "deepseek",
   "human",
   "unassigned",
 ];
@@ -21,19 +21,6 @@ const ROLES = [
   "qa",
   "unassigned",
 ];
-
-// Legacy mapping for the old single `agent:` field. Used by the migration
-// script and by ticket.js when accepting a deprecated --agent flag.
-const LEGACY_AGENT_MAP = {
-  "codex": { assignee: "codex", role: "developer" },
-  "gemini": { assignee: "gemini", role: "developer" },
-  "opus-4.7": { assignee: "opus-4.7", role: "developer" },
-  "developer": { assignee: "unassigned", role: "developer" },
-  "designer": { assignee: "claude-sonnet-4-6", role: "designer" },
-  "marketing": { assignee: "claude-sonnet-4-6", role: "marketing" },
-  "roadmap-sync": { assignee: "unassigned", role: "developer" },
-  "unassigned": { assignee: "unassigned", role: "unassigned" },
-};
 
 // Backwards-compatible name kept so existing modules that import
 // `AGENT_ROLES` keep working.
@@ -63,7 +50,7 @@ and keep changes confined to the ticket scope.`,
 Write copy for logistics professionals, keep it data-driven and short,
 and respect the ticket scope.`,
 
-  reviewer: `You are the reviewing CEO/Opus 4.7. You may move tickets
+  reviewer: `You are the reviewing CEO (Opus). You may move tickets
 from in-review to done after verifying the worker's evidence. You are
 the only role allowed to push to GitHub (batched).`,
 
@@ -108,7 +95,6 @@ const MODEL_CONFIG = {
 module.exports = {
   ASSIGNEES,
   ROLES,
-  LEGACY_AGENT_MAP,
   AGENT_ROLES,
   AGENT_STATUS,
   SYSTEM_PROMPTS,

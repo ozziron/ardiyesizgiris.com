@@ -4,8 +4,13 @@ import { calculateArdiye } from "@/lib/calculations/calculate-tariff"
 import { readBearerApiKey, resolveCorporateApiKey } from "@/lib/corporate/api-keys"
 import { prisma } from "@/lib/db/prisma"
 import { apiCalculationSchema } from "@/lib/validation/schemas"
+import { BILLING_ENABLED } from "@/lib/billing/config"
 
 export async function POST(request: Request) {
+  if (!BILLING_ENABLED) {
+    return NextResponse.json({ error: "Kurumsal API devre dışı." }, { status: 503 })
+  }
+
   const apiKey = readBearerApiKey(request)
   if (!apiKey) {
     return NextResponse.json({ error: "API key gerekli." }, { status: 401 })

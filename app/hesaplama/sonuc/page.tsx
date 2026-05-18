@@ -147,12 +147,6 @@ function ResultContent() {
           <CalendarPlus className="h-4 w-4" />
           Takvime Ekle
         </Button>
-        <Button variant="outline">
-          PDF İndir
-        </Button>
-        <Button variant="outline">
-          Email Gönder
-        </Button>
       </div>
     </div>
   )

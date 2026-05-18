@@ -37,20 +37,44 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           return null
         }
 
+        // Block login if email has not been verified yet.
+        // We encode this as a special error code the client can detect.
+        if (!user.emailVerified) {
+          // NextAuth v5: to pass a structured error back to the form,
+          // throw a special marker error. The signIn callback can't surface
+          // custom codes, so we encode "email_not_verified" in the throw message.
+          throw new Error("EMAIL_NOT_VERIFIED")
+        }
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          membershipType: user.membershipType,
+          subscriptionActive: user.subscriptionActive,
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = user.role ?? undefined
+        token.membershipType = user.membershipType ?? undefined
+        token.subscriptionActive = user.subscriptionActive ?? false
+      }
+      // Refresh membership/subscription on session update trigger (post-checkout)
+      if (trigger === "update" && token.id) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { membershipType: true, subscriptionActive: true },
+        })
+        if (fresh) {
+          token.membershipType = fresh.membershipType
+          token.subscriptionActive = fresh.subscriptionActive
+        }
       }
       return token
     },
@@ -58,6 +82,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role
+        session.user.membershipType = token.membershipType
+        session.user.subscriptionActive = token.subscriptionActive ?? false
       }
       return session
     },

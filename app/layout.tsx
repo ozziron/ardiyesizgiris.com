@@ -4,7 +4,9 @@ import { Inter, Inter_Tight } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
 import { AppShell } from "@/components/layout/app-shell"
+import { ScrollLockGuard } from "@/components/scroll-lock-guard"
 import Script from "next/script"
+import { Analytics } from "@vercel/analytics/next"
 
 // Body text — Inter Latin Extended subset includes Turkish diacritics.
 const inter = Inter({
@@ -81,6 +83,7 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning className={`${inter.variable} ${interTight.variable}`}>
       <body className="font-sans antialiased">
+        <ScrollLockGuard />
         <AuthSessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AppShell>{children}</AppShell>
@@ -100,6 +103,7 @@ export default function RootLayout({
         >
           {JSON.stringify(siteJsonLd)}
         </Script>
+        <Analytics />
       </body>
     </html>
   )
