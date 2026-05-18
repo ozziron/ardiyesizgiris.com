@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/app-shell"
 import { ScrollLockGuard } from "@/components/scroll-lock-guard"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Body text — Inter Latin Extended subset includes Turkish diacritics.
 const inter = Inter({
@@ -104,6 +105,7 @@ export default function RootLayout({
           {JSON.stringify(siteJsonLd)}
         </Script>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
