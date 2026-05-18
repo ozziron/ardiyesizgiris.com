@@ -155,9 +155,17 @@ export function PlanningResultCard(props: PlanningResultCardProps) {
               Hat Ek Ücretleri (Bu konteyner tipine uygulanır)
             </p>
             {surcharges.map((s, idx) => (
-              <p key={idx} className="mt-1 text-sm text-amber-800 dark:text-amber-200">
-                {s.name}: {formatMoney(s.amount, s.currency)}
-              </p>
+              <div key={idx} className="mt-1.5">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <span className="font-medium">{s.name}:</span>{" "}
+                  {formatMoney(s.amount, s.currency)}
+                </p>
+                {s.description ? (
+                  <p className="mt-0.5 text-xs italic leading-relaxed text-amber-700/80 dark:text-amber-300/70">
+                    {s.description}
+                  </p>
+                ) : null}
+              </div>
             ))}
           </div>
         ) : undefined
@@ -289,8 +297,15 @@ export function CostResultCard(props: CostResultCardProps) {
                         key={idx}
                         className={idx % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/40"}
                       >
-                        <td className="px-3 py-2">{s.name}</td>
-                        <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                        <td className="px-3 py-2 align-top">
+                          <div className="font-medium">{s.name}</div>
+                          {s.description ? (
+                            <div className="mt-1 text-xs italic leading-relaxed text-muted-foreground">
+                              {s.description}
+                            </div>
+                          ) : null}
+                        </td>
+                        <td className="px-3 py-2 text-right align-top font-semibold tabular-nums">
                           {formatMoney(s.amount, s.currency)}
                         </td>
                       </tr>

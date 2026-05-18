@@ -22,6 +22,7 @@ export interface CalculationEmailData {
   chargeBreakdown?: ChargeBreakdownItem[]
   surcharges?: Array<{
     name: string
+    description?: string | null
     amount: number
     currency: string
     apply_type: string
@@ -186,10 +187,16 @@ const buildEmailHtml = (data: CalculationEmailData) => {
     ? data.surcharges!.map(
         (s, idx) => {
           const fms = moneyFormatter(s.currency)
+          const descHtml = s.description
+            ? `<div style="margin-top: 4px; font-size: 12px; font-style: italic; color: #6b7280; line-height: 1.5;">${s.description}</div>`
+            : ""
           return `
           <tr style="background-color: ${idx % 2 === 0 ? "#ffffff" : "#f9fafb"};">
-            <td style="padding: 10px 12px; font-size: 14px; color: #111827;">${s.name}</td>
-            <td style="padding: 10px 12px; font-size: 14px; color: #111827; text-align: right; font-weight: 600;">${fms(s.amount)}</td>
+            <td style="padding: 10px 12px; font-size: 14px; color: #111827; vertical-align: top;">
+              <div style="font-weight: 500;">${s.name}</div>
+              ${descHtml}
+            </td>
+            <td style="padding: 10px 12px; font-size: 14px; color: #111827; text-align: right; font-weight: 600; vertical-align: top;">${fms(s.amount)}</td>
           </tr>`
         }
       ).join("")

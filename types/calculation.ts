@@ -9,6 +9,7 @@ export interface CalculationInput {
 
 export interface CarrierSurchargeItem {
   name: string
+  description?: string | null
   amount: number
   currency: string
   apply_type: string

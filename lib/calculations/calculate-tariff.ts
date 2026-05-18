@@ -47,6 +47,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     }
     applicableSurcharges.push({
       name: s.name,
+      description: s.description,
       amount: Number(s.amount),
       currency: s.currency,
       apply_type: s.applyType,

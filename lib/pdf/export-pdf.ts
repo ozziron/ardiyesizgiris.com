@@ -26,6 +26,7 @@ export interface CalculationPDFData {
   }>
   surcharges?: Array<{
     name: string
+    description?: string | null
     amount: number
     currency: string
     apply_type: string
@@ -364,9 +365,18 @@ const drawSurchargeTable = (
   if (!surcharges || surcharges.length === 0) return y
 
   const headerH = 8
-  const rowH = 7
+  const baseRowH = 7
+  const descLineH = 4
   const totalRowH = 9
-  const tableHeight = headerH + surcharges.length * rowH + totalRowH
+  const textMaxWidth = PAGE.CONTENT_WIDTH - 30
+
+  // Her satirin yuksekligini description'a gore on-hesapla
+  const rowHeights = surcharges.map((s) => {
+    if (!s.description) return baseRowH
+    const lines = doc.splitTextToSize(s.description, textMaxWidth) as string[]
+    return baseRowH + lines.length * descLineH + 1.5
+  })
+  const tableHeight = headerH + rowHeights.reduce((a, b) => a + b, 0) + totalRowH
 
   // Outer border
   setDraw(doc, [252, 211, 77]) // amber-300
@@ -387,9 +397,10 @@ const drawSurchargeTable = (
   // Body rows
   let rowY = y + headerH + 5
   surcharges.forEach((s, idx) => {
+    const thisRowH = rowHeights[idx]
     if (idx % 2 === 1) {
       setFill(doc, COLORS.SURFACE)
-      doc.rect(PAGE.MARGIN_X + 0.3, rowY - 4.5, PAGE.CONTENT_WIDTH - 0.6, rowH, "F")
+      doc.rect(PAGE.MARGIN_X + 0.3, rowY - 4.5, PAGE.CONTENT_WIDTH - 0.6, thisRowH, "F")
     }
     const fmts = moneyFormatter(s.currency)
     doc.setFont(FONT_FAMILY, "normal")
@@ -397,7 +408,17 @@ const drawSurchargeTable = (
     setText(doc, COLORS.TEXT_PRIMARY)
     doc.text(s.name, PAGE.MARGIN_X + 4, rowY)
     doc.text(fmts(s.amount), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY, { align: "right" })
-    rowY += rowH
+
+    if (s.description) {
+      const lines = doc.splitTextToSize(s.description, textMaxWidth) as string[]
+      doc.setFont(FONT_FAMILY, "italic")
+      doc.setFontSize(8)
+      setText(doc, COLORS.TEXT_MUTED)
+      lines.forEach((line, li) => {
+        doc.text(line, PAGE.MARGIN_X + 4, rowY + baseRowH - 2 + li * descLineH)
+      })
+    }
+    rowY += thisRowH
   })
 
   // Total row
