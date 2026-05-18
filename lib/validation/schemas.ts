@@ -80,10 +80,10 @@ export const tariffRuleSchema = z
     tier1PricePerDay: z.coerce.number().nonnegative("Fiyat negatif olamaz (0 girilirse muafiyet olarak değerlendirilir)"),
     tier2DaysFrom: z.coerce.number().int().min(1),
     tier2DaysTo: z.coerce.number().int().min(1),
-    tier2PricePerDay: z.coerce.number().positive(),
+    tier2PricePerDay: z.coerce.number().nonnegative(),
     tier2Enabled: z.boolean().default(true),
     tier3DaysFrom: z.coerce.number().int().min(1),
-    tier3PricePerDay: z.coerce.number().positive(),
+    tier3PricePerDay: z.coerce.number().nonnegative(),
     tier3Enabled: z.boolean().default(true),
     currency: z.string().default("TRY"),
     effectiveFrom: dateField,
@@ -124,6 +124,14 @@ export const tariffRuleSchema = z
   }, {
     message: "Tier 3'ü açmak için Tier 2 de aktif olmalıdır",
     path: ["tier3Enabled"],
+  })
+  .refine((data) => !data.tier2Enabled || data.tier2PricePerDay > 0, {
+    message: "Günlük ücret 0'dan büyük olmalı",
+    path: ["tier2PricePerDay"],
+  })
+  .refine((data) => !data.tier3Enabled || data.tier3PricePerDay > 0, {
+    message: "Günlük ücret 0'dan büyük olmalı",
+    path: ["tier3PricePerDay"],
   })
 
 // Carrier surcharge form schema — admin-managed surcharge definitions
