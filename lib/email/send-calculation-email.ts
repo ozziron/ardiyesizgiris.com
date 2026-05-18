@@ -20,6 +20,12 @@ export interface CalculationEmailData {
   chargeableDays?: number
   warning?: string
   chargeBreakdown?: ChargeBreakdownItem[]
+  surcharges?: Array<{
+    name: string
+    amount: number
+    currency: string
+    apply_type: string
+  }>
 }
 
 export type SendEmailResult =
@@ -174,6 +180,49 @@ const buildEmailHtml = (data: CalculationEmailData) => {
       </table>`
     : ""
 
+  const showSurcharges = data.surcharges && data.surcharges.length > 0
+
+  const surchargeRowsHtml = showSurcharges
+    ? data.surcharges!.map(
+        (s, idx) => {
+          const fms = moneyFormatter(s.currency)
+          return `
+          <tr style="background-color: ${idx % 2 === 0 ? "#ffffff" : "#f9fafb"};">
+            <td style="padding: 10px 12px; font-size: 14px; color: #111827;">${s.name}</td>
+            <td style="padding: 10px 12px; font-size: 14px; color: #111827; text-align: right; font-weight: 600;">${fms(s.amount)}</td>
+          </tr>`
+        }
+      ).join("")
+    : ""
+
+  const surchargeTotal = showSurcharges
+    ? data.surcharges!.reduce((sum, s) => sum + s.amount, 0)
+    : 0
+  const fmsSurcharge = showSurcharges ? moneyFormatter(data.surcharges![0].currency) : formatTL
+
+  const surchargesBlock = showSurcharges
+    ? `
+      <h2 style="font-size: 14px; margin: 24px 16px 8px; color: #111827; font-weight: 700;">
+        Hat Ek Ücretleri (Surcharge)
+        <span style="display: inline-block; width: 20px; height: 2px; background: #d97706; vertical-align: middle; margin-left: 4px;"></span>
+      </h2>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width: calc(100% - 32px); margin: 0 16px; border-collapse: separate; border-spacing: 0; border: 1px solid #fcd34d; border-radius: 8px; overflow: hidden;">
+        <thead>
+          <tr style="background-color: #d97706;">
+            <th style="padding: 10px 12px; text-align: left; color: #ffffff; font-size: 13px; font-weight: 700;">Açıklama</th>
+            <th style="padding: 10px 12px; text-align: right; color: #ffffff; font-size: 13px; font-weight: 700;">Tutar</th>
+          </tr>
+        </thead>
+        <tbody>${surchargeRowsHtml}</tbody>
+        <tfoot>
+          <tr style="background-color: #fef3c7;">
+            <td style="padding: 12px; font-size: 14px; font-weight: 700; color: #78350f;">SURCHARGE TOPLAM</td>
+            <td style="padding: 12px; font-size: 14px; font-weight: 700; color: #78350f; text-align: right;">${fmsSurcharge(surchargeTotal)}</td>
+          </tr>
+        </tfoot>
+      </table>`
+    : ""
+
   // Warning card (amber) — only when we have a warning to show.
   const warningBlock = data.warning
     ? `
@@ -269,6 +318,9 @@ const buildEmailHtml = (data: CalculationEmailData) => {
 
             <!-- Tier breakdown (cost mode w/ charges only) -->
             <tr><td>${tiersBlock}</td></tr>
+
+            <!-- Surcharges (cost mode when applicable) -->
+            <tr><td>${surchargesBlock}</td></tr>
 
             <!-- Warning (if any) -->
             <tr><td>${warningBlock}</td></tr>

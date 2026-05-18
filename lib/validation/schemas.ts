@@ -104,6 +104,18 @@ export const tariffRuleSchema = z
     path: ["tier3DaysFrom"],
   })
 
+// Carrier surcharge form schema — admin-managed surcharge definitions
+export const carrierSurchargeFormSchema = z.object({
+  shippingCompanyId: z.string().min(1, "Hat seciniz"),
+  name: z.string().min(1, "Ek ucret adi girin").max(200),
+  description: z.string().max(500).optional().nullable(),
+  amount: z.coerce.number().positive("Tutar pozitif olmalidir"),
+  currency: z.string().default("USD"),
+  applyType: z.string().default("PER_CONTAINER"),
+  containerTypes: z.array(z.string()).default([]),
+  isActive: z.boolean().default(true),
+})
+
 // API calculation request schema
 export const apiCalculationSchema = z.object({
   portId: z.string(),

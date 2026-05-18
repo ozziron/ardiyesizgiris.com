@@ -44,7 +44,7 @@ export default async function LoginPage({
           </Suspense>
           <p className="px-8 text-center text-sm text-muted-foreground">
             Hesabınız yok mu?{" "}
-            <Link href="/(auth)/kayit" className="underline underline-offset-4 hover:text-primary">
+            <Link href="/kayit" className="underline underline-offset-4 hover:text-primary">
               Hemen Kaydolun
             </Link>
           </p>

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/prisma"
 import { differenceInCalendarDays } from "date-fns"
-import type { CalculationInput, CalculationResult } from "@/types/calculation"
+import type { CalculationInput, CalculationResult, CarrierSurchargeItem } from "@/types/calculation"
 
 function dayRangeLength(from: number, to: number) {
   return Math.max(0, to - from + 1)
@@ -32,6 +32,27 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     throw new Error("Bu liman ve hat kombinasyonu için tarife bulunamadı")
   }
 
+  // Step 1b: Query applicable carrier surcharges
+  const surcharges = await prisma.carrierSurcharge.findMany({
+    where: {
+      shippingCompanyId: input.shippingCompanyId,
+      isActive: true,
+    },
+  })
+
+  const applicableSurcharges: CarrierSurchargeItem[] = []
+  for (const s of surcharges) {
+    if (s.containerTypes.length > 0 && !s.containerTypes.includes(input.containerType)) {
+      continue
+    }
+    applicableSurcharges.push({
+      name: s.name,
+      amount: Number(s.amount),
+      currency: s.currency,
+      apply_type: s.applyType,
+    })
+  }
+
   const tier1Price = Number(tariff.tier1PricePerDay)
   const tier2Price = Number(tariff.tier2PricePerDay)
   const tier3Price = Number(tariff.tier3PricePerDay)
@@ -57,6 +78,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
       total_charge: 0,
       currency: tariff.currency,
       charge_breakdown: [],
+      surcharges: applicableSurcharges,
       timeline: {
         departure: input.departureDate,
         free_until: free_until_date,
@@ -117,6 +139,8 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     charge_breakdown.push({ tier: 3, days, price_per_day: tier3Price, subtotal })
   }
 
+  total_charge += applicableSurcharges.reduce((sum, s) => sum + s.amount, 0)
+
   return {
     free_days,
     free_until_date,
@@ -126,6 +150,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     total_charge,
     currency: tariff.currency,
     charge_breakdown,
+    surcharges: applicableSurcharges,
     timeline: {
       departure: input.departureDate,
       free_until: free_until_date,

@@ -275,6 +275,7 @@ export function useCalculationForm() {
       chargeableDays: result.chargeable_days,
       warning: result.warning,
       chargeBreakdown: result.charge_breakdown,
+      surcharges: result.surcharges,
     };
   };
 

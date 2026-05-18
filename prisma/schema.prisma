@@ -71,8 +71,28 @@ model ShippingCompany {
   creator      User?         @relation("CarrierCreatedBy", fields: [createdBy], references: [id])
   tariffRules  TariffRule[]
   calculations Calculation[]
+  surcharges   CarrierSurcharge[]
 
   @@map("shipping_companies")
+}
+
+model CarrierSurcharge {
+  id                String   @id @default(uuid())
+  shippingCompanyId String   @map("shipping_company_id")
+  name              String
+  description       String?
+  amount            Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD")
+  applyType         String   @default("PER_CONTAINER") @map("apply_type")
+  containerTypes    String[] @map("container_types")
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  shippingCompany ShippingCompany @relation(fields: [shippingCompanyId], references: [id], onDelete: Cascade)
+
+  @@index([shippingCompanyId, isActive])
+  @@map("carrier_surcharges")
 }
 
 model TariffRule {

@@ -2,10 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock prisma BEFORE importing the function under test.
 // vi.mock is hoisted, so the mock instance must be created via vi.hoisted.
-const { findFirstMock } = vi.hoisted(() => ({ findFirstMock: vi.fn() }));
+const { findFirstMock, findManySurchargeMock } = vi.hoisted(() => ({
+  findFirstMock: vi.fn(),
+  findManySurchargeMock: vi.fn(),
+}));
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     tariffRule: { findFirst: findFirstMock },
+    carrierSurcharge: { findMany: findManySurchargeMock },
   },
 }));
 
@@ -57,8 +61,22 @@ const baseInput = {
 };
 
 describe("calculateArdiye", () => {
+  const surcharge = (overrides: Partial<{
+    name: string; amount: number; currency: string; containerTypes: string[]; applyType: string;
+  }> = {}) => ({
+    name: "DTE Surcharge",
+    amount: 160,
+    currency: "USD",
+    containerTypes: ["20RF", "40RF"],
+    applyType: "PER_CONTAINER",
+    isActive: true,
+    ...overrides,
+  });
+
   beforeEach(() => {
     findFirstMock.mockReset();
+    findManySurchargeMock.mockReset();
+    findManySurchargeMock.mockResolvedValue([]);
   });
 
   it("Senaryo 1: gate-in inside muafiyet -> total_charge 0", async () => {
@@ -173,5 +191,58 @@ describe("calculateArdiye", () => {
   it("No matching tariff -> throws", async () => {
     findFirstMock.mockResolvedValue(null);
     await expect(calculateArdiye(baseInput)).rejects.toThrow(/tarife bulunamadı/);
+  });
+
+  // ── Surcharge tests (TICKET-042) ─────────────────────────────────
+
+  it("Surcharge matching container type added to total_charge in cost mode", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge()]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "20RF",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    // Gate-in inside muafiyet (free_days=7), so tier total should be 0.
+    // Surcharge adds 160 USD on top.
+    expect(result.total_charge).toBe(160);
+    expect(result.surcharges.length).toBe(1);
+    expect(result.surcharges[0]).toMatchObject({ name: "DTE Surcharge", amount: 160, currency: "USD" });
+  });
+
+  it("Surcharge NOT matching container type is excluded", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge({ containerTypes: ["20RF", "40RF"] })]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "40DC",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(result.surcharges.length).toBe(0);
+    expect(result.total_charge).toBe(0);
+  });
+
+  it("Empty containerTypes surcharge applies to all container types", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge({ containerTypes: [] })]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "40DC",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(result.surcharges.length).toBe(1);
+    expect(result.total_charge).toBe(160);
+  });
+
+  it("Planning mode returns surcharge info but does not add to charge", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge()]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "20RF",
+    });
+    expect(result.total_charge).toBe(0);
+    expect(result.surcharges.length).toBe(1);
+    expect(result.surcharges[0].name).toBe("DTE Surcharge");
   });
 });
