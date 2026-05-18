@@ -49,14 +49,17 @@ const bulkFormSchema = z
     cityFilter: z.string().optional(),
     portIds: z.array(z.string()).min(1, "En az bir liman seçilmelidir"),
     containerTypeCodes: z.array(z.string()).min(1, "En az bir ekipman tipi seçilmelidir"),
+    imoCargo: z.boolean().default(false),
     tier1DaysFrom: z.coerce.number().int().min(1),
     tier1DaysTo: z.coerce.number().int().min(1),
     tier1PricePerDay: z.coerce.number().nonnegative("Fiyat negatif olamaz"),
     tier2DaysFrom: z.coerce.number().int().min(1),
     tier2DaysTo: z.coerce.number().int().min(1),
     tier2PricePerDay: z.coerce.number().positive("Tier 2 ücreti 0'dan büyük olmalıdır"),
+    tier2Enabled: z.boolean().default(true),
     tier3DaysFrom: z.coerce.number().int().min(1),
     tier3PricePerDay: z.coerce.number().positive("Tier 3 ücreti 0'dan büyük olmalıdır"),
+    tier3Enabled: z.boolean().default(true),
     currency: z.string().min(1),
     effectiveFrom: z.string().min(1, "Başlangıç tarihi zorunludur"),
     effectiveUntil: z.string().optional(),
@@ -67,17 +70,34 @@ const bulkFormSchema = z
     message: "Tier 1 gün aralığı geçersiz",
     path: ["tier1DaysTo"],
   })
-  .refine((data) => data.tier2DaysFrom > data.tier1DaysTo, {
+  .refine((data) => {
+    if (!data.tier2Enabled) return true
+    return data.tier2DaysFrom > data.tier1DaysTo
+  }, {
     message: "Tier 2, Tier 1 bittikten sonra başlamalı",
     path: ["tier2DaysFrom"],
   })
-  .refine((data) => data.tier2DaysTo >= data.tier2DaysFrom, {
+  .refine((data) => {
+    if (!data.tier2Enabled) return true
+    return data.tier2DaysTo >= data.tier2DaysFrom
+  }, {
     message: "Tier 2 gün aralığı geçersiz",
     path: ["tier2DaysTo"],
   })
-  .refine((data) => data.tier3DaysFrom > data.tier2DaysTo, {
+  .refine((data) => {
+    if (!data.tier3Enabled) return true
+    if (!data.tier2Enabled) return false
+    return data.tier3DaysFrom > data.tier2DaysTo
+  }, {
     message: "Tier 3, Tier 2 bittikten sonra başlamalı",
     path: ["tier3DaysFrom"],
+  })
+  .refine((data) => {
+    if (data.tier3Enabled && !data.tier2Enabled) return false
+    return true
+  }, {
+    message: "Tier 3'ü açmak için Tier 2 de aktif olmalıdır",
+    path: ["tier3Enabled"],
   })
 
 type BulkFormValues = z.infer<typeof bulkFormSchema>
@@ -104,14 +124,17 @@ export default function BulkTariffPage() {
       cityFilter: "",
       portIds: [],
       containerTypeCodes: [],
+      imoCargo: false,
       tier1DaysFrom: 1,
       tier1DaysTo: 5,
       tier1PricePerDay: 0,
       tier2DaysFrom: 6,
       tier2DaysTo: 10,
       tier2PricePerDay: 100,
+      tier2Enabled: true,
       tier3DaysFrom: 11,
       tier3PricePerDay: 200,
+      tier3Enabled: true,
       currency: "TRY",
       effectiveFrom: new Date().toISOString().split("T")[0],
       effectiveUntil: "",
@@ -123,6 +146,8 @@ export default function BulkTariffPage() {
   const cityFilter = form.watch("cityFilter") ?? ""
   const selectedPortIds = form.watch("portIds")
   const selectedContainerTypeCodes = form.watch("containerTypeCodes")
+  const tier2Enabled = form.watch("tier2Enabled")
+  const tier3Enabled = form.watch("tier3Enabled")
 
   // Distinct cities from ports
   const cities = Array.from(
@@ -197,14 +222,17 @@ export default function BulkTariffPage() {
         carrierId: values.carrierId,
         portIds: values.portIds,
         containerTypeCodes: values.containerTypeCodes,
+        imoCargo: values.imoCargo,
         tier1DaysFrom: values.tier1DaysFrom,
         tier1DaysTo: values.tier1DaysTo,
         tier1PricePerDay: values.tier1PricePerDay,
         tier2DaysFrom: values.tier2DaysFrom,
         tier2DaysTo: values.tier2DaysTo,
         tier2PricePerDay: values.tier2PricePerDay,
+        tier2Enabled: values.tier2Enabled,
         tier3DaysFrom: values.tier3DaysFrom,
         tier3PricePerDay: values.tier3PricePerDay,
+        tier3Enabled: values.tier3Enabled,
         currency: values.currency,
         effectiveFrom: values.effectiveFrom,
         effectiveUntil: values.effectiveUntil || null,
@@ -454,6 +482,24 @@ export default function BulkTariffPage() {
               <CardTitle>4. Tarife Bilgileri</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              <FormField
+                control={form.control}
+                name="imoCargo"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-2xl border p-4">
+                    <div>
+                      <FormLabel>IMO Cargo (Tehlikeli Yük)</FormLabel>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Bu tarifeler sadece IMO Cargo seçili hesaplamalarda eşleşir.
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
                 <span
                   aria-hidden
@@ -515,90 +561,151 @@ export default function BulkTariffPage() {
 
                 {/* Tier 2 */}
                 <div className="space-y-4">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">Tier 2</p>
-                  <FormField
-                    control={form.control}
-                    name="tier2DaysFrom"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gün Başlangıcı</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="tier2DaysTo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gün Bitişi</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="tier2PricePerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Günlük Ücret</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" step="0.01" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Tier 2</p>
+                    <FormField
+                      control={form.control}
+                      name="tier2Enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormLabel className="text-xs text-slate-500">Aktif</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked)
+                                if (!checked) form.setValue("tier3Enabled", false)
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {tier2Enabled && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="tier2DaysFrom"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gün Başlangıcı</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="1" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="tier2DaysTo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gün Bitişi</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="1" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="tier2PricePerDay"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Günlük Ücret</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="0" step="0.01" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
                 </div>
 
                 {/* Tier 3 */}
                 <div className="space-y-4">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">Tier 3</p>
-                  <FormField
-                    control={form.control}
-                    name="tier3DaysFrom"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gün Başlangıcı</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="tier3PricePerDay"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Günlük Ücret</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" step="0.01" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="currency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Para Birimi</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Tier 3</p>
+                    <FormField
+                      control={form.control}
+                      name="tier3Enabled"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormLabel className="text-xs text-slate-500">Aktif</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              disabled={!tier2Enabled}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {tier3Enabled && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="tier3DaysFrom"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gün Başlangıcı</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="1" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="tier3PricePerDay"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Günlük Ücret</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="0" step="0.01" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="currency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Para Birimi</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+                  {!tier3Enabled && (
+                    <FormField
+                      control={form.control}
+                      name="currency"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Para Birimi</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
 

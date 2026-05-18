@@ -19,6 +19,7 @@ export type FormState = {
   portId: string;
   shippingCompanyId: string;
   containerType: string;
+  imoCargo: boolean;
   departureDate: string;
   containerId: string;
   gateInDate: string;
@@ -46,6 +47,7 @@ const initialForm: FormState = {
   portId: "",
   shippingCompanyId: "",
   containerType: "",
+  imoCargo: false,
   departureDate: "",
   containerId: "",
   gateInDate: "",
@@ -163,6 +165,7 @@ export function useCalculationForm() {
       portId: form.portId,
       shippingCompanyId: form.shippingCompanyId,
       containerType: form.containerType,
+      imoCargo: form.imoCargo,
       departureDate: form.departureDate,
       containerId: form.gateInDate ? form.containerId : null,
       gateInDate: form.gateInDate || null,
@@ -264,7 +267,7 @@ export function useCalculationForm() {
       portalName: getOptionName(ports, form.portId),
       carrierName: getOptionName(carriers, form.shippingCompanyId),
       containerId: isCost ? form.containerId : null,
-      containerType: getContainerTypeLabel(form.containerType),
+      containerType: getContainerTypeLabel(form.containerType) + (form.imoCargo ? " (IMO)" : ""),
       departureDate: form.departureDate,
       gateInDate: isCost ? form.gateInDate : null,
       freeDays: result.free_days,
@@ -275,6 +278,7 @@ export function useCalculationForm() {
       chargeableDays: result.chargeable_days,
       warning: result.warning,
       chargeBreakdown: result.charge_breakdown,
+      surcharges: result.surcharges,
     };
   };
 
@@ -365,10 +369,11 @@ export function useCalculationForm() {
   };
 
   const isCostResult = submittedMode === "cost";
+  const containerTypeLabel = getContainerTypeLabel(form.containerType) + (form.imoCargo ? " (IMO)" : "");
   const summaryRows: SummaryRow[] = [
     { label: "Liman", value: getOptionName(ports, form.portId) },
     { label: "Hat", value: getOptionName(carriers, form.shippingCompanyId) },
-    { label: "Konteyner", value: getContainerTypeLabel(form.containerType) },
+    { label: "Konteyner", value: containerTypeLabel },
     ...(isCostResult ? [{ label: "Konteyner ID", value: form.containerId, mono: true }] : []),
     { label: "Kalkış", value: formatTR(form.departureDate), mono: true },
     ...(isCostResult ? [{ label: "Gate-in", value: formatTR(form.gateInDate), mono: true }] : []),

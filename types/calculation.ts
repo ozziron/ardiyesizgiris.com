@@ -3,8 +3,17 @@ export interface CalculationInput {
   shippingCompanyId: string
   containerId?: string | null
   containerType: string
+  imoCargo?: boolean
   departureDate: Date
   gateInDate?: Date | null
+}
+
+export interface CarrierSurchargeItem {
+  name: string
+  description?: string | null
+  amount: number
+  currency: string
+  apply_type: string
 }
 
 export interface ChargeBreakdownItem {
@@ -24,6 +33,7 @@ export interface CalculationResult {
   /** ISO-4217 code (TRY, USD, EUR…) from the matched TariffRule. */
   currency: string
   charge_breakdown: ChargeBreakdownItem[]
+  surcharges: CarrierSurchargeItem[]
   timeline: {
     departure: Date
     free_until: Date
@@ -46,6 +56,7 @@ export interface CalculationApiResult {
   total_charge: number
   currency?: string
   charge_breakdown?: ChargeBreakdownItem[]
+  surcharges?: CarrierSurchargeItem[]
   warning?: string
   /** Only present for cost-mode runs that get persisted. */
   calculationId?: string | null

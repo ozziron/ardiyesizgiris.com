@@ -460,6 +460,20 @@ export default function HesaplamaPage() {
                 )}
               </div>
 
+              {/* IMO Cargo */}
+              {form.containerType && !form.containerType.includes("IM") && (
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Checkbox
+                    id="imoCargo"
+                    checked={form.imoCargo}
+                    onCheckedChange={(checked) => updateForm({ imoCargo: !!checked })}
+                  />
+                  <Label htmlFor="imoCargo" className="cursor-pointer text-sm font-medium">
+                    IMO Cargo (Tehlikeli Yük)
+                  </Label>
+                </div>
+              )}
+
               {/* ETD - Gemi Kalkış Tarihi */}
               <div className="flex flex-col gap-1.5">
                 <Label>Gemi Kalkış Tarihi (ETD)</Label>
@@ -737,6 +751,7 @@ export default function HesaplamaPage() {
                     chargeBreakdown={result.charge_breakdown}
                     currency={result.currency || "TRY"}
                     warning={result.warning}
+                    surcharges={result.surcharges}
                   >
                     {actions}
                   </CostResultCard>
@@ -747,6 +762,7 @@ export default function HesaplamaPage() {
                     freeUntilDate={result.free_until_date}
                     departureDate={form.departureDate}
                     warning={result.warning}
+                    surcharges={result.surcharges}
                   >
                     {actions}
                   </PlanningResultCard>

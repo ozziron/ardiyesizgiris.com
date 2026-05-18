@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       shippingCompanyId: validatedData.shippingCompanyId,
       containerId: validatedData.containerId,
       containerType: validatedData.containerType,
+      imoCargo: validatedData.imoCargo ?? false,
       departureDate,
       gateInDate,
     })

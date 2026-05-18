@@ -16,14 +16,17 @@ const bulkTariffSchema = z
     carrierId: z.string().min(1, "Hat zorunludur"),
     portIds: z.array(z.string().min(1)).min(1, "En az bir liman seçilmelidir"),
     containerTypeCodes: z.array(z.string().min(1)).min(1, "En az bir ekipman tipi seçilmelidir"),
+    imoCargo: z.boolean().default(false),
     tier1DaysFrom: z.coerce.number().int().min(1),
     tier1DaysTo: z.coerce.number().int().min(1),
     tier1PricePerDay: z.coerce.number().nonnegative("Fiyat negatif olamaz"),
     tier2DaysFrom: z.coerce.number().int().min(1),
     tier2DaysTo: z.coerce.number().int().min(1),
     tier2PricePerDay: z.coerce.number().positive("Tier 2 ücreti 0'dan büyük olmalıdır"),
+    tier2Enabled: z.boolean().default(true),
     tier3DaysFrom: z.coerce.number().int().min(1),
     tier3PricePerDay: z.coerce.number().positive("Tier 3 ücreti 0'dan büyük olmalıdır"),
+    tier3Enabled: z.boolean().default(true),
     currency: z.string().min(1).default("TRY"),
     effectiveFrom: z.string().min(1, "Başlangıç tarihi zorunludur"),
     effectiveUntil: z.string().nullable().optional(),
@@ -34,17 +37,34 @@ const bulkTariffSchema = z
     message: "Tier 1 gün aralığı geçersiz",
     path: ["tier1DaysTo"],
   })
-  .refine((data) => data.tier2DaysFrom > data.tier1DaysTo, {
+  .refine((data) => {
+    if (!data.tier2Enabled) return true
+    return data.tier2DaysFrom > data.tier1DaysTo
+  }, {
     message: "Tier 2, Tier 1 bittikten sonra başlamalı",
     path: ["tier2DaysFrom"],
   })
-  .refine((data) => data.tier2DaysTo >= data.tier2DaysFrom, {
+  .refine((data) => {
+    if (!data.tier2Enabled) return true
+    return data.tier2DaysTo >= data.tier2DaysFrom
+  }, {
     message: "Tier 2 gün aralığı geçersiz",
     path: ["tier2DaysTo"],
   })
-  .refine((data) => data.tier3DaysFrom > data.tier2DaysTo, {
+  .refine((data) => {
+    if (!data.tier3Enabled) return true
+    if (!data.tier2Enabled) return false
+    return data.tier3DaysFrom > data.tier2DaysTo
+  }, {
     message: "Tier 3, Tier 2 bittikten sonra başlamalı",
     path: ["tier3DaysFrom"],
+  })
+  .refine((data) => {
+    if (data.tier3Enabled && !data.tier2Enabled) return false
+    return true
+  }, {
+    message: "Tier 3'ü açmak için Tier 2 de aktif olmalıdır",
+    path: ["tier3Enabled"],
   })
 
 export async function POST(request: Request) {
@@ -64,14 +84,17 @@ export async function POST(request: Request) {
       carrierId,
       portIds,
       containerTypeCodes,
+      imoCargo,
       tier1DaysFrom,
       tier1DaysTo,
       tier1PricePerDay,
       tier2DaysFrom,
       tier2DaysTo,
       tier2PricePerDay,
+      tier2Enabled,
       tier3DaysFrom,
       tier3PricePerDay,
+      tier3Enabled,
       currency,
       effectiveFrom,
       effectiveUntil,
@@ -103,6 +126,7 @@ export async function POST(request: Request) {
         shippingCompanyId: carrierId,
         portId: { in: portIds },
         containerType: { in: containerTypeCodes },
+        imoCargo,
         effectiveFrom: effectiveFromDate,
       },
       select: { portId: true, containerType: true },
@@ -144,14 +168,17 @@ export async function POST(request: Request) {
               portId,
               shippingCompanyId: carrierId,
               containerType,
+              imoCargo,
               tier1DaysFrom,
               tier1DaysTo,
               tier1PricePerDay,
               tier2DaysFrom,
               tier2DaysTo,
               tier2PricePerDay,
+              tier2Enabled,
               tier3DaysFrom,
               tier3PricePerDay,
+              tier3Enabled,
               currency,
               effectiveFrom: effectiveFromDate,
               effectiveUntil: effectiveUntilDate,

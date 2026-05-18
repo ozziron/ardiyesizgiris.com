@@ -2,10 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock prisma BEFORE importing the function under test.
 // vi.mock is hoisted, so the mock instance must be created via vi.hoisted.
-const { findFirstMock } = vi.hoisted(() => ({ findFirstMock: vi.fn() }));
+const { findFirstMock, findManySurchargeMock } = vi.hoisted(() => ({
+  findFirstMock: vi.fn(),
+  findManySurchargeMock: vi.fn(),
+}));
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     tariffRule: { findFirst: findFirstMock },
+    carrierSurcharge: { findMany: findManySurchargeMock },
   },
 }));
 
@@ -20,8 +24,11 @@ function tariff(overrides: Partial<{
   tier2DaysFrom: number;
   tier2DaysTo: number;
   tier2Price: number;
+  tier2Enabled: boolean;
   tier3DaysFrom: number;
   tier3Price: number;
+  tier3Enabled: boolean;
+  imoCargo: boolean;
   currency: string;
 }> = {}) {
   const o = {
@@ -31,8 +38,11 @@ function tariff(overrides: Partial<{
     tier2DaysFrom: 8,
     tier2DaysTo: 14,
     tier2Price: 100,
+    tier2Enabled: true,
     tier3DaysFrom: 15,
     tier3Price: 200,
+    tier3Enabled: true,
+    imoCargo: false,
     currency: "TRY",
     ...overrides,
   };
@@ -43,8 +53,11 @@ function tariff(overrides: Partial<{
     tier2DaysFrom: o.tier2DaysFrom,
     tier2DaysTo: o.tier2DaysTo,
     tier2PricePerDay: o.tier2Price,
+    tier2Enabled: o.tier2Enabled,
     tier3DaysFrom: o.tier3DaysFrom,
     tier3PricePerDay: o.tier3Price,
+    tier3Enabled: o.tier3Enabled,
+    imoCargo: o.imoCargo,
     currency: o.currency,
   };
 }
@@ -57,8 +70,22 @@ const baseInput = {
 };
 
 describe("calculateArdiye", () => {
+  const surcharge = (overrides: Partial<{
+    name: string; amount: number; currency: string; containerTypes: string[]; applyType: string;
+  }> = {}) => ({
+    name: "DTE Surcharge",
+    amount: 160,
+    currency: "USD",
+    containerTypes: ["20RF", "40RF"],
+    applyType: "PER_CONTAINER",
+    isActive: true,
+    ...overrides,
+  });
+
   beforeEach(() => {
     findFirstMock.mockReset();
+    findManySurchargeMock.mockReset();
+    findManySurchargeMock.mockResolvedValue([]);
   });
 
   it("Senaryo 1: gate-in inside muafiyet -> total_charge 0", async () => {
@@ -173,5 +200,160 @@ describe("calculateArdiye", () => {
   it("No matching tariff -> throws", async () => {
     findFirstMock.mockResolvedValue(null);
     await expect(calculateArdiye(baseInput)).rejects.toThrow(/tarife bulunamadı/);
+  });
+
+  // ── Surcharge tests (TICKET-042) ─────────────────────────────────
+
+  it("Surcharge matching container type returned separately, NOT merged into total_charge", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge()]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "20RF",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    // Gate-in inside muafiyet (free_days=7), tier total = 0.
+    // Surcharge ayri donulur, total_charge'a EKLENMEZ (currency mismatch riski).
+    expect(result.total_charge).toBe(0);
+    expect(result.surcharges.length).toBe(1);
+    expect(result.surcharges[0]).toMatchObject({ name: "DTE Surcharge", amount: 160, currency: "USD" });
+  });
+
+  it("Surcharge NOT matching container type is excluded", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge({ containerTypes: ["20RF", "40RF"] })]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "40DC",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(result.surcharges.length).toBe(0);
+    expect(result.total_charge).toBe(0);
+  });
+
+  it("Empty containerTypes surcharge applies to all container types (separate from total)", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge({ containerTypes: [] })]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "40DC",
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(result.surcharges.length).toBe(1);
+    // total_charge tier toplami; surcharge ayri.
+    expect(result.total_charge).toBe(0);
+  });
+
+  it("Planning mode returns surcharge info but does not add to charge", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    findManySurchargeMock.mockResolvedValue([surcharge()]);
+    const result = await calculateArdiye({
+      ...baseInput,
+      containerType: "20RF",
+    });
+    expect(result.total_charge).toBe(0);
+    expect(result.surcharges.length).toBe(1);
+    expect(result.surcharges[0].name).toBe("DTE Surcharge");
+  });
+
+  // ── IMO Cargo tests ──────────────────────────────────────────────
+
+  it("IMO cargo: imoCargo flag passed to tariff lookup", async () => {
+    findFirstMock.mockResolvedValue(tariff({ imoCargo: true }));
+    const result = await calculateArdiye({
+      ...baseInput,
+      imoCargo: true,
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    // findFirst should have been called with imoCargo: true
+    expect(findFirstMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ imoCargo: true }),
+      })
+    );
+    expect(result.free_days).toBe(7);
+  });
+
+  it("IMO cargo: defaults to false when not provided", async () => {
+    findFirstMock.mockResolvedValue(tariff());
+    await calculateArdiye({
+      ...baseInput,
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(findFirstMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ imoCargo: false }),
+      })
+    );
+  });
+
+  it("IMO cargo error message includes IMO label", async () => {
+    findFirstMock.mockResolvedValue(null);
+    await expect(
+      calculateArdiye({ ...baseInput, imoCargo: true })
+    ).rejects.toThrow(/IMO/);
+  });
+
+  // ── Esnek Tier tests ─────────────────────────────────────────────
+
+  it("Only tier 1 enabled: all days charged at tier 1 rate (open-ended)", async () => {
+    findFirstMock.mockResolvedValue(
+      tariff({
+        tier1Price: 50, // ücretli, muafiyet yok
+        tier2Enabled: false,
+        tier3Enabled: false,
+      })
+    );
+    const result = await calculateArdiye({
+      ...baseInput,
+      gateInDate: new Date("2026-06-13T00:00:00Z"),
+    });
+    // 11 days at port, no muafiyet (tier1Price > 0), all days tier 1
+    expect(result.total_days_at_port).toBe(11);
+    expect(result.free_days).toBe(0);
+    expect(result.total_charge).toBe(11 * 50); // 550
+    expect(result.charge_breakdown).toHaveLength(1);
+    expect(result.charge_breakdown[0]).toMatchObject({ tier: 1, days: 11, subtotal: 550 });
+  });
+
+  it("Only tier 1 enabled + muafiyet (price=0): all days free", async () => {
+    findFirstMock.mockResolvedValue(
+      tariff({
+        tier1Price: 0,
+        tier2Enabled: false,
+        tier3Enabled: false,
+      })
+    );
+    const result = await calculateArdiye({
+      ...baseInput,
+      gateInDate: new Date("2026-06-20T00:00:00Z"),
+    });
+    expect(result.free_days).toBe(7);
+    expect(result.total_charge).toBe(0);
+  });
+
+  it("Tier 1 + Tier 2 enabled, Tier 3 disabled: Tier 2 open-ended", async () => {
+    findFirstMock.mockResolvedValue(
+      tariff({
+        tier1Price: 0,          // muafiyet 1-7
+        tier2DaysFrom: 8,
+        tier2DaysTo: 14,
+        tier2Price: 100,
+        tier2Enabled: true,
+        tier3Enabled: false,
+      })
+    );
+    const result = await calculateArdiye({
+      ...baseInput,
+      gateInDate: new Date("2026-06-08T00:00:00Z"),
+    });
+    // 16 days: 7 free (tier1), 9 charged at tier2 (open-ended)
+    expect(result.total_days_at_port).toBe(16);
+    expect(result.free_days).toBe(7);
+    expect(result.chargeable_days).toBe(9);
+    expect(result.total_charge).toBe(9 * 100); // 900
+    expect(result.charge_breakdown).toHaveLength(2);
+    expect(result.charge_breakdown[0]).toMatchObject({ tier: 1, days: 7, subtotal: 0 });
+    expect(result.charge_breakdown[1]).toMatchObject({ tier: 2, days: 9, subtotal: 900 });
   });
 });

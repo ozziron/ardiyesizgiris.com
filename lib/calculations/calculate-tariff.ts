@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/prisma"
 import { differenceInCalendarDays } from "date-fns"
-import type { CalculationInput, CalculationResult } from "@/types/calculation"
+import type { CalculationInput, CalculationResult, CarrierSurchargeItem } from "@/types/calculation"
 
 function dayRangeLength(from: number, to: number) {
   return Math.max(0, to - from + 1)
@@ -18,6 +18,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
       portId: input.portId,
       shippingCompanyId: input.shippingCompanyId,
       containerType: input.containerType,
+      imoCargo: input.imoCargo ?? false,
       isActive: true,
       effectiveFrom: { lte: effectiveDate },
       OR: [
@@ -29,18 +30,50 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   })
 
   if (!tariff) {
-    throw new Error("Bu liman ve hat kombinasyonu için tarife bulunamadı")
+    const imoLabel = input.imoCargo ? " (IMO)" : ""
+    throw new Error(`Bu liman ve hat kombinasyonu için${imoLabel} tarife bulunamadı`)
   }
 
-  const tier1Price = Number(tariff.tier1PricePerDay)
-  const tier2Price = Number(tariff.tier2PricePerDay)
-  const tier3Price = Number(tariff.tier3PricePerDay)
+  // Step 1b: Query applicable carrier surcharges
+  const surcharges = await prisma.carrierSurcharge.findMany({
+    where: {
+      shippingCompanyId: input.shippingCompanyId,
+      isActive: true,
+    },
+  })
 
-  const tier1Days = dayRangeLength(tariff.tier1DaysFrom, tariff.tier1DaysTo)
-  const tier2Days = dayRangeLength(tariff.tier2DaysFrom, tariff.tier2DaysTo)
+  const applicableSurcharges: CarrierSurchargeItem[] = []
+  for (const s of surcharges) {
+    if (s.containerTypes.length > 0 && !s.containerTypes.includes(input.containerType)) {
+      continue
+    }
+    applicableSurcharges.push({
+      name: s.name,
+      description: s.description,
+      amount: Number(s.amount),
+      currency: s.currency,
+      apply_type: s.applyType,
+    })
+  }
+
+  // Build enabled tier list. Tier 1 is always mandatory.
+  // The last enabled tier is open-ended (no upper day limit).
+  type TierDef = { tier: number; from: number; to: number | null; price: number }
+  const enabledTiers: TierDef[] = [
+    { tier: 1, from: tariff.tier1DaysFrom, to: tariff.tier1DaysTo, price: Number(tariff.tier1PricePerDay) },
+  ]
+  if (tariff.tier2Enabled) {
+    enabledTiers.push({ tier: 2, from: tariff.tier2DaysFrom, to: tariff.tier2DaysTo, price: Number(tariff.tier2PricePerDay) })
+  }
+  if (tariff.tier3Enabled) {
+    enabledTiers.push({ tier: 3, from: tariff.tier3DaysFrom, to: null, price: Number(tariff.tier3PricePerDay) })
+  }
+
+  const tier1Price = enabledTiers[0]!.price
+  const tier1Range = tariff.tier1DaysTo - tariff.tier1DaysFrom + 1
 
   // Free time: Tier 1 ücretsizse muafiyet penceresi Tier 1 aralığının uzunluğudur.
-  const free_days = tier1Price === 0 ? tier1Days : 0
+  const free_days = tier1Price === 0 ? tier1Range : 0
 
   // Step 2: Calculate free until date (departure - free_days + 1)
   const free_until_date = new Date(effectiveDate)
@@ -57,6 +90,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
       total_charge: 0,
       currency: tariff.currency,
       charge_breakdown: [],
+      surcharges: applicableSurcharges,
       timeline: {
         departure: input.departureDate,
         free_until: free_until_date,
@@ -79,9 +113,8 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   const free_period_days = Math.min(total_days_at_port, free_days)
   const chargeable_days = Math.max(0, total_days_at_port - free_period_days)
 
-  // Step 7: Tier breakdown across ALL days at port. Tier 1 subtotal is 0
-  // when it represents muafiyet, but we still surface the row so consumers
-  // (result-card, PDF, email) can display "Muafiyet Dönemi: N gün".
+  // Step 7: Tier breakdown across ALL days at port.
+  // Iterate enabled tiers; the last enabled tier is open-ended.
   let total_charge = 0
   const charge_breakdown: Array<{
     tier: number
@@ -91,31 +124,27 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
   }> = []
   let remaining_days = total_days_at_port
 
-  // Tier 1 (may be muafiyet)
-  if (remaining_days > 0) {
-    const days = Math.min(remaining_days, tier1Days)
-    const subtotal = days * tier1Price
+  for (let i = 0; i < enabledTiers.length; i++) {
+    if (remaining_days <= 0) break
+    const td = enabledTiers[i]!
+    const isLast = i === enabledTiers.length - 1
+    let days: number
+    if (isLast) {
+      days = remaining_days
+    } else {
+      const rangeLen = dayRangeLength(td.from, td.to!)
+      days = Math.min(remaining_days, rangeLen)
+    }
+    const subtotal = days * td.price
     total_charge += subtotal
-    charge_breakdown.push({ tier: 1, days, price_per_day: tier1Price, subtotal })
+    charge_breakdown.push({ tier: td.tier, days, price_per_day: td.price, subtotal })
     remaining_days -= days
   }
 
-  // Tier 2
-  if (remaining_days > 0) {
-    const days = Math.min(remaining_days, tier2Days)
-    const subtotal = days * tier2Price
-    total_charge += subtotal
-    charge_breakdown.push({ tier: 2, days, price_per_day: tier2Price, subtotal })
-    remaining_days -= days
-  }
-
-  // Tier 3
-  if (remaining_days > 0) {
-    const days = remaining_days
-    const subtotal = days * tier3Price
-    total_charge += subtotal
-    charge_breakdown.push({ tier: 3, days, price_per_day: tier3Price, subtotal })
-  }
+  // NOT: applicableSurcharges total_charge'a EKLENMEZ. Sebep: (1) farkli
+  // currency'lerin matematiksel toplanmasi yanlis (TRY tier + USD surcharge),
+  // (2) tier breakdown'da satir gozukmedigi icin kullanici "mukerrer" algilar.
+  // Surcharges UI/PDF/email'de ayri bolum olarak gosterilir.
 
   return {
     free_days,
@@ -126,6 +155,7 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     total_charge,
     currency: tariff.currency,
     charge_breakdown,
+    surcharges: applicableSurcharges,
     timeline: {
       departure: input.departureDate,
       free_until: free_until_date,

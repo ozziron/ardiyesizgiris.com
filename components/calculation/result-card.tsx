@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowRight, FileText } from "lucide-react"
-import type { ChargeBreakdownItem } from "@/types/calculation"
+import type { ChargeBreakdownItem, CarrierSurchargeItem } from "@/types/calculation"
 import { formatTR, formatMoney } from "@/lib/format"
 import { CalculationTimeline } from "./timeline"
 import { CostBreakdownChart } from "./cost-chart"
@@ -18,6 +18,7 @@ interface SharedProps {
   freeUntilDate: Date | string
   departureDate: Date | string
   warning?: string
+  surcharges?: CarrierSurchargeItem[]
   /** Action panel (PDF / email) rendered at the bottom of the card. */
   children?: React.ReactNode
 }
@@ -130,7 +131,7 @@ function DateHero({ freeUntilDate }: { freeUntilDate: Date | string }) {
 }
 
 export function PlanningResultCard(props: PlanningResultCardProps) {
-  const { freeDays, freeUntilDate } = props
+  const { freeDays, freeUntilDate, surcharges } = props
   return (
     <ResultCardShell
       {...props}
@@ -147,6 +148,28 @@ export function PlanningResultCard(props: PlanningResultCardProps) {
           </div>
         </>
       }
+      extras={
+        surcharges && surcharges.length > 0 ? (
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+              Hat Ek Ücretleri (Bu konteyner tipine uygulanır)
+            </p>
+            {surcharges.map((s, idx) => (
+              <div key={idx} className="mt-1.5">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <span className="font-medium">{s.name}:</span>{" "}
+                  {formatMoney(s.amount, s.currency)}
+                </p>
+                {s.description ? (
+                  <p className="mt-0.5 text-xs italic leading-relaxed text-amber-700/80 dark:text-amber-300/70">
+                    {s.description}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : undefined
+      }
     />
   )
 }
@@ -160,10 +183,12 @@ export function CostResultCard(props: CostResultCardProps) {
     totalDaysAtPort,
     chargeBreakdown,
     currency = "TRY",
+    surcharges,
   } = props
   const fmt = (n: number) => formatMoney(n, currency)
   const showBreakdown = totalCharge > 0 && chargeBreakdown && chargeBreakdown.length > 0
   const free = totalCharge === 0
+  const showSurcharges = surcharges && surcharges.length > 0
 
   return (
     <ResultCardShell
@@ -243,6 +268,57 @@ export function CostResultCard(props: CostResultCardProps) {
                       </td>
                       <td className="px-3 py-2.5 text-right tabular-nums text-emerald-700 dark:text-emerald-300">
                         {fmt(totalCharge)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {showSurcharges && (
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-amber-600" />
+                <p className="text-sm font-semibold">Hat Ek Ücretleri (Surcharge)</p>
+                <span className="ml-auto h-px flex-1 bg-amber-100 dark:bg-amber-900/40" />
+              </div>
+              <div className="overflow-hidden rounded-xl border border-amber-200 dark:border-amber-800">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-amber-600 text-white">
+                      <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider">Açıklama</th>
+                      <th className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider">Tutar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {surcharges!.map((s, idx) => (
+                      <tr
+                        key={idx}
+                        className={idx % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/40"}
+                      >
+                        <td className="px-3 py-2 align-top">
+                          <div className="font-medium">{s.name}</div>
+                          {s.description ? (
+                            <div className="mt-1 text-xs italic leading-relaxed text-muted-foreground">
+                              {s.description}
+                            </div>
+                          ) : null}
+                        </td>
+                        <td className="px-3 py-2 text-right align-top font-semibold tabular-nums">
+                          {formatMoney(s.amount, s.currency)}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-amber-50 font-semibold dark:bg-amber-950/40">
+                      <td className="px-3 py-2.5 uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                        Surcharge Toplam
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-amber-700 dark:text-amber-300">
+                        {formatMoney(
+                          surcharges!.reduce((sum, s) => sum + s.amount, 0),
+                          surcharges![0].currency
+                        )}
                       </td>
                     </tr>
                   </tbody>

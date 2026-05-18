@@ -20,14 +20,17 @@ interface TariffRuleListItem {
   port: { id: string; name: string; city: string | null }
   shippingCompany: { id: string; name: string }
   containerType: string
+  imoCargo?: boolean
   tier1DaysFrom: number
   tier1DaysTo: number
   tier1PricePerDay: number | string
   tier2DaysFrom: number
   tier2DaysTo: number
   tier2PricePerDay: number | string
+  tier2Enabled?: boolean
   tier3DaysFrom: number
   tier3PricePerDay: number | string
+  tier3Enabled?: boolean
   currency: string
   isActive: boolean
 }
@@ -355,7 +358,14 @@ export default function TariffRulesPage() {
                           return (
                             <Fragment key={rule.id}>
                               <TableRow>
-                                <TableCell className="font-medium">{rule.containerType}</TableCell>
+                                <TableCell className="font-medium">
+                                  {rule.containerType}
+                                  {rule.imoCargo && (
+                                    <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
+                                      IMO
+                                    </span>
+                                  )}
+                                </TableCell>
                                 <TableCell>
                                   <span
                                     className={`rounded-full px-2 py-1 text-xs font-medium ${

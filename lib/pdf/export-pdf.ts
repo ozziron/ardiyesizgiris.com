@@ -24,6 +24,13 @@ export interface CalculationPDFData {
     price_per_day: number
     subtotal: number
   }>
+  surcharges?: Array<{
+    name: string
+    description?: string | null
+    amount: number
+    currency: string
+    apply_type: string
+  }>
 }
 
 const CURRENCY_SYMBOL: Record<string, string> = {
@@ -350,6 +357,88 @@ const drawTierTable = (
  * Amber-bordered notice card for warnings — visually distinct from
  * the emerald hero so users notice it without alarm.
  */
+const drawSurchargeTable = (
+  doc: jsPDF,
+  surcharges: NonNullable<CalculationPDFData["surcharges"]>,
+  y: number
+): number => {
+  if (!surcharges || surcharges.length === 0) return y
+
+  const headerH = 8
+  const baseRowH = 7
+  const descLineH = 4
+  const totalRowH = 9
+  const textMaxWidth = PAGE.CONTENT_WIDTH - 30
+
+  // Her satirin yuksekligini description'a gore on-hesapla
+  const rowHeights = surcharges.map((s) => {
+    if (!s.description) return baseRowH
+    const lines = doc.splitTextToSize(s.description, textMaxWidth) as string[]
+    return baseRowH + lines.length * descLineH + 1.5
+  })
+  const tableHeight = headerH + rowHeights.reduce((a, b) => a + b, 0) + totalRowH
+
+  // Outer border
+  setDraw(doc, [252, 211, 77]) // amber-300
+  doc.setLineWidth(0.3)
+  doc.roundedRect(PAGE.MARGIN_X, y, PAGE.CONTENT_WIDTH, tableHeight, 2, 2, "S")
+
+  // Header
+  setFill(doc, [217, 119, 6]) // amber-600
+  doc.roundedRect(PAGE.MARGIN_X, y, PAGE.CONTENT_WIDTH, headerH, 2, 2, "F")
+  doc.rect(PAGE.MARGIN_X, y + headerH - 2, PAGE.CONTENT_WIDTH, 2, "F")
+
+  doc.setFont(FONT_FAMILY, "bold")
+  doc.setFontSize(9)
+  doc.setTextColor(255, 255, 255)
+  doc.text("Açıklama", PAGE.MARGIN_X + 4, y + 5.5)
+  doc.text("Tutar", PAGE.WIDTH - PAGE.MARGIN_X - 4, y + 5.5, { align: "right" })
+
+  // Body rows
+  let rowY = y + headerH + 5
+  surcharges.forEach((s, idx) => {
+    const thisRowH = rowHeights[idx]
+    if (idx % 2 === 1) {
+      setFill(doc, COLORS.SURFACE)
+      doc.rect(PAGE.MARGIN_X + 0.3, rowY - 4.5, PAGE.CONTENT_WIDTH - 0.6, thisRowH, "F")
+    }
+    const fmts = moneyFormatter(s.currency)
+    doc.setFont(FONT_FAMILY, "normal")
+    doc.setFontSize(9.5)
+    setText(doc, COLORS.TEXT_PRIMARY)
+    doc.text(s.name, PAGE.MARGIN_X + 4, rowY)
+    doc.text(fmts(s.amount), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY, { align: "right" })
+
+    if (s.description) {
+      const lines = doc.splitTextToSize(s.description, textMaxWidth) as string[]
+      doc.setFont(FONT_FAMILY, "italic")
+      doc.setFontSize(8)
+      setText(doc, COLORS.TEXT_MUTED)
+      lines.forEach((line, li) => {
+        doc.text(line, PAGE.MARGIN_X + 4, rowY + baseRowH - 2 + li * descLineH)
+      })
+    }
+    rowY += thisRowH
+  })
+
+  // Total row
+  setFill(doc, COLORS.AMBER_LIGHT)
+  doc.rect(PAGE.MARGIN_X + 0.3, rowY - 4.5, PAGE.CONTENT_WIDTH - 0.6, totalRowH, "F")
+  setDraw(doc, COLORS.AMBER_BORDER)
+  doc.setLineWidth(0.4)
+  doc.line(PAGE.MARGIN_X, rowY - 4.5, PAGE.WIDTH - PAGE.MARGIN_X, rowY - 4.5)
+
+  const totalSurcharge = surcharges.reduce((sum, s) => sum + s.amount, 0)
+  const fmtsFirst = moneyFormatter(surcharges[0].currency)
+  doc.setFont(FONT_FAMILY, "bold")
+  doc.setFontSize(10)
+  setText(doc, COLORS.AMBER_TEXT)
+  doc.text("SURCHARGE TOPLAM", PAGE.MARGIN_X + 4, rowY + 1)
+  doc.text(fmtsFirst(totalSurcharge), PAGE.WIDTH - PAGE.MARGIN_X - 4, rowY + 1, { align: "right" })
+
+  return y + tableHeight + 8
+}
+
 const drawWarningCard = (doc: jsPDF, message: string, y: number): number => {
   const padding = 5
   const lines = doc.splitTextToSize(message, PAGE.CONTENT_WIDTH - padding * 2 - 8)
@@ -478,6 +567,12 @@ export function generateCalculationPDF(data: CalculationPDFData): string {
   if (!isPlanning && data.totalCharge > 0 && data.chargeBreakdown && data.chargeBreakdown.length > 0) {
     y = drawSectionTitle(doc, "Masraf Kırılımı", y)
     y = drawTierTable(doc, data.chargeBreakdown, data.totalCharge, y, currency)
+  }
+
+  // Surcharge table — cost mode when surcharges present
+  if (!isPlanning && data.surcharges && data.surcharges.length > 0) {
+    y = drawSectionTitle(doc, "Hat Ek Ücretleri (Surcharge)", y)
+    y = drawSurchargeTable(doc, data.surcharges, y)
   }
 
   // Warning (cost mode edge cases like gate-in before departure)
