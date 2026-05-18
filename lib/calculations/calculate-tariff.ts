@@ -139,7 +139,10 @@ export async function calculateArdiye(input: CalculationInput): Promise<Calculat
     charge_breakdown.push({ tier: 3, days, price_per_day: tier3Price, subtotal })
   }
 
-  total_charge += applicableSurcharges.reduce((sum, s) => sum + s.amount, 0)
+  // NOT: applicableSurcharges total_charge'a EKLENMEZ. Sebep: (1) farkli
+  // currency'lerin matematiksel toplanmasi yanlis (TRY tier + USD surcharge),
+  // (2) tier breakdown'da satir gozukmedigi icin kullanici "mukerrer" algilar.
+  // Surcharges UI/PDF/email'de ayri bolum olarak gosterilir.
 
   return {
     free_days,

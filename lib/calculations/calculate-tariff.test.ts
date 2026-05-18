@@ -195,7 +195,7 @@ describe("calculateArdiye", () => {
 
   // ── Surcharge tests (TICKET-042) ─────────────────────────────────
 
-  it("Surcharge matching container type added to total_charge in cost mode", async () => {
+  it("Surcharge matching container type returned separately, NOT merged into total_charge", async () => {
     findFirstMock.mockResolvedValue(tariff());
     findManySurchargeMock.mockResolvedValue([surcharge()]);
     const result = await calculateArdiye({
@@ -203,9 +203,9 @@ describe("calculateArdiye", () => {
       containerType: "20RF",
       gateInDate: new Date("2026-06-20T00:00:00Z"),
     });
-    // Gate-in inside muafiyet (free_days=7), so tier total should be 0.
-    // Surcharge adds 160 USD on top.
-    expect(result.total_charge).toBe(160);
+    // Gate-in inside muafiyet (free_days=7), tier total = 0.
+    // Surcharge ayri donulur, total_charge'a EKLENMEZ (currency mismatch riski).
+    expect(result.total_charge).toBe(0);
     expect(result.surcharges.length).toBe(1);
     expect(result.surcharges[0]).toMatchObject({ name: "DTE Surcharge", amount: 160, currency: "USD" });
   });
@@ -222,7 +222,7 @@ describe("calculateArdiye", () => {
     expect(result.total_charge).toBe(0);
   });
 
-  it("Empty containerTypes surcharge applies to all container types", async () => {
+  it("Empty containerTypes surcharge applies to all container types (separate from total)", async () => {
     findFirstMock.mockResolvedValue(tariff());
     findManySurchargeMock.mockResolvedValue([surcharge({ containerTypes: [] })]);
     const result = await calculateArdiye({
@@ -231,7 +231,8 @@ describe("calculateArdiye", () => {
       gateInDate: new Date("2026-06-20T00:00:00Z"),
     });
     expect(result.surcharges.length).toBe(1);
-    expect(result.total_charge).toBe(160);
+    // total_charge tier toplami; surcharge ayri.
+    expect(result.total_charge).toBe(0);
   });
 
   it("Planning mode returns surcharge info but does not add to charge", async () => {
