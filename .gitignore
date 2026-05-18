@@ -53,3 +53,4 @@ Thumbs.db
 test-*.json
 e2e-*.json
 *.log
+.env*.local
