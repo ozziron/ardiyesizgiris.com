@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import * as Sentry from "@sentry/nextjs"
 import { Ship } from "lucide-react"
 
 export default function Error({
@@ -11,7 +12,11 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error(error)
+    // Sentry'ye hatayı bildir, ek bağlam ile
+    Sentry.captureException(error, {
+      tags: { boundary: "app-error" },
+      extra: { digest: error.digest },
+    })
   }, [error])
 
   return (
