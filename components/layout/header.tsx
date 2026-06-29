@@ -34,7 +34,7 @@ export default function Header() {
         "fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm py-3",
       )}
     >
-      <div className="container mx-auto px-4 grid grid-cols-3 items-center">
+      <div className="container mx-auto px-3 sm:px-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
         {/* Left: Navigation Dropdown */}
         <div className="flex items-center">
           <DropdownMenu>
