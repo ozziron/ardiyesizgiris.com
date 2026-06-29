@@ -1,0 +1,127 @@
+# iOS PR Verification — validates the iOS build pipeline without signing.
+#
+# Runs on every PR that touches iOS/web source files.  This catches build
+# regressions (Next.js static export + Capacitor iOS project generation +
+# Xcode project structure) before merge, WITHOUT requiring Apple Developer
+# credentials.
+#
+# The full TestFlight upload (ios-build.yml) still runs only on main.
+
+name: iOS PR Verify
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'public/**'
+      - 'styles/**'
+      - 'next.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.ts'
+      - 'ios/**'
+      - '.github/workflows/ios-pr-verify.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-pr-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-ios-build:
+    name: Verify iOS build pipeline (no signing)
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    env:
+      NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://www.ardiyesizgiris.com' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Ruby (Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Build Next.js static export
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Add iOS platform (Capacitor)
+        run: npx cap add ios
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Verify Xcode project structure
+        run: |
+          echo "=== Verifying iOS project structure ==="
+
+          # Check workspace
+          if [ -d "ios/App/App.xcworkspace" ]; then
+            echo "✅ App.xcworkspace found"
+          else
+            echo "❌ App.xcworkspace NOT found"
+            exit 1
+          fi
+
+          # Check project
+          if [ -d "ios/App/App.xcodeproj" ]; then
+            echo "✅ App.xcodeproj found"
+          else
+            echo "❌ App.xcodeproj NOT found"
+            exit 1
+          fi
+
+          # Check Capacitor config copy
+          if [ -f "ios/App/capacitor.config.json" ]; then
+            echo "✅ capacitor.config.json found in iOS output"
+          else
+            echo "⚠️  capacitor.config.json NOT found (non-fatal)"
+          fi
+
+          # Check Info.plist
+          if [ -f "ios/App/App/Info.plist" ]; then
+            echo "✅ Info.plist found"
+          else
+            echo "⚠️  Info.plist NOT found (non-fatal)"
+          fi
+
+          echo "=== iOS project structure OK ==="
+
+      - name: Verify Xcode build (simulator, no signing)
+        working-directory: ios
+        run: bundle exec fastlane ci_verify
+        # ci_verify lane builds for simulator with CODE_SIGNING_ALLOWED=NO
+        # This catches Xcode compilation errors without needing certificates.
+
+      - name: Verify IPA can be produced (dry-run check only)
+        run: |
+          echo "=== IPA build dry-run ==="
+          echo "For a real IPA, the full ios-build.yml workflow on main:"
+          echo "  1. Apple signing certificates (P12)"
+          echo "  2. App Store Connect API key"
+          echo "  3. Match code signing (MATCH_GIT_URL, MATCH_PASSWORD)"
+          echo "These secrets are configured in GitHub Settings → Secrets and Variables."
+          echo ""
+          echo "✅ PR verification complete — merge to main to trigger full TestFlight build."

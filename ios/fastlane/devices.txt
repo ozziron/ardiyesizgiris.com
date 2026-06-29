@@ -1,0 +1,20 @@
+# fastlane cihaz kayıt dosyası
+# Apple Developer → Devices sayfasına yeni test cihazı UDID'leri eklemek için kullanılır.
+#
+# Format: Device ID (UDID)  Cihaz Adı
+# Örnek:
+# 00008030-0012345678901234  iPhone 15 Pro — Ozdem
+#
+# UDID bulma:
+#   macOS: Finder → iPhone seç → cihaz adına tıkla → Identifier görünür
+#   Windows: iTunes → cihaz özet sayfası → Seri Numarasına tıkla → Identifier görünür
+#   Xcode: Window → Devices and Simulators → device → Identifier
+#
+# Cihazları ekledikten sonra:
+#   bundle exec fastlane register_devices
+#
+# Şu an için boş — ilk test cihazı UDID'lerini buraya ekleyin.
+
+#-----------------------
+# İç Test Cihazları
+#-----------------------

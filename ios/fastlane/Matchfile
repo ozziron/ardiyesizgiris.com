@@ -1,0 +1,60 @@
+# Fastlane Match — ardiyesizgiris.com iOS Code Signing
+#
+# Match stores code-signing identities (certificates + private keys) and
+# provisioning profiles in an encrypted git repository.  One source of
+# truth shared across the team (CI included).
+#
+# Setup (first time, macOS required):
+#   1. Create a **private** git repo for Match storage.
+#   2. Set MATCH_GIT_URL below (or export the env var).
+#   3. Generate a strong MATCH_PASSWORD (encrypts the repo contents).
+#   4. Run:  bundle exec fastlane match appstore
+#      This creates the distribution certificate & App Store profile.
+#   5. For development builds:  bundle exec fastlane match development
+#
+# CI secrets required (add to GitHub → Settings → Secrets and variables):
+#   APPSTORE_CONNECT_KEY_ID      — App Store Connect API Key ID
+#   APPSTORE_CONNECT_ISSUER_ID   — App Store Connect Issuer ID
+#   APPSTORE_CONNECT_API_KEY     — Base64-encoded .p8 key file
+#   MATCH_PASSWORD               — Decryption passphrase for Match repo
+#   MATCH_GIT_URL                — Private git repo URL (HTTPS + token)
+#
+# Ref: https://docs.fastlane.tools/actions/match/
+
+# ---- Storage ----
+storage_mode("git")
+
+# CI-friendly: shallow clone saves time on large repos.
+# When a single branch holds certs, clone_branch_directly skips the
+# full history fetch.
+git_branch("main")
+shallow_clone(true)
+clone_branch_directly(true)
+
+# ---- Signing type ----
+# "appstore" = App Store + TestFlight distribution
+# "development" = local dev builds (Xcode auto-managed signing is fine
+#                  for solo dev; use Match when the team grows)
+type("appstore")
+
+# ---- App identifiers ----
+# Bundle ID from capacitor.config.ts → appId
+app_identifier("com.ardiyesizgiris.web")
+
+# ---- Apple Developer account ----
+# Leave empty — Fastlane reads APPSTORE_CONNECT_KEY_ID /
+# APPSTORE_CONNECT_ISSUER_ID from the environment (CI) or from the
+# App Store Connect API key file on the Mac that runs fastlane match.
+username("")
+team_id("") # Set after Apple Developer enrollment (e.g. "ABCDEF1234")
+
+# ---- Behavior ----
+# On local machines: regenerate profiles when new devices are added
+# to the Apple Developer account.
+force_for_new_devices(false)
+
+# Keep the Match repo readable — commit a README with helpful info.
+skip_docs(false)
+
+# Verbose logging during CI debugging.
+verbose(false)
