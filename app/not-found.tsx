@@ -1,6 +1,17 @@
 import Link from "next/link"
 import { Ship } from "lucide-react"
 
+/**
+ * Global 404 — statik olarak build sırasında prerender edilir.
+ *
+ * ⚠️  BU SAYFA SAF SERVER COMPONENT OLARAK KALMALIDIR.
+ *     "use client", useContext, veya client-side hook kullanan
+ *     bileşenler eklenirse /_not-found prerender'ı patlar.
+ *     İhtiyaç halinde client etkileşimi için ayrı bir client
+ *     alt bileşen oluşturup Suspense ile sarın.
+ *
+ * @see ARDA-16 — build prerender güvenliği
+ */
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">

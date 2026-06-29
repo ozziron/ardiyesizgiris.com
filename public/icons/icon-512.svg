@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" fill="none" viewBox="0 0 512 512">
+  <!-- Ardiyesiz Giriş — B2B lojistik SaaS app icon -->
+  <!-- Emerald brand background -->
+  <rect width="512" height="512" rx="112" fill="#10b981"/>
+
+  <!--
+    Stylized port gate + container mark.
+    A bold arch (gate/giriş) with a container block passing through it.
+    White on emerald for maximum contrast and clean silhouette at any size.
+  -->
+  <g transform="translate(80, 88)">
+    <!-- Arch / gate pillars and beam — the "port entry" motif -->
+    <!-- Left pillar -->
+    <rect x="0" y="56" width="52" height="224" rx="16" fill="#fff"/>
+    <!-- Right pillar -->
+    <rect x="300" y="56" width="52" height="224" rx="16" fill="#fff"/>
+    <!-- Top arch beam -->
+    <rect x="0" y="0" width="352" height="56" rx="16" fill="#fff"/>
+
+    <!-- Container block inside gate — sits centered, conveys "cargo through port" -->
+    <rect x="80" y="104" width="192" height="128" rx="20" fill="#10b981"/>
+
+    <!-- Container vertical corrugation (3 lines — reads at small sizes) -->
+    <rect x="110" y="116" width="12" height="104" rx="6" fill="#fff"/>
+    <rect x="170" y="116" width="12" height="104" rx="6" fill="#fff"/>
+    <rect x="230" y="116" width="12" height="104" rx="6" fill="#fff"/>
+  </g>
+</svg>
