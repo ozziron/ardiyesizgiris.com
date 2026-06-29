@@ -253,6 +253,16 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
+model StripeEvent {
+  id             String   @id @default(uuid())
+  stripeEventId  String   @unique @map("stripe_event_id")
+  eventType      String   @map("event_type")
+  processedAt    DateTime @default(now()) @map("processed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("stripe_events")
+}
+
 enum ExportType {
   PDF
   EMAIL
