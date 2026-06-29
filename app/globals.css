@@ -24,6 +24,13 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 160 84% 39%;
     --radius: 0.5rem;
+    /* Safe-area insets — 0px fallback for non-notch devices */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    /* Bottom nav height — referenced by layout components */
+    --bottom-nav-height: 56px;
   }
 
   .dark {
@@ -155,4 +162,80 @@ body[style*="padding-right"],
 body[style*="margin-right"] {
   margin-right: 0 !important;
   padding-right: 0 !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Safe-area utility classes                                          */
+/* ------------------------------------------------------------------ */
+
+/* Top padding that accounts for the device notch / status bar */
+.pt-safe {
+  padding-top: var(--safe-area-inset-top);
+}
+
+/* Bottom padding that accounts for the home indicator */
+.pb-safe {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+/* Left / right safe area padding */
+.pl-safe {
+  padding-left: var(--safe-area-inset-left);
+}
+.pr-safe {
+  padding-right: var(--safe-area-inset-right);
+}
+
+/*
+  Minimum bottom padding: bottom nav height + home indicator.
+  Use this on <main> or the outermost content wrapper on mobile
+  routes that sit above the bottom tab bar.
+*/
+.pb-safe-nav {
+  padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-inset-bottom));
+}
+
+/* ------------------------------------------------------------------ */
+/* Touch target helpers                                                */
+/* ------------------------------------------------------------------ */
+
+/*
+  Ensures an element meets the 44×44 px WCAG 2.1 Level AAA minimum
+  touch target. Use on icon-only buttons, social links, and small
+  interactive elements.
+*/
+.touch-target-min {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/*
+  Use on touch-friendly icon wrappers — keeps the visual icon small
+  (e.g. 20×20) while the clickable area spans 44×44 via padding.
+*/
+.touch-target-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Offline indicator animation                                         */
+/* ------------------------------------------------------------------ */
+
+@keyframes offline-slide-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-offline-slide-in {
+  animation: offline-slide-in 250ms ease-out;
 }

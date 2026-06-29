@@ -201,4 +201,92 @@ IMO yük taşıyan konteynerler için **ardiye ücretleri genellikle daha yükse
 Gümrük işlemleri, **ardiyesiz giriş hesaplamasında** kritik bir zamanlama faktörüdür. Gümrük onayı alınmadan konteyner gemiye yüklenemez; bu nedenle konteynerin limana giriş zamanlaması gümrük süreciyle uyumlu olmalıdır.`,
     relatedTerms: ["liman", "konteyner", "konsimento"],
   },
+  {
+    slug: "gate-in",
+    title: "Gate-In",
+    description:
+      "Gate-In nedir? Konteyner liman giriş işlemi nasıl yapılır? Gate-In'in ardiyesiz giriş hesaplamasındaki önemi.",
+    definition: `**Gate-In**, bir konteynerin liman sahasına resmi olarak giriş yaptığı anı ifade eden lojistik terimdir.
+
+Gate-In işlemi sırasında:
+1. Konteyner liman kapısından giriş yapar
+2. Konteyner numarası ve mühür kontrolü yapılır
+3. Konteyner hasar tespiti gerçekleştirilir
+4. Konteyner, gemi yükleme sahasına (CY) alınır
+
+**Gate-In'in ardiyesiz giriş hesaplamasındaki önemi:**
+- Ardiye süresi, Gate-In tarihinden itibaren işlemeye başlar
+- Serbest günler Gate-In tarihi esas alınarak hesaplanır
+- Gate-In tarihi ile gemi ETD'si arasındaki gün farkı = toplam bekleme süresi
+- Bekleme süresi > serbest gün ise ardiye ücreti tahakkuk eder
+
+Doğru Gate-In zamanlaması, ardiye maliyetlerini minimize etmenin en kritik adımıdır.`,
+    relatedTerms: ["ardiyesiz-giris", "ardiye", "gate-out", "serbest-gun"],
+  },
+  {
+    slug: "gate-out",
+    title: "Gate-Out",
+    description:
+      "Gate-Out nedir? Konteyner liman çıkış işlemi nasıl yapılır? Gate-Out ve detention ilişkisi.",
+    definition: `**Gate-Out**, bir konteynerin liman sahasından resmi olarak çıkış yaptığı anı ifade eden lojistik terimdir.
+
+Gate-Out işlemi:
+1. İthalatçı veya forwarder konteyneri teslim alır
+2. Liman çıkış evrakları kontrol edilir
+3. Konteyner liman kapısından çıkış yapar
+4. Çıkış kaydı terminal işletim sistemine işlenir
+
+**Gate-Out ve Detention İlişkisi:**
+- Detention süresi, Gate-Out tarihinden itibaren başlar
+- Konteynerin Gate-Out'tan sonra boş olarak iade edilmesi gerekir
+- İade süresi detention serbest günlerini aşarsa detention ücreti tahakkuk eder
+- Gate-Out tarihi, demuraj ve detention arasındaki sınırı belirler`,
+    relatedTerms: ["gate-in", "detention", "demuraj", "ardiye"],
+  },
+  {
+    slug: "etd-eta",
+    title: "ETD ve ETA",
+    description:
+      "ETD ve ETA nedir? Tahmini kalkış ve varış zamanı. Konteyner taşımacılığında ETD ve ETA'nın önemi.",
+    definition: `**ETD (Estimated Time of Departure)**, geminin limandan tahmini kalkış zamanını; **ETA (Estimated Time of Arrival)**, geminin varış limanına tahmini varış zamanını ifade eder.
+
+**ETD (Tahmini Kalkış):**
+- Konteyner ihracat operasyonlarında planlamanın merkezinde ETD yer alır
+- Gate-In son tarihi, ETD'den geriye doğru hesaplanır
+- Gümrük işlemleri ETD'den önce tamamlanmış olmalıdır
+- ETD değişiklikleri (delay) ardiye maliyetlerini doğrudan etkiler
+
+**ETA (Tahmini Varış):**
+- İthalat operasyonlarında konteynerin ne zaman limana ulaşacağını belirtir
+- Gümrükleme ve dahiliye nakliyesi planlaması ETA'ya göre yapılır
+- ETA gecikmeleri tedarik zincirinde domino etkisi yaratabilir
+
+**Operasyonel İpucu:** ETD değişikliklerini yakından takip edin. Geminin 2-3 gün gecikmesi, konteyner başına yüzlerce dolar ek ardiye maliyeti doğurabilir.`,
+    relatedTerms: ["gate-in", "gate-out", "ardiye", "konsimento"],
+  },
+  {
+    slug: "konteyner-terminali",
+    title: "Konteyner Terminali",
+    description:
+      "Konteyner terminali nedir? Türkiye'deki başlıca konteyner terminalleri ve terminal operasyonları hakkında bilgi.",
+    definition: `**Konteyner terminali**, liman bünyesinde konteynerlerin elleçlendiği, depolandığı ve gemiye yüklendiği/boşaltıldığı **özel ekipmanlı tesistir**.
+
+Bir konteyner terminalinde bulunan ana ekipman ve alanlar:
+- **Rıhtım (Berth):** Geminin yanaştığı alan
+- **SSG / RTG:** Konteyner istifleme vinçleri (Straddle Carrier, Rubber Tyred Gantry)
+- **CY (Container Yard):** Konteyner depolama sahası
+- **CFS (Container Freight Station):** Konteyner içi yük elleçleme alanı
+- **Gate:** Konteyner giriş-çıkış kontrol noktası
+
+**Türkiye'deki başlıca konteyner terminalleri:**
+- **Ambarlı:** Kumport, Marport, Mardaş
+- **Mersin:** MIP (Mersin International Port)
+- **Aliağa:** TCEGE, Petkim
+- **Gemlik:** Gemlik Limanı
+- **Asyaport:** Türkiye'nin en büyük transshipment terminali
+- **Derince:** Safiport ve Derince Limanı
+
+Her terminalin kendine özel ardiye tarifesi ve serbest gün uygulamaları vardır. Ardiyesiz giriş hesaplaması terminal bazında yapılmalıdır.`,
+    relatedTerms: ["liman", "ardiye", "gate-in", "konteyner"],
+  },
 ]
