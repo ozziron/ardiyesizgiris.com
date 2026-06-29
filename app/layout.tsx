@@ -37,7 +37,7 @@ export const metadata = {
     "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
   keywords:
     "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
-  generator: "v0.dev",
+  generator: "nextjs",
   // PWA theme-color — Android status bar per color scheme
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#10b981" },
