@@ -110,18 +110,26 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/#sss"
+                  href="/sozluk"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  Destek Merkezi
+                  Lojistik Sözlüğü
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/#cta"
+                  href="/limanlar"
                   className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
                 >
-                  Demo Talep Et
+                  Limanlar
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#sss"
+                  className="text-gray-600 dark:text-gray-400 hover:text-emerald-600 transition-colors"
+                >
+                  Destek Merkezi
                 </Link>
               </li>
             </ul>
