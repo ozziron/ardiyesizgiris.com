@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface TariffRuleListItem {
   id: string
   port: { id: string; name: string; city: string | null }
@@ -121,8 +123,8 @@ export default function TariffRulesPage() {
     const fetchOptions = async () => {
       try {
         const [carriersResponse, portsResponse] = await Promise.all([
-          fetch("/api/carriers"),
-          fetch("/api/ports"),
+          apiFetch("/api/carriers"),
+          apiFetch("/api/ports"),
         ])
         if (!carriersResponse.ok || !portsResponse.ok) {
           throw new Error("Filtre seçenekleri yüklenemedi")

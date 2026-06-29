@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+import { apiFetch } from '@/lib/api-client';
+
 type TrackingEvent = {
   status: string
   location?: string | null
@@ -49,7 +51,7 @@ export default function ContainerTrackingPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/container-tracking", {
+      const response = await apiFetch("/api/container-tracking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

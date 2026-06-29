@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from '@/lib/api-client';
+
 
 export type SelectOption = {
   id: string;
@@ -19,8 +21,8 @@ export function useCalculationOptions() {
     const fetchOptions = async () => {
       try {
         const [portsRes, carriersRes] = await Promise.all([
-          fetch("/api/ports"),
-          fetch("/api/carriers"),
+          apiFetch("/api/ports"),
+          apiFetch("/api/carriers"),
         ]);
         const portsData = await portsRes.json();
         const carriersData = await carriersRes.json();

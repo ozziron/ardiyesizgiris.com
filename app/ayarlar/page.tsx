@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Settings, Lock, Bell, Shield, CheckCircle2, AlertCircle } from "lucide-react"
 
+import { apiFetch } from '@/lib/api-client';
+
 export default function AyarlarPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -51,7 +53,7 @@ export default function AyarlarPage() {
 
     setIsChangingPassword(true)
     try {
-      const res = await fetch("/api/users/change-password", {
+      const res = await apiFetch("/api/users/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),

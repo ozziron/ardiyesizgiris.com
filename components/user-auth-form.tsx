@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface UserAuthFormProps {
   searchParams?: { [key: string]: string | string[] | undefined }
 }
@@ -83,7 +85,7 @@ export function UserAuthForm({ searchParams }: UserAuthFormProps) {
     setResendMessage(null)
 
     try {
-      const response = await fetch("/api/auth/resend-verification", {
+      const response = await apiFetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

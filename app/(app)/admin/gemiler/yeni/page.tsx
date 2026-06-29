@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { carrierFormSchema } from "@/lib/validation/schemas"
+import { apiFetch } from '@/lib/api-client';
 import { z } from "zod"
 import {
   Form,
@@ -36,7 +37,7 @@ export default function NewCarrierPage() {
 
   const onSubmit = async (formData: CarrierFormData) => {
     try {
-      const response = await fetch("/api/admin/carriers", {
+      const response = await apiFetch("/api/admin/carriers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

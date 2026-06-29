@@ -34,6 +34,21 @@ export function apiUrl(path: string): string {
 }
 
 /**
+ * Typed fetch wrapper that automatically prefixes API paths with the
+ * production base URL when NEXT_PUBLIC_API_BASE_URL is set (Capacitor /
+ * static export mode). In `next dev`, paths are used as-is.
+ *
+ * Use this everywhere instead of raw `fetch("/api/…")` so API calls work
+ * inside Capacitor's webview AND in the regular Next.js server.
+ */
+export async function apiFetch(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
+  return fetch(apiUrl(path), init)
+}
+
+/**
  * Returns the base URL for the API (without trailing slash).
  * Useful for configuring third-party libraries like NextAuth SessionProvider.
  */

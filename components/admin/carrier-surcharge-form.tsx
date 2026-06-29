@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { carrierSurchargeFormSchema } from "@/lib/validation/schemas"
+import { apiFetch } from '@/lib/api-client';
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -78,7 +79,7 @@ export function CarrierSurchargeForm({
   })
 
   useEffect(() => {
-    fetch("/api/admin/carriers")
+    apiFetch("/api/admin/carriers")
       .then((r) => r.json())
       .then((d) => setCarriers(d.data || []))
       .catch(() => {})

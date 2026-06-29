@@ -8,6 +8,8 @@ import { useCalculationPreview, type LivePreview } from "@/hooks/use-calculation
 import type { CalculationApiResult, ChargeBreakdownItem } from "@/types/calculation";
 import { formatTR } from "@/lib/format";
 import { BILLING_ENABLED } from "@/lib/billing/config";
+import { apiFetch } from '@/lib/api-client';
+
 
 export type { ChargeBreakdownItem, SelectOption, LivePreview };
 
@@ -172,7 +174,7 @@ export function useCalculationForm() {
     };
 
     try {
-      const response = await fetch("/api/calculate", {
+      const response = await apiFetch("/api/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -214,7 +216,7 @@ export function useCalculationForm() {
     setIsCheckoutLoading(true);
 
     try {
-      const response = await fetch("/api/billing/checkout", { method: "POST" });
+      const response = await apiFetch("/api/billing/checkout", { method: "POST" });
       const data = await response.json();
 
       if (!response.ok || !data?.url) {
@@ -242,7 +244,7 @@ export function useCalculationForm() {
     setIsBuyingCredits(true);
 
     try {
-      const response = await fetch("/api/billing/buy-credits", { method: "POST" });
+      const response = await apiFetch("/api/billing/buy-credits", { method: "POST" });
       const data = await response.json();
 
       if (!response.ok || !data?.url) {
@@ -289,7 +291,7 @@ export function useCalculationForm() {
     setExportState((current) => ({ ...current, isPdfLoading: true, message: "", messageTone: null }));
 
     try {
-      const response = await fetch("/api/export/pdf", {
+      const response = await apiFetch("/api/export/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -332,7 +334,7 @@ export function useCalculationForm() {
     setExportState((current) => ({ ...current, isEmailLoading: true, message: "", messageTone: null }));
 
     try {
-      const response = await fetch("/api/export/email", {
+      const response = await apiFetch("/api/export/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, recipientEmail: recipientEmail || undefined }),

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Ship, Mail, RefreshCw } from "lucide-react"
 
+import { apiFetch } from '@/lib/api-client';
+
 function EmailPendingContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email") || ""
@@ -19,7 +21,7 @@ function EmailPendingContent() {
     setMessage(null)
 
     try {
-      const response = await fetch("/api/auth/resend-verification", {
+      const response = await apiFetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

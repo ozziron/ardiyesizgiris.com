@@ -3,12 +3,14 @@ import "./globals.css"
 import { Inter, Inter_Tight } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
+import { DeepLinkHandler } from "@/components/deep-link-handler"
 import { AppShell } from "@/components/layout/app-shell"
 import { MobileBottomTabBar } from "@/components/layout/mobile-bottom-tab-bar"
 import { ScrollLockGuard } from "@/components/scroll-lock-guard"
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register"
 import { InstallPrompt } from "@/components/pwa/install-prompt"
 import { OfflineBanner } from "@/components/pwa/offline-banner"
+import { CapacitorSentryProvider } from "@/components/sentry/capacitor-sentry-provider"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -149,7 +151,9 @@ export default function RootLayout({
         <ScrollLockGuard />
         <ServiceWorkerRegister />
         <OfflineBanner />
+        <CapacitorSentryProvider />
         <AuthSessionProvider>
+          <DeepLinkHandler />
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AppShell>{children}</AppShell>
             <MobileBottomTabBar />

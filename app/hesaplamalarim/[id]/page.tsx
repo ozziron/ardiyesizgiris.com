@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Ship, Calendar, Clock, Wallet, FileDown, Mail, CheckCircle2, AlertCircle, TestTube2, Download, Container } from "lucide-react"
 import Link from "next/link"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface ExportRecord {
   id: string
   type: "PDF" | "EMAIL"
@@ -89,7 +91,7 @@ export default function HesaplamaDetayPage() {
     if (!calculation) return
 
     try {
-      const res = await fetch("/api/export/pdf", {
+      const res = await apiFetch("/api/export/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -47,7 +47,7 @@ export interface AppleAppSiteAssociationPayload {
 function getAndroidPackageName(): string {
   return (
     process.env.DEEP_LINK_ANDROID_PACKAGE_NAME?.trim() ||
-    "com.ardiyesizgiris.app"
+    "com.ardiyesizgiris.web"
   )
 }
 
@@ -67,7 +67,7 @@ function getAndroidSha256Fingerprints(): string[] {
 function getIosBundleId(): string {
   return (
     process.env.DEEP_LINK_IOS_BUNDLE_ID?.trim() ||
-    "com.ardiyesizgiris.app"
+    "com.ardiyesizgiris.web"
   )
 }
 

@@ -44,12 +44,13 @@ const config: CapacitorConfig = {
   // Native plugins (App, SplashScreen, etc.) still need `npm install`
   // and `npx cap sync` to link the native side.
   plugins: {
-    // App plugin handles deep links / URL open events.
-    // Install: npm install @capacitor/app
-    // App: {
-    //   // No extra config needed — App.addListener('appUrlOpen', ...)
-    //   // in the web app handles incoming URL events.
-    // },
+    // App plugin handles deep links / URL open events from Universal Links
+    // (iOS) and App Links (Android).  The web app receives 'appUrlOpen'
+    // events and navigates to the matching route inside the shell.
+    App: {
+      // No extra config needed — App.addListener('appUrlOpen', ...)
+      // in the web app handles incoming URL events.
+    },
   },
 }
 
