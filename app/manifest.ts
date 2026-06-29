@@ -69,22 +69,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
     ],
-    screenshots: [
-      {
-        src: "/screenshots/desktop-wide.png",
-        sizes: "1280x800",
-        type: "image/png",
-        form_factor: "wide",
-        label: "Ardiyesiz giriş hesaplama aracı — masaüstü",
-      },
-      {
-        src: "/screenshots/mobile-narrow.png",
-        sizes: "390x844",
-        type: "image/png",
-        form_factor: "narrow",
-        label: "Ardiyesiz giriş hesaplama aracı — mobil",
-      },
-    ],
+    screenshots: [],
     shortcuts: [
       {
         name: "Hesaplama",
