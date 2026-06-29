@@ -25,9 +25,11 @@ export function Wordmark({
   logoClassName,
 }: WordmarkProps) {
   const inner = (
-    <span className={cn("flex items-center gap-2.5", className)}>
-      <Logo className={cn("h-8 w-8 shrink-0 text-emerald-600", logoClassName)} />
-      <span className="font-display text-lg font-bold tracking-tight leading-none">
+    <span className={cn("flex items-center gap-1.5 sm:gap-2.5", className)}>
+      <Logo className={cn("h-7 w-7 sm:h-8 sm:w-8 shrink-0 text-emerald-600", logoClassName)} />
+      {/* Mobile: icon-only to prevent overlap with adjacent header controls.
+          sm+ (640px): full wordmark with brand text. */}
+      <span className="hidden sm:inline font-display text-lg font-bold tracking-tight leading-none">
         Ardiyesiz <span className="text-emerald-600">Giriş</span>
       </span>
     </span>
