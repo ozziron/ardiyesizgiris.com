@@ -2,10 +2,11 @@ import { withSentryConfig } from "@sentry/nextjs"
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static HTML export for Capacitor native mobile wrapper.
-  // API routes run on the live Vercel domain; the Capacitor webview
-  // calls them via NEXT_PUBLIC_API_BASE_URL (see lib/api-client.ts).
-  output: "export",
+  // Capacitor integration: the native app loads the live Vercel deployment
+  // via capacitor.config.ts server.url. No static export is needed for the
+  // main build — API routes, auth, and server features remain fully functional.
+  // For a fully-offline static bundle, see scripts/build-capacitor-static.sh
+  // (moves API routes aside, runs output:'export', then restores them).
 
   eslint: {
     ignoreDuringBuilds: true,
@@ -70,11 +71,6 @@ const sentryBuildOptions = {
   errorHandler: (err) => {
     console.warn("[Sentry] Build-time warning:", err.message)
   },
-
-  // Static export modunda server instrumentation gerekmez,
-  // sadece client bundle'ı instrument edilir.
-  autoInstrumentServerFunctions: false,
-  autoInstrumentMiddleware: false,
 }
 
 export default withSentryConfig(nextConfig, sentryBuildOptions)
