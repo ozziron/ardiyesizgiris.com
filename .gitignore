@@ -22,6 +22,23 @@
 # production
 /build
 
+# Capacitor / Native mobile
+ios/App/Pods/
+ios/App/build/
+ios/fastlane/builds/
+ios/fastlane/report.xml
+ios/fastlane/test_output/
+android/app/build/
+android/.gradle/
+android/build/
+*.jks
+*.keystore
+android/keystore.properties
+android/local.properties
+android/sdk/
+android/*.zip
+android/gradle/wrapper/gradle-wrapper.jar
+
 # debug
 npm-debug.log*
 yarn-debug.log*

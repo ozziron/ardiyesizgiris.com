@@ -1,0 +1,8 @@
+# Fastlane Appfile — ardiyesizgiris.com
+
+app_identifier("com.ardiyesizgiris.web")  # The bundle identifier of your app
+apple_id("")                               # Apple ID email (leave empty, use API key)
+team_id("")                                # Apple Developer Team ID
+
+# For signing via fastlane match
+# Run `fastlane match init` after first iOS project generation.

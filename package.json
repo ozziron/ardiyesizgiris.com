@@ -21,7 +21,15 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "cap:add:ios": "npx cap add ios",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "build:capacitor": "npm run build && npx cap sync",
+    "ios:beta": "cd ios && bundle exec fastlane beta",
+    "ios:devices:register": "cd ios && bundle exec fastlane register_devices"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
