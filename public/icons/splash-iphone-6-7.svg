@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796" fill="none" viewBox="0 0 1290 2796">
+  <!--
+    Ardiyesiz Giriş — iOS Splash Screen 6.7" iPhone (1290×2796)
+    Centered brand mark on white background.
+    Covers: iPhone 14 Pro Max, 15 Pro Max, 16 Pro Max
+  -->
+  <rect width="1290" height="2796" fill="#fff"/>
+  <g transform="translate(405, 1118)">
+    <rect x="0" y="56" width="52" height="224" rx="16" fill="#10b981"/>
+    <rect x="428" y="56" width="52" height="224" rx="16" fill="#10b981"/>
+    <rect x="0" y="0" width="480" height="56" rx="16" fill="#10b981"/>
+    <rect x="108" y="104" width="264" height="128" rx="20" fill="#fff"/>
+    <rect x="150" y="116" width="18" height="104" rx="9" fill="#10b981"/>
+    <rect x="231" y="116" width="18" height="104" rx="9" fill="#10b981"/>
+    <rect x="312" y="116" width="18" height="104" rx="9" fill="#10b981"/>
+  </g>
+</svg>

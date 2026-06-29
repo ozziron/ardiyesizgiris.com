@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" fill="none" viewBox="0 0 108 108">
+  <!--
+    Android Adaptive Icon — Background layer
+    Solid emerald (#10b981) fill. The launcher applies the user's icon shape
+    mask (circle, squircle, rounded square, etc.) over the composite.
+  -->
+  <rect width="108" height="108" fill="#10b981"/>
+</svg>

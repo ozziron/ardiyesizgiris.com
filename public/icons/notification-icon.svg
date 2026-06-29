@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 48 48">
+  <!--
+    Android Notification Icon
+    Simple white silhouette on transparent background.
+    Android tints this white when the notification shade is pulled down,
+    but it renders as-is in the status bar. Keep it bold and minimal.
+  -->
+  <!-- Container box silhouette — clean, recognizable at tiny sizes -->
+  <g transform="translate(6, 10)">
+    <!-- Container body -->
+    <rect x="0" y="4" width="36" height="20" rx="3" fill="#fff"/>
+    <!-- Container top bar (door header) -->
+    <rect x="0" y="0" width="36" height="4" rx="1.5" fill="#fff"/>
+    <!-- Corrugation ridges — three vertical lines -->
+    <rect x="7" y="6" width="2" height="16" rx="1" fill="#000"/>
+    <rect x="17" y="6" width="2" height="16" rx="1" fill="#000"/>
+    <rect x="27" y="6" width="2" height="16" rx="1" fill="#000"/>
+  </g>
+</svg>

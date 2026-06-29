@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" fill="none" viewBox="0 0 512 512">
+  <!--
+    Ardiyesiz Giriş — Splash Screen centered icon
+    Designed for mobile splash / launch screen.
+    Centered brand mark on white background for maximum brightness,
+    or used as the centered icon on a solid-color splash.
+  -->
+  <g transform="translate(80, 88)">
+    <!-- Arch / gate pillars and beam -->
+    <rect x="0" y="56" width="52" height="224" rx="16" fill="#10b981"/>
+    <rect x="300" y="56" width="52" height="224" rx="16" fill="#10b981"/>
+    <rect x="0" y="0" width="352" height="56" rx="16" fill="#10b981"/>
+
+    <!-- Container block -->
+    <rect x="80" y="104" width="192" height="128" rx="20" fill="#fff"/>
+
+    <!-- Corrugation lines -->
+    <rect x="110" y="116" width="12" height="104" rx="6" fill="#10b981"/>
+    <rect x="170" y="116" width="12" height="104" rx="6" fill="#10b981"/>
+    <rect x="230" y="116" width="12" height="104" rx="6" fill="#10b981"/>
+  </g>
+</svg>

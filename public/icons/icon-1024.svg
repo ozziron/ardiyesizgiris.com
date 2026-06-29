@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" fill="none" viewBox="0 0 1024 1024">
+  <!-- Ardiyesiz Giriş — App Store icon 1024×1024 -->
+  <!-- Emerald brand background -->
+  <rect width="1024" height="1024" rx="224" fill="#10b981"/>
+
+  <!--
+    Stylized port gate + container mark.
+    A bold arch (gate/giriş) with a container block passing through it.
+    White on emerald for maximum contrast and clean silhouette at any size.
+  -->
+  <g transform="translate(160, 176)">
+    <!-- Arch / gate pillars and beam — the "port entry" motif -->
+    <!-- Left pillar -->
+    <rect x="0" y="112" width="104" height="448" rx="32" fill="#fff"/>
+    <!-- Right pillar -->
+    <rect x="600" y="112" width="104" height="448" rx="32" fill="#fff"/>
+    <!-- Top arch beam -->
+    <rect x="0" y="0" width="704" height="112" rx="32" fill="#fff"/>
+
+    <!-- Container block inside gate — sits centered, conveys "cargo through port" -->
+    <rect x="160" y="208" width="384" height="256" rx="40" fill="#10b981"/>
+
+    <!-- Container vertical corrugation (3 lines — reads at all sizes) -->
+    <rect x="220" y="232" width="24" height="208" rx="12" fill="#fff"/>
+    <rect x="340" y="232" width="24" height="208" rx="12" fill="#fff"/>
+    <rect x="460" y="232" width="24" height="208" rx="12" fill="#fff"/>
+  </g>
+</svg>

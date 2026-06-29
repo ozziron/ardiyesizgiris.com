@@ -43,7 +43,7 @@ export const metadata = {
     { media: "(prefers-color-scheme: light)", color: "#10b981" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
   ],
-  // PWA & icon metadata
+  // PWA & icon metadata — favicon sizes + apple + manifest reference
   icons: {
     icon: [
       { url: "/icons/icon-192.svg", type: "image/svg+xml", sizes: "192x192" },
@@ -51,12 +51,39 @@ export const metadata = {
     ],
     shortcut: "/icons/icon-192.svg",
     apple: "/icons/apple-touch-icon.svg",
+    other: [
+      {
+        rel: "apple-touch-icon",
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+      },
+    ],
   },
   appleWebApp: {
     capable: true,
     title: "Ardiyesiz Giriş",
     statusBarStyle: "black-translucent",
-    startupImage: [],
+    startupImage: [
+      // iOS splash screens — device-specific sizes
+      // 6.7" iPhone (iPhone 14 Pro Max, 15 Pro Max): 1290×2796
+      {
+        url: "/icons/splash-iphone-6-7.png",
+        media:
+          "screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      // 6.5" iPhone (iPhone 11 Pro Max, XS Max): 1242×2688
+      {
+        url: "/icons/splash-iphone-6-5.png",
+        media:
+          "screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      // 5.5" iPhone (iPhone 8 Plus): 1242×2208
+      {
+        url: "/icons/splash-iphone-5-5.png",
+        media:
+          "screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+    ],
   },
   openGraph: {
     type: "website",
