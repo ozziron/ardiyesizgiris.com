@@ -34,6 +34,21 @@ export const metadata = {
   keywords:
     "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
   generator: "v0.dev",
+  // PWA & icon metadata
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.svg", type: "image/svg+xml", sizes: "192x192" },
+      { url: "/icons/icon-512.svg", type: "image/svg+xml", sizes: "512x512" },
+    ],
+    shortcut: "/icons/icon-192.svg",
+    apple: "/icons/apple-touch-icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Ardiyesiz Giriş",
+    statusBarStyle: "black-translucent",
+    startupImage: [],
+  },
   openGraph: {
     type: "website",
     url: "https://www.ardiyesizgiris.com/",

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" fill="none" viewBox="0 0 512 512">
+  <!-- Ardiyesiz Giriş maskable icon 512×512 — design fits within safe zone (inner 80%) -->
+  <rect width="512" height="512" rx="112" fill="#10b981"/>
+  <!-- Safe zone: inner 80% = 409.6px → scale ~0.78 of icon-512 design -->
+  <g transform="translate(51.2, 51.2) scale(0.8)">
+    <!-- Arch / gate pillars and beam -->
+    <rect x="0" y="56" width="52" height="224" rx="16" fill="#fff"/>
+    <rect x="300" y="56" width="52" height="224" rx="16" fill="#fff"/>
+    <rect x="0" y="0" width="352" height="56" rx="16" fill="#fff"/>
+    <!-- Container block -->
+    <rect x="80" y="104" width="192" height="128" rx="20" fill="#10b981"/>
+    <!-- Corrugation lines -->
+    <rect x="110" y="116" width="12" height="104" rx="6" fill="#fff"/>
+    <rect x="170" y="116" width="12" height="104" rx="6" fill="#fff"/>
+    <rect x="230" y="116" width="12" height="104" rx="6" fill="#fff"/>
+  </g>
+</svg>
