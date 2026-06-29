@@ -37,7 +37,6 @@ android/keystore.properties
 android/local.properties
 android/sdk/
 android/*.zip
-android/gradle/wrapper/gradle-wrapper.jar
 
 # debug
 npm-debug.log*

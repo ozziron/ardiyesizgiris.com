@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ardiyesizgiris.web",
+      "sha256_cert_fingerprints": [
+        "3E:5C:C8:B9:27:DA:2F:8D:74:33:9C:82:0D:0B:90:54:AF:8B:B1:14:2F:89:F7:15:BE:3F:B6:DE:A7:1B:EC:5C"
+      ]
+    }
+  }
+]

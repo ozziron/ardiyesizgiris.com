@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand emerald-500: #10b981 -->
+    <color name="brandColor">#FF10B981</color>
+    <color name="brandColorDark">#FF059669</color>
+
+    <!-- Status bar — matches theme-color from PWA manifest -->
+    <color name="statusBarColor">#FF10B981</color>
+
+    <!-- Background colors -->
+    <color name="backgroundColor">#FFFFFFFF</color>
+    <color name="backgroundColorDark">#FF0A0A0B</color>
+
+    <!-- Adaptive icon background -->
+    <color name="adaptiveBackground">#FF10B981</color>
+</resources>
