@@ -4,7 +4,11 @@ import { Inter, Inter_Tight } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
 import { AppShell } from "@/components/layout/app-shell"
+import { MobileBottomTabBar } from "@/components/layout/mobile-bottom-tab-bar"
 import { ScrollLockGuard } from "@/components/scroll-lock-guard"
+import { ServiceWorkerRegister } from "@/components/pwa/sw-register"
+import { InstallPrompt } from "@/components/pwa/install-prompt"
+import { OfflineBanner } from "@/components/pwa/offline-banner"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -34,6 +38,11 @@ export const metadata = {
   keywords:
     "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
   generator: "v0.dev",
+  // PWA theme-color — Android status bar per color scheme
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#10b981" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
+  ],
   // PWA & icon metadata
   icons: {
     icon: [
@@ -66,7 +75,18 @@ export const metadata = {
     description:
       "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
   },
+  manifest: "/manifest.webmanifest",
 } as const
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#10b981" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -100,9 +120,13 @@ export default function RootLayout({
     <html lang="tr" suppressHydrationWarning className={`${inter.variable} ${interTight.variable}`}>
       <body className="font-sans antialiased">
         <ScrollLockGuard />
+        <ServiceWorkerRegister />
+        <OfflineBanner />
         <AuthSessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AppShell>{children}</AppShell>
+            <MobileBottomTabBar />
+            <InstallPrompt />
           </ThemeProvider>
         </AuthSessionProvider>
         <Script
