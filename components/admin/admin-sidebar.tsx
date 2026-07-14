@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Anchor, BarChart3, Box, FileBarChart, Receipt, Ship, TrendingUp } from "lucide-react"
+import { Anchor, BarChart3, Box, FileBarChart, Receipt, Ship, Terminal, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const menuItems = [
   { label: "Dashboard", href: "/admin", icon: BarChart3 },
+  { label: "Agent Kontrol", href: "/admin/agent-kontrol", icon: Terminal },
   { label: "Limanlar", href: "/admin/limanlar", icon: Anchor },
   { label: "Hatlar", href: "/admin/gemiler", icon: Ship },
   { label: "Ekipman Tipleri", href: "/admin/ekipman-tipleri", icon: Box },

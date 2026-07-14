@@ -64,6 +64,7 @@ Thumbs.db
 .idea/
 
 # Test artifacts (generated during dev/test runs)
+test-results/
 *.pdf
 !lib/pdf/fonts/*.ttf
 test-*.json
