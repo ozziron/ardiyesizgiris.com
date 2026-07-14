@@ -495,11 +495,15 @@ function commandCheck() {
     if (!parsed.data.role) {
       issues.push(`${file.name}: missing frontmatter field "role"`);
     }
-    if (parsed.data.assignee && !ASSIGNEES.includes(parsed.data.assignee)) {
-      issues.push(`${file.name}: invalid assignee "${parsed.data.assignee}"`);
-    }
-    if (parsed.data.role && !ROLES.includes(parsed.data.role)) {
-      issues.push(`${file.name}: invalid role "${parsed.data.role}"`);
+    // Skip assignee/role validation for done tickets (historical records may
+    // reference removed assignees like gemini/codex/deepseek or roles like marketing/qa).
+    if (file.status !== "done") {
+      if (parsed.data.assignee && !ASSIGNEES.includes(parsed.data.assignee)) {
+        issues.push(`${file.name}: invalid assignee "${parsed.data.assignee}"`);
+      }
+      if (parsed.data.role && !ROLES.includes(parsed.data.role)) {
+        issues.push(`${file.name}: invalid role "${parsed.data.role}"`);
+      }
     }
 
     if (parsed.data.id !== idFromName) {
