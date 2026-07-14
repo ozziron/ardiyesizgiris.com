@@ -55,8 +55,14 @@ fastlane deliver \
 
 ## Durum
 
-- [ ] iPhone 6.7" ekran görüntüleri
-- [ ] iPhone 6.5" ekran görüntüleri
-- [ ] iPhone 5.5" ekran görüntüleri
+| Set | Durum | Not |
+|-----|-------|-----|
+| iPhone 6.7" (15 Pro Max) — 5 ekran | ⬜ Bekliyor | ARDA-49'a bağlı |
+| iPhone 6.5" (14 Plus) — 5 ekran | ⬜ Bekliyor | ARDA-49'a bağlı |
+| iPhone 5.5" (8 Plus) — 5 ekran | ⬜ Bekliyor | ARDA-49'a bağlı |
 
-**Not:** iOS ekran görüntüleri almak için macOS ve çalışan bir iOS build'i zorunludur.
+**Bloke:** [ARDA-49](/ARDA/issues/ARDA-49) — iOS build + TestFlight CI (Apple Developer Program bekleniyor)
+
+**Detaylı capture spec:** [`CAPTURE_SPEC.md`](./CAPTURE_SPEC.md) — 5 ekran × 3 cihaz, tüm veri/durum tanımları, prosedür.
+
+**Not:** iOS ekran görüntüleri almak için macOS ve çalışan bir iOS build'i zorunludur. ARDA-49 çözülene kadar placeholder'lar Windows'ta Chrome DevTools device mode ile alınabilir.

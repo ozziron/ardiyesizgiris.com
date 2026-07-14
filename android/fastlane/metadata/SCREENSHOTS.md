@@ -68,6 +68,30 @@ images/
 
 ## Durum
 
-- [ ] Telefon ekran görüntüleri (4 adet)
+- [x] Telefon ekran görüntüleri (4 adet) — 2026-06-29
 - [ ] 7" tablet ekran görüntüleri (opsiyonel)
 - [ ] 10" tablet ekran görüntüleri (opsiyonel)
+
+## Mevcut Ekran Görüntüleri
+
+| Dosya | Açıklama | Boyut |
+|-------|----------|-------|
+| `phoneScreenshots/1_main.png` | Ana sayfa — hero, özellikler, istatistikler | 1080×1920 |
+| `phoneScreenshots/2_calculation.png` | Hesaplama formu — hat, liman, ekipman seçimi | 1080×1920 |
+| `phoneScreenshots/3_results.png` | Hesaplama sonucu — ardiyesiz giriş tarihi | 1080×1920 |
+| `phoneScreenshots/4_pricing.png` | Fiyatlandırma — üç plan kartı | 1080×1920 |
+
+## Yakalama Yöntemi
+
+Bu ekran görüntüleri headless Chrome + CDP (Chrome DevTools Protocol) ile alındı.
+Script: `scripts/capture-playstore-screenshots.mjs`
+
+```bash
+# Önce dev server'ı başlat
+npm run dev
+
+# Sonra screenshot'ları al
+node scripts/capture-playstore-screenshots.mjs
+```
+
+Cihaz emülasyonu: Pixel 7 (360×640 CSS, ×3 DPR = 1080×1920)

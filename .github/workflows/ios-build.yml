@@ -79,11 +79,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Setup Apple Code Signing
-        uses: apple-actions/import-codesign-certs@v3
-        with:
-          p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
-          p12-password: ${{ secrets.APPLE_P12_PASSWORD }}
+      # ── Code Signing via Fastlane Match ─────────────────────────
+      # Match stores encrypted certs & profiles in a private git repo.
+      # No manual P12 import needed — the Fastfile `match` action
+      # clones the repo, decrypts, and installs everything into the
+      # keychain automatically.
 
       - name: Setup App Store Connect API Key
         run: |
@@ -96,8 +96,10 @@ jobs:
         env:
           APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
           APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+          APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
 
       - name: Upload build artifacts
         if: always()

@@ -1,8 +1,18 @@
 # Fastlane Appfile — ardiyesizgiris.com
+#
+# App Store Connect authentication uses API key (App Manager role),
+# not Apple ID + password.  Set APPSTORE_CONNECT_KEY_ID and
+# APPSTORE_CONNECT_ISSUER_ID in the environment (CI does this
+# automatically via GitHub Secrets).
+#
+# Team ID is your Apple Developer Program membership identifier.
+# Find it at https://developer.apple.com/account → Membership.
 
-app_identifier("com.ardiyesizgiris.web")  # The bundle identifier of your app
-apple_id("")                               # Apple ID email (leave empty, use API key)
-team_id("")                                # Apple Developer Team ID
+app_identifier("com.ardiyesizgiris.web")   # Bundle ID (from capacitor.config.ts)
 
-# For signing via fastlane match
-# Run `fastlane match init` after first iOS project generation.
+# API-key auth — leave empty
+apple_id("")
+
+# Set after Apple Developer enrollment.
+# Fastlane also reads FASTLANE_TEAM_ID from the environment.
+team_id(ENV["FASTLANE_TEAM_ID"] || "")
