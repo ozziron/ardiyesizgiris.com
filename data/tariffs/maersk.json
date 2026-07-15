@@ -1,0 +1,2022 @@
+{
+  "carrier": {
+    "code": "MAEU",
+    "name": "Maersk"
+  },
+  "meta": {
+    "source": "prod-export",
+    "sourceRef": "prod DB export",
+    "receivedAt": "2026-07-14",
+    "verified": true,
+    "verifiedBy": "export",
+    "verifiedAt": "2026-07-14",
+    "notes": null
+  },
+  "defaults": {
+    "currency": "USD",
+    "effectiveFrom": "2025-09-15",
+    "effectiveUntil": "2026-12-31"
+  },
+  "surcharges": [
+    {
+      "name": "DTE-Freetime Extension Surcharge",
+      "description": "Days 0-5 will be included in DTE-Freetime Extension Surcharge of USD 160 per reefer container",
+      "amount": 160,
+      "currency": "USD",
+      "applyType": "PER_CONTAINER",
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ]
+    }
+  ],
+  "coverage": {
+    "ports": [
+      "GEM-BORUSAN",
+      "GEM-RODAPORT",
+      "MER-MIP",
+      "IZT-BELDEPORT",
+      "GEM-GEMPORT",
+      "IZT-YARIMCA",
+      "IST-MARDAS",
+      "IZM-TCEEGE",
+      "IZT-YILPORTGEBZE",
+      "ISK-LIMAKPORT",
+      "IZM-SOCAR",
+      "IST-MARPORT",
+      "IZT-EVYAPPORT",
+      "IST-KUMPORT",
+      "IZT-SAFIPORT"
+    ],
+    "exceptions": [
+      {
+        "port": "IZT-BELDEPORT",
+        "containerType": "20OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-BELDEPORT",
+        "containerType": "40OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-EVYAPPORT",
+        "containerType": "20OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-EVYAPPORT",
+        "containerType": "40OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-SAFIPORT",
+        "containerType": "20OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-SAFIPORT",
+        "containerType": "40OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-YARIMCA",
+        "containerType": "20OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-YARIMCA",
+        "containerType": "40OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-YILPORTGEBZE",
+        "containerType": "20OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      },
+      {
+        "port": "IZT-YILPORTGEBZE",
+        "containerType": "40OTOOG",
+        "reason": "DB'de aktif kural yok (export sırasında tespit edildi)"
+      }
+    ],
+    "portDefs": [
+      {
+        "code": "GEM-BORUSAN",
+        "name": "Borusan Port",
+        "city": "Gemlik",
+        "country": "TR"
+      },
+      {
+        "code": "GEM-GEMPORT",
+        "name": "Gemport",
+        "city": "Gemlik",
+        "country": "TR"
+      },
+      {
+        "code": "GEM-RODAPORT",
+        "name": "Rodaport",
+        "city": "Gemlik",
+        "country": "TR"
+      },
+      {
+        "code": "ISK-LIMAKPORT",
+        "name": "Limak Port",
+        "city": "İskenderun",
+        "country": "TR"
+      },
+      {
+        "code": "IST-KUMPORT",
+        "name": "Kumport",
+        "city": "İstanbul",
+        "country": "TR"
+      },
+      {
+        "code": "IST-MARDAS",
+        "name": "Mardaş",
+        "city": "İstanbul",
+        "country": "TR"
+      },
+      {
+        "code": "IST-MARPORT",
+        "name": "Marport",
+        "city": "İstanbul",
+        "country": "TR"
+      },
+      {
+        "code": "IZM-SOCAR",
+        "name": "SOCAR Terminal",
+        "city": "İzmir",
+        "country": "TR"
+      },
+      {
+        "code": "IZM-TCEEGE",
+        "name": "TCEEGE",
+        "city": "İzmir",
+        "country": "TR"
+      },
+      {
+        "code": "IZT-BELDEPORT",
+        "name": "Beldeport",
+        "city": "İzmit",
+        "country": "TR"
+      },
+      {
+        "code": "IZT-EVYAPPORT",
+        "name": "Evyapport",
+        "city": "İzmit",
+        "country": "TR"
+      },
+      {
+        "code": "IZT-SAFIPORT",
+        "name": "Safiport",
+        "city": "İzmit",
+        "country": "TR"
+      },
+      {
+        "code": "IZT-YARIMCA",
+        "name": "Dp World Yarımca",
+        "city": "İzmit",
+        "country": "TR"
+      },
+      {
+        "code": "IZT-YILPORTGEBZE",
+        "name": "Yılport Gebze",
+        "city": "İzmit",
+        "country": "TR"
+      },
+      {
+        "code": "MER-MIP",
+        "name": "Mersin International Port (MIP)",
+        "city": "Mersin",
+        "country": "TR"
+      }
+    ],
+    "containerTypeDefs": [
+      {
+        "code": "20DC",
+        "label": "20 DC",
+        "displayOrder": 1
+      },
+      {
+        "code": "40DC",
+        "label": "40 DC",
+        "displayOrder": 2
+      },
+      {
+        "code": "40HC",
+        "label": "40 HC",
+        "displayOrder": 3
+      },
+      {
+        "code": "20RF",
+        "label": "20 RF",
+        "displayOrder": 4
+      },
+      {
+        "code": "40RF",
+        "label": "40 RF",
+        "displayOrder": 5
+      },
+      {
+        "code": "20OTOOG",
+        "label": "20 OT (Out-of-Gauge)",
+        "displayOrder": 6
+      },
+      {
+        "code": "40OTOOG",
+        "label": "40 OT (Out-of-Gauge)",
+        "displayOrder": 7
+      }
+    ]
+  },
+  "ruleGroups": [
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 15,
+                "40HC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 30,
+                "40HC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 50
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 70,
+                "40RF": 70
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 90
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "40OTOOG": 60
+              }
+            }
+          ],
+          "currency": "TRY",
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 15,
+                "40HC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 30,
+                "40HC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 50
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 70,
+                "40RF": 70
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 90
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "40OTOOG": 60
+              }
+            }
+          ],
+          "currency": "TRY",
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20DC": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 14,
+              "prices": {
+                "20DC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": null,
+              "prices": {
+                "20OTOOG": 75,
+                "40OTOOG": 90
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 95,
+                "40RF": 95
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 110,
+                "40RF": 110
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 14,
+              "prices": {
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "effectiveUntil": "0026-12-31",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 15,
+                "40HC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 30,
+                "40HC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 50
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 70,
+                "40RF": 70
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 90
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "40OTOOG": 60
+              }
+            }
+          ],
+          "currency": "TRY",
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 8,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 9,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 75,
+                "40OTOOG": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 85,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": null,
+              "prices": {
+                "20OTOOG": 40,
+                "40OTOOG": 50
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": "usd",
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2025-05-19",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 40,
+                "40OTOOG": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 90,
+                "40RF": 90
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": null,
+              "prices": {
+                "20OTOOG": 40,
+                "40OTOOG": 50
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": "usd",
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 8,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 9,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 75,
+                "40OTOOG": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 85,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 8,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 9,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 1,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 2,
+              "to": null,
+              "prices": {
+                "20OTOOG": 75,
+                "40OTOOG": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 85,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": "2026-09-15",
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 14,
+              "prices": {
+                "20DC": 15,
+                "40DC": 30,
+                "40HC": 30
+              }
+            },
+            {
+              "from": 15,
+              "to": null,
+              "prices": {
+                "20DC": 30,
+                "40DC": 60,
+                "40HC": 60
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    },
+    {
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 80,
+                "40RF": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 100,
+                "40RF": 100
+              }
+            }
+          ],
+          "currency": null,
+          "effectiveFrom": null,
+          "notes": null
+        }
+      }
+    }
+  ]
+}
