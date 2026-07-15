@@ -8,12 +8,13 @@
 
 ## 🤖 Claude Code Agent Kullanımı
 
-Projede `.claude/agents/` altında 3 agent tanımlıdır: `developer`, `designer`, `reviewer`.
+Projede `.claude/agents/` altında 4 agent tanımlıdır: `developer`, `designer`, `reviewer`, `database`.
 
 ```text
 /agent developer "şu bileşeni refactor et"
 /agent designer "şu sayfanın mobil görünümünü düzelt"
 /agent reviewer "şu diff'i incele"
+/agent database "MSC tarifesini işle: <kaynak>"
 ```
 
 Agent'lar Claude Code'un built-in Agent tool'u üzerinden çalışır. Eski DeveloperAgent.js/DesignerAgent.js/MarketingAgent.js sınıfları kaldırıldı.
@@ -22,6 +23,7 @@ Agent'lar Claude Code'un built-in Agent tool'u üzerinden çalışır. Eski Deve
 - **developer:** Feature, bug fix, refactor, test — kod yazan her iş
 - **designer:** UI/UX değişiklikleri, shadcn/ui bileşenleri, responsive tasarım, Türkçe karakter kontrolü
 - **reviewer:** Kod inceleme, tip kontrolü, güvenlik review'u, ticket doğrulama
+- **database:** Armatör tarife verisi normalize + DB import (`main/data/tariffs/README.md` akışı)
 
 ---
 
@@ -49,6 +51,9 @@ Agent'lar Claude Code'un built-in Agent tool'u üzerinden çalışır. Eski Deve
   - Liste endpoint'i default `isActive: true` filter
 - **Singleton client:** `lib/db/prisma.ts` — Next.js hot-reload sırasında multiple instance oluşmasın diye global cache.
 - **Decimal handling:** Prisma Decimal'i JS Number'a `Number(value)` ile çevir, hesaplamada precision kaybı olabilir — gerekirse `decimal.js`'e dönüş gerekir.
+- **⚠️ İKİ AYRI DB (2026-07 tespiti):** lokal `main/.env` DATABASE_URL'i canlı siteninkinden FARKLI bir Neon DB'ye bakar. Canlı veriler (admin panelden girilenler: 15 terminal-bazlı liman, 7 tip) sadece prod DB'de; lokal dev DB küçük bir test setidir. Prod'a erişim: `vercel env pull .env.production-db --environment=production` + araçlarda `--db prod`.
+- **Tarife verisi tek yetkili yazım yolu:** `npm run db:import-tariffs` (dry-run → onay → `--apply`). Eski `prisma/seed-maersk-tariffs.ts/.sql` 2026-07'de KALDIRILDI (7 şehir-liman/12 tip taksonomisi bayattı; gerekirse git geçmişinden bakılır). Format: `main/data/tariffs/README.md`.
+- **ID'ler ortamlar arasında tutarsız** (dev'de `"Maersk"` literal id, prod'da uuid) — eşleştirme daima `code` alanıyla yapılır.
 
 ---
 

@@ -16,6 +16,7 @@ const ROLES = [
   "developer",
   "designer",
   "reviewer",
+  "database",
   "unassigned",
 ];
 
@@ -47,6 +48,13 @@ and mobile overflow, and keep changes confined to the ticket scope.`,
 You review in-review tickets, verify the worker's evidence against
 the ticket body, and may move tickets from in-review to done after
 verification. Push to GitHub only with user approval.`,
+
+  database: `You are the Database/Data agent for ardiyesizgiris.com.
+You normalize carrier tariff sources (PDF/screenshot/email/web) into
+main/data/tariffs/*.json packs, always run db:import-tariffs dry-run
+first, and apply only after explicit user approval (verified: true).
+Never migrate, never delete rows, take a prod export backup before
+applying to prod, and stop at in-review.`,
 };
 
 // Backwards-compat: legacy callers used UPPER_CASE keys
