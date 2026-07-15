@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useContainerTypes } from "@/hooks/use-container-types";
 import { useCalculationOptions, type SelectOption } from "@/hooks/use-calculation-options";
@@ -84,12 +84,14 @@ const downloadPdfDataUri = (pdfDataUri: string, filename: string) => {
 
 export function useCalculationForm() {
   const { data: session } = useSession();
-  const { ports, carriers } = useCalculationOptions();
+  const [form, setForm] = useState<FormState>(initialForm);
+  // Liman listesi seçili hatta göre filtrelenir (hat o limana hizmet
+  // vermiyorsa dropdown'da görünmez).
+  const { ports, carriers } = useCalculationOptions(form.shippingCompanyId || undefined);
   const { options: containerTypes } = useContainerTypes();
   const getContainerTypeLabel = (code: string) =>
     containerTypes.find((c) => c.code === code)?.label ?? code;
 
-  const [form, setForm] = useState<FormState>(initialForm);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [submittedMode, setSubmittedMode] = useState<CalculationMode | null>(null);
   const [error, setError] = useState("");
@@ -114,6 +116,14 @@ export function useCalculationForm() {
   });
 
   const mode: CalculationMode = form.gateInDate ? "cost" : "planning";
+
+  // Hat değişince filtrelenmiş liman listesine artık dahil olmayan seçim temizlenir.
+  useEffect(() => {
+    if (!form.portId || ports.length === 0) return;
+    if (!ports.some((p) => p.id === form.portId)) {
+      setForm((current) => ({ ...current, portId: "" }));
+    }
+  }, [ports, form.portId]);
 
   const updateForm = (patch: Partial<FormState>) => {
     setForm((current) => ({ ...current, ...patch }));

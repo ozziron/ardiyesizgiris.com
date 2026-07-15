@@ -12,28 +12,46 @@ export type SelectOption = {
 /**
  * Loads port and carrier dropdown options for the calculation form.
  * Self-contained; no form coupling.
+ *
+ * shippingCompanyId verilirse liman listesi o hatta hizmet veren (aktif
+ * tarife kuralı olan) limanlarla sınırlanır; hat değiştikçe yeniden yüklenir.
  */
-export function useCalculationOptions() {
+export function useCalculationOptions(shippingCompanyId?: string) {
   const [ports, setPorts] = useState<SelectOption[]>([]);
   const [carriers, setCarriers] = useState<SelectOption[]>([]);
 
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchCarriers = async () => {
       try {
-        const [portsRes, carriersRes] = await Promise.all([
-          apiFetch("/api/ports"),
-          apiFetch("/api/carriers"),
-        ]);
-        const portsData = await portsRes.json();
+        const carriersRes = await apiFetch("/api/carriers");
         const carriersData = await carriersRes.json();
-        setPorts(portsData.data || []);
         setCarriers(carriersData.data || []);
       } catch (err) {
         console.error("Veri yükleme hatası:", err);
       }
     };
-    fetchOptions();
+    fetchCarriers();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchPorts = async () => {
+      try {
+        const url = shippingCompanyId
+          ? `/api/ports?shippingCompanyId=${encodeURIComponent(shippingCompanyId)}`
+          : "/api/ports";
+        const portsRes = await apiFetch(url);
+        const portsData = await portsRes.json();
+        if (!cancelled) setPorts(portsData.data || []);
+      } catch (err) {
+        console.error("Veri yükleme hatası:", err);
+      }
+    };
+    fetchPorts();
+    return () => {
+      cancelled = true;
+    };
+  }, [shippingCompanyId]);
 
   return { ports, carriers };
 }
