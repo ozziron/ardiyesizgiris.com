@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Adaptive icon foreground layer.
+    Uses the vector drawable for the full icon with transparency.
+    The actual artwork is the 108dp safe-zone centered version.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Container (simplified — main icon sits in 66% inner zone per adaptive icon spec) -->
+    <group
+        android:translateX="18"
+        android:translateY="22">
+        <!-- Gate pillars -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,30 L0,72 Q0,76 4,76 L12,76 Q16,76 16,72 L16,30 Q16,26 12,26 L4,26 Q0,26 0,30 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M56,30 L56,72 Q56,76 60,76 L68,76 Q72,76 72,72 L72,30 Q72,26 68,26 L60,26 Q56,26 56,30 Z" />
+        <!-- Gate beam -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,0 L72,0 Q76,0 76,4 L76,12 Q76,16 72,16 L0,16 Q-4,16 -4,12 L-4,4 Q-4,0 0,0 Z" />
+        <!-- Container -->
+        <path
+            android:fillColor="#10B981"
+            android:pathData="M16,44 L56,44 Q60,44 60,48 L60,66 Q60,70 56,70 L16,70 Q12,70 12,66 L12,48 Q12,44 16,44 Z" />
+        <!-- Corrugation lines -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M22,46 L24,46 Q25,46 25,47 L25,67 Q25,68 24,68 L22,68 Q21,68 21,67 L21,47 Q21,46 22,46 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M34,46 L36,46 Q37,46 37,47 L37,67 Q37,68 36,68 L34,68 Q33,68 33,67 L33,47 Q33,46 34,46 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M46,46 L48,46 Q49,46 49,47 L49,67 Q49,68 48,68 L46,68 Q45,68 45,67 L45,47 Q45,46 46,46 Z" />
+    </group>
+</vector>

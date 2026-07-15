@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Base app theme for Ardiyesiz Giriş TWA.
+        Uses a minimal theme since the TWA renders the PWA content.
+    -->
+    <style name="Theme.ArdiyesizGiris" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:navigationBarColor">@color/backgroundColor</item>
+        <item name="android:windowBackground">@color/backgroundColor</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- Splash screen theme (Android 12+) -->
+    <style name="Theme.ArdiyesizGiris.Splash" parent="Theme.ArdiyesizGiris">
+        <item name="android:windowBackground">@color/backgroundColor</item>
+        <item name="android:windowSplashScreenBackground">@color/backgroundColor</item>
+    </style>
+</resources>

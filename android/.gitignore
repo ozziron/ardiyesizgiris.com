@@ -1,0 +1,22 @@
+# Android build outputs
+/build
+/app/build
+/app/release
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# Keystore config (contains passwords, never commit)
+keystore.properties
+
+# Gradle
+.gradle/
+gradle-dist/
+sdk/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store

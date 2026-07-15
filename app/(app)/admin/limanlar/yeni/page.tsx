@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 
+import { apiFetch } from '@/lib/api-client';
+
 export default function NewPortPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -25,7 +27,7 @@ export default function NewPortPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/admin/ports", {
+      const response = await apiFetch("/api/admin/ports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

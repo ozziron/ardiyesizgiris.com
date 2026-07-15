@@ -1,0 +1,2041 @@
+{
+  "carrier": {
+    "code": "CMDU",
+    "name": "CMA CGM"
+  },
+  "meta": {
+    "source": "user-pdf",
+    "sourceRef": "main/data/tariffs/sources/CMDU/CMA-Storage_Tarifs_TR.pdf + CMA-Detention_Tarifs_TR.pdf (D&D Tariffs Turkey, EXPORT - ALL PLACES; lokal, gitignore *.pdf)",
+    "receivedAt": "2026-07-15",
+    "verified": false,
+    "verifiedBy": null,
+    "verifiedAt": null,
+    "notes": "EXPORT tabloları işlendi; PDF'teki IMPORT tarifeleri site ihracat odaklı olduğu için alınmadı. | Tarife 'ALL PLACES' — tüm aktif limanlara aynı tablo uygulandı; CMA'nın fiilen uğramadığı terminal varsa bildirin. | ⚠ TIER BİRLEŞTİRME (Standard): kaynak 10 gün free + 3 kademe (11-15: 18/30, 16-21: 25/45, 22+: 55/85). Şema 3 tier desteklediği için 11-15 ve 16-21 kademeleri MUHAFAZAKÂR (yüksek fiyat) birleştirildi: 11-21 @ 25/45. 11-15. günlerde 20'de 7 USD/gün, 40'ta 15 USD/gün fazla tahmin üretir. | ⚠ TIER BİRLEŞTİRME (Hazardous): kaynak 7 gün free + 3 kademe (8-12: 20/35, 13-18: 35/70, 19+: 80/130). 8-12 ve 13-18 birleştirildi: 8-18 @ 35/70. 8-12. günlerde 20'de 15 USD/gün, 40'ta 35 USD/gün fazla tahmin üretir. | NOR (soğutmasız reefer) tablosu atlandı — fiyatları Standard ile birebir aynı ve sistemde ayrı NOR tipi yok. | 45' sütunu tüm tablolarda 40' ile aynı; DB'de 45' tipi yok. 40HC, 40' fiyatından yazıldı. | Hazardous tablosu imoCargo=true kuralları olarak TÜM ekipman tiplerine uygulandı (kaynakta ekipman ayrımı yok). | Günler takvim günü (kaynakta açıkça belirtilmiş). Para birimi USD. Geçerlilik 2025-05-10'dan itibaren, bitiş tarihi yok (until further notice)."
+  },
+  "defaults": {
+    "currency": "USD",
+    "effectiveFrom": "2025-05-10",
+    "effectiveUntil": null
+  },
+  "surcharges": [],
+  "coverage": {
+    "ports": [
+      "GEM-BORUSAN",
+      "GEM-GEMPORT",
+      "GEM-RODAPORT",
+      "ISK-LIMAKPORT",
+      "IST-KUMPORT",
+      "IST-MARDAS",
+      "IST-MARPORT",
+      "IZM-SOCAR",
+      "IZM-TCEEGE",
+      "IZT-BELDEPORT",
+      "IZT-EVYAPPORT",
+      "IZT-SAFIPORT",
+      "IZT-YARIMCA",
+      "IZT-YILPORTGEBZE",
+      "MER-MIP"
+    ],
+    "exceptions": [],
+    "portDefs": [],
+    "containerTypeDefs": []
+  },
+  "ruleGroups": [
+    {
+      "name": "Standard (Dry) — tier 2-3 birleştirilmiş",
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        },
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 10,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0
+              }
+            },
+            {
+              "from": 11,
+              "to": 21,
+              "prices": {
+                "20DC": 25,
+                "40DC": 45,
+                "40HC": 45
+              }
+            },
+            {
+              "from": 22,
+              "to": null,
+              "prices": {
+                "20DC": 55,
+                "40DC": 85,
+                "40HC": 85
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Reefer",
+      "containerTypes": [
+        "20RF",
+        "40RF"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        },
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 5,
+              "prices": {
+                "20RF": 0,
+                "40RF": 0
+              }
+            },
+            {
+              "from": 6,
+              "to": 10,
+              "prices": {
+                "20RF": 45,
+                "40RF": 85
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20RF": 90,
+                "40RF": 170
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Special (OT/OOG)",
+      "containerTypes": [
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": false,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        },
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 6,
+              "prices": {
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "prices": {
+                "20OTOOG": 50,
+                "40OTOOG": 80
+              }
+            },
+            {
+              "from": 11,
+              "to": null,
+              "prices": {
+                "20OTOOG": 80,
+                "40OTOOG": 150
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Hazardous (IMO) — tier 2-3 birleştirilmiş",
+      "containerTypes": [
+        "20DC",
+        "40DC",
+        "40HC",
+        "20RF",
+        "40RF",
+        "20OTOOG",
+        "40OTOOG"
+      ],
+      "imoCargo": true,
+      "ports": {
+        "GEM-BORUSAN": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "GEM-GEMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "GEM-RODAPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "ISK-LIMAKPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IST-KUMPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IST-MARDAS": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IST-MARPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZM-SOCAR": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZM-TCEEGE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZT-BELDEPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZT-EVYAPPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZT-SAFIPORT": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZT-YARIMCA": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "IZT-YILPORTGEBZE": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        },
+        "MER-MIP": {
+          "tiers": [
+            {
+              "from": 1,
+              "to": 7,
+              "prices": {
+                "20DC": 0,
+                "40DC": 0,
+                "40HC": 0,
+                "20RF": 0,
+                "40RF": 0,
+                "20OTOOG": 0,
+                "40OTOOG": 0
+              }
+            },
+            {
+              "from": 8,
+              "to": 18,
+              "prices": {
+                "20DC": 35,
+                "40DC": 70,
+                "40HC": 70,
+                "20RF": 35,
+                "40RF": 70,
+                "20OTOOG": 35,
+                "40OTOOG": 70
+              }
+            },
+            {
+              "from": 19,
+              "to": null,
+              "prices": {
+                "20DC": 80,
+                "40DC": 130,
+                "40HC": 130,
+                "20RF": 80,
+                "40RF": 130,
+                "20OTOOG": 80,
+                "40OTOOG": 130
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

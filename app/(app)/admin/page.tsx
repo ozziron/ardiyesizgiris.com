@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Anchor, FileBarChart, Ship, TrendingUp } from "lucide-react"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface DashboardStats {
   ports: number
   carriers: number
@@ -24,7 +26,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("/api/admin/stats")
+        const res = await apiFetch("/api/admin/stats")
         if (res.ok) {
           const data = await res.json()
           setStats(data.data)

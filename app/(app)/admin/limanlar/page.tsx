@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pencil, Trash2, Plus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface Port {
   id: string
   name: string
@@ -23,7 +25,7 @@ export default function PortsManagementPage() {
 
   const fetchPorts = async () => {
     try {
-      const response = await fetch("/api/admin/ports")
+      const response = await apiFetch("/api/admin/ports")
       const data = await response.json()
       setPorts(data.data || [])
     } catch (error) {

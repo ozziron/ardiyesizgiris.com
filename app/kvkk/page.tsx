@@ -12,7 +12,7 @@ export default function KvkkPage() {
     <div className="container mx-auto max-w-3xl py-12 px-4">
       <h1 className="text-3xl font-bold mb-2">KVKK Aydınlatma Metni</h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Son güncelleme: 17 Mayıs 2026
+        Son güncelleme: 29 Haziran 2026
       </p>
 
       <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
@@ -21,8 +21,9 @@ export default function KvkkPage() {
           <h2 className="text-xl font-semibold mb-3">1. Veri Sorumlusu</h2>
           <p>
             6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) uyarınca, kişisel
-            verileriniz; ardiyesizgiris.com platformunu işleten hizmet sağlayıcı tarafından Veri
-            Sorumlusu sıfatıyla işlenmektedir.
+            verileriniz; ardiyesizgiris.com web platformu, iOS mobil uygulaması ve Android mobil
+            uygulamasını işleten hizmet sağlayıcı tarafından Veri Sorumlusu sıfatıyla
+            işlenmektedir.
           </p>
         </section>
 
@@ -33,8 +34,15 @@ export default function KvkkPage() {
             <li><strong>İletişim verileri:</strong> E-posta adresi, telefon numarası</li>
             <li><strong>İş yeri bilgisi:</strong> Şirket adı</li>
             <li><strong>İşlem verileri:</strong> Gerçekleştirilen hesaplama kayıtları, kullanım istatistikleri</li>
-            <li><strong>Teknik veriler:</strong> IP adresi, oturum bilgileri, tarayıcı ve cihaz bilgileri</li>
+            <li><strong>Teknik veriler:</strong> IP adresi, oturum bilgileri, tarayıcı ve cihaz bilgileri
+            (cihaz modeli, işletim sistemi türü ve sürümü, uygulama sürümü)</li>
           </ul>
+          <p>
+            Mobil uygulamalarımız; kamera, mikrofon, konum (GPS), kişi rehberi,
+            fotoğraf/medya, Bluetooth veya sağlık verileri gibi hassas cihaz
+            izinlerinden hiçbirine erişmez. Uygulama içinde hiçbir reklam ağı
+            veya kullanıcı takip (tracking) sistemi bulunmamaktadır.
+          </p>
         </section>
 
         <section>
@@ -61,10 +69,20 @@ export default function KvkkPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">5. Kişisel Verilerin Aktarılması</h2>
           <p>
-            Kişisel verileriniz; hizmetin sağlanması amacıyla yurt içindeki ve yurt dışındaki
-            altyapı sağlayıcılarına (barındırma, e-posta gönderim servisleri), yasal zorunluluk
-            kapsamında yetkili kamu kurum ve kuruluşlarına aktarılabilir. Bu aktarımlar KVKK&apos;nın
-            8. ve 9. maddelerinde belirtilen güvenlik tedbirleri çerçevesinde gerçekleştirilir.
+            Kişisel verileriniz; hizmetin sağlanması amacıyla aşağıdaki altyapı
+            sağlayıcılarına ve yasal zorunluluk kapsamında yetkili kamu kurum ve
+            kuruluşlarına aktarılabilir:
+          </p>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>Neon (veritabanı barındırma — ABD)</li>
+            <li>Resend (e-posta gönderim servisi — ABD)</li>
+            <li>Vercel (web barındırma ve anonim analitik — ABD)</li>
+          </ul>
+          <p>
+            Bu aktarımlar KVKK&apos;nın 8. ve 9. maddelerinde belirtilen
+            güvenlik tedbirleri çerçevesinde gerçekleştirilir. Yurt dışına
+            aktarım, ilgili ülkede yeterli korumanın bulunması veya yeterli
+            korumanın yazılı olarak taahhüt edilmesi kaydıyla yapılır.
           </p>
         </section>
 
@@ -100,7 +118,11 @@ export default function KvkkPage() {
             <a href="/iletisim" className="underline underline-offset-4 hover:text-primary">
               iletişim formu
             </a>{" "}
-            aracılığıyla veya kayıtlı e-posta adresinizden yazılı başvuru yapabilirsiniz.
+            aracılığıyla veya{" "}
+            <a href="mailto:info@ardiyesizgiris.com" className="underline underline-offset-4 hover:text-primary">
+              info@ardiyesizgiris.com
+            </a>{" "}
+            adresine kayıtlı e-posta adresinizden yazılı başvuru yapabilirsiniz.
             Başvurularınız en geç 30 (otuz) gün içinde sonuçlandırılacaktır.
           </p>
         </section>

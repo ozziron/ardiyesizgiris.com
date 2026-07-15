@@ -1,0 +1,15 @@
+# Gemfile — ardiyesizgiris.com iOS Fastlane dependencies
+#
+# Install:
+#   bundle install
+#
+# On CI (GitHub Actions), ruby/setup-ruby handles this via bundler-cache: true.
+
+source "https://rubygems.org"
+
+gem "fastlane", "~> 2.225"
+gem "cocoapods", "~> 1.16"
+
+# Fastlane plugins
+plugins_path = File.join(File.dirname(__FILE__), "fastlane", "Pluginfile")
+eval_gemfile(plugins_path) if File.exist?(plugins_path)

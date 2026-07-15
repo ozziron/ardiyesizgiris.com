@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pencil, Trash2, Plus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface SurchargeRecord {
   id: string
   shippingCompanyId: string
@@ -32,7 +34,7 @@ export default function CarrierSurchargesPage() {
 
   const fetchSurcharges = async () => {
     try {
-      const response = await fetch("/api/admin/carrier-surcharges")
+      const response = await apiFetch("/api/admin/carrier-surcharges")
       const data = await response.json()
       setSurcharges(data.data || [])
     } catch (error) {

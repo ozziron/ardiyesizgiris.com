@@ -22,6 +22,22 @@
 # production
 /build
 
+# Capacitor / Native mobile
+ios/App/Pods/
+ios/App/build/
+ios/fastlane/builds/
+ios/fastlane/report.xml
+ios/fastlane/test_output/
+android/app/build/
+android/.gradle/
+android/build/
+*.jks
+*.keystore
+android/keystore.properties
+android/local.properties
+android/sdk/
+android/*.zip
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -48,6 +64,7 @@ Thumbs.db
 .idea/
 
 # Test artifacts (generated during dev/test runs)
+test-results/
 *.pdf
 !lib/pdf/fonts/*.ttf
 test-*.json

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    App shortcuts — long-press launcher icon (Android 7.1+)
+    Mirrors the shortcuts defined in the PWA manifest.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/splash_icon"
+        android:shortcutId="hesaplama"
+        android:shortcutLongLabel="@string/shortcut_hesaplama"
+        android:shortcutShortLabel="@string/shortcut_hesaplama">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://www.ardiyesizgiris.com/hesaplama"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/splash_icon"
+        android:shortcutId="fiyatlandirma"
+        android:shortcutLongLabel="@string/shortcut_fiyatlandirma"
+        android:shortcutShortLabel="@string/shortcut_fiyatlandirma">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://www.ardiyesizgiris.com/fiyatlandirma"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/splash_icon"
+        android:shortcutId="sozluk"
+        android:shortcutLongLabel="@string/shortcut_sozluk"
+        android:shortcutShortLabel="@string/shortcut_sozluk">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://www.ardiyesizgiris.com/sozluk"
+            android:targetClass="com.google.androidbrowserhelper.trusted.LauncherActivity" />
+    </shortcut>
+</shortcuts>

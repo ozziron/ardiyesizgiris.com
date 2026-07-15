@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ardiyesiz Giriş</string>
+    <string name="shortcut_hesaplama">Hesaplama</string>
+    <string name="shortcut_fiyatlandirma">Fiyatlandırma</string>
+    <string name="shortcut_sozluk">Sözlük</string>
+</resources>

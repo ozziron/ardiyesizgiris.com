@@ -24,6 +24,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import { apiFetch } from '@/lib/api-client';
+
 type ExportType = "PDF" | "EMAIL"
 type ExportStatus = "success" | "failed" | "dry_run" | "not_configured"
 
@@ -185,7 +187,7 @@ export default function HesaplamalarimPage() {
 
   async function fetchCalculations() {
     try {
-      const res = await fetch("/api/users/calculations")
+      const res = await apiFetch("/api/users/calculations")
       if (res.ok) {
         const data = await res.json()
         setCalculations(data.data || [])

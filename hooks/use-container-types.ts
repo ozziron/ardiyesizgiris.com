@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 
+import { apiFetch } from '@/lib/api-client';
+
 export interface ContainerTypeOption {
   id: string
   code: string
@@ -26,7 +28,7 @@ export function useContainerTypes() {
 
   useEffect(() => {
     let cancelled = false
-    fetch("/api/container-types")
+    apiFetch("/api/container-types")
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return

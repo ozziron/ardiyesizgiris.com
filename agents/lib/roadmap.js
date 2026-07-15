@@ -28,9 +28,8 @@ function inferRole(text, fallback) {
     if (ROLES.includes(raw)) return raw;
     if (raw.includes("i18n") || raw.includes("developer")) return "developer";
     if (raw.includes("designer")) return "designer";
-    if (raw.includes("marketing")) return "marketing";
-    if (raw.includes("review")) return "reviewer";
-    if (raw.includes("qa") || raw.includes("test")) return "qa";
+    if (raw.includes("database") || raw.includes("veri") || raw.includes("tarife") || raw.includes("import")) return "database";
+    if (raw.includes("review") || raw.includes("qa") || raw.includes("test")) return "reviewer";
   }
   return fallback || "developer";
 }

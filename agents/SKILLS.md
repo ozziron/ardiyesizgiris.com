@@ -6,58 +6,24 @@
 
 ---
 
-## 🤖 Worker Agent Atama Workflow
+## 🤖 Claude Code Agent Kullanımı
 
-Tüm worker CLI'lar (Claude Haiku, Gemini, Codex) için ortak risk matrisi. CLI-spesifik notlar yerine tüm worker'lar için aynı kural uygulanır; CLI farkları `BOOTSTRAP.md` §5–6'da.
+Projede `.claude/agents/` altında 4 agent tanımlıdır: `developer`, `designer`, `reviewer`, `database`.
 
-**Risk matrisi (renk = atama):**
+```text
+/agent developer "şu bileşeni refactor et"
+/agent designer "şu sayfanın mobil görünümünü düzelt"
+/agent reviewer "şu diff'i incele"
+/agent database "MSC tarifesini işle: <kaynak>"
+```
 
-| Etki Yüzeyi | Reversible | Yarı-rev. | Irreversible |
-|---|---|---|---|
-| Yerel (tek dosya) | 🟢 | 🟢 | 🟡 |
-| Modül (birkaç dosya) | 🟢 | 🟡 | 🔴 |
-| Çapraz (schema/auth/payment/calc) | 🟡 | 🔴 | 🔴 |
+Agent'lar Claude Code'un built-in Agent tool'u üzerinden çalışır. Eski DeveloperAgent.js/DesignerAgent.js/MarketingAgent.js sınıfları kaldırıldı.
 
-- 🟢 → Worker (standart prompt + verifier checklist)
-- 🟡 → Close-supervised (her commit reviewer git diff + visual smoke)
-- 🔴 → CEO (Opus) / kullanıcı
-
-**Override (her zaman 🔴, renkten bağımsız) — worker'a verme:**
-- `prisma/schema.prisma`, `prisma/migrations/**`
-- `lib/calculations/**` (sabit hesaplama kuralları)
-- `lib/auth/**`, `middleware.ts`, `app/api/auth/**`
-- Payment / Stripe / Resend production config
-- DNS, `.env*`, Vercel project settings
-- iOS / yeni stack başlangıçları
-- Mimari karar gerektiren ticket'lar
-
-**Whitelist (worker-uygun tipik işler):**
-- i18n / copy / Türkçe karakter cleanup
-- Tek dosya UI polish (skeleton, empty state, hover)
-- Pure utility / helper script
-- Şablon / boilerplate duplikasyonu
-- Doc güncellemeleri, mevcut davranışı pin'leyen testler
-
-**Önce-doğrula (2dk triage, ticket başına):**
-1. Kapsam zaten yapıldı mı? (son 5–10 commit veya `session list`)
-2. Self-contained mi? (v2 body: `Ne ve Neden` + `Nasıl Yapılır` dolu mu)
-3. Renk + override kontrolü.
-
-**Reviewer verifier checklist (her ticket sonu):**
-1. `node main/agents/ticket.js check` → 0 uyarı
-2. Frontmatter `status: in-review`, `sessions: [...]` dolu (session start ile otomatik)
-3. v2 body: `Sonuç` + `Etkilenen Dosyalar` boş değil
-4. **Grep verify** (gpt-oss dersi) — iddia edilen değişiklikler gerçekten yapılmış mı
-5. `cd main && npm run typecheck` exit 0
-6. UI etkisi varsa `npm run build` veya görsel smoke (🟡'da zorunlu)
-7. İlgili session dosyasında commit hash + verification çıktısı yer alıyor
-8. `node main/agents/ticket.js done TICKET-XXX --commit <hash> --reviewer opus`
-
-**Disiplin:**
-- `todo/` max 1 ticket per assignee. Paralel yok.
-- Session başında `ticket.js session start --tickets ...`, sonunda `session end`. Tek ACTIVITY_LOG'a yazma yasak.
-- `in-review`'a almadan önce commit zorunlu ("uncommitted" gotcha tekrar etmesin).
-- Worker 2. iterasyonda da bitiremezse → eskale (CEO (Opus)).
+**Hangi agent ne zaman:**
+- **developer:** Feature, bug fix, refactor, test — kod yazan her iş
+- **designer:** UI/UX değişiklikleri, shadcn/ui bileşenleri, responsive tasarım, Türkçe karakter kontrolü
+- **reviewer:** Kod inceleme, tip kontrolü, güvenlik review'u, ticket doğrulama
+- **database:** Armatör tarife verisi normalize + DB import (`main/data/tariffs/README.md` akışı)
 
 ---
 
@@ -85,6 +51,9 @@ Tüm worker CLI'lar (Claude Haiku, Gemini, Codex) için ortak risk matrisi. CLI-
   - Liste endpoint'i default `isActive: true` filter
 - **Singleton client:** `lib/db/prisma.ts` — Next.js hot-reload sırasında multiple instance oluşmasın diye global cache.
 - **Decimal handling:** Prisma Decimal'i JS Number'a `Number(value)` ile çevir, hesaplamada precision kaybı olabilir — gerekirse `decimal.js`'e dönüş gerekir.
+- **⚠️ İKİ AYRI DB (2026-07 tespiti):** lokal `main/.env` DATABASE_URL'i canlı siteninkinden FARKLI bir Neon DB'ye bakar. Canlı veriler (admin panelden girilenler: 15 terminal-bazlı liman, 7 tip) sadece prod DB'de; lokal dev DB küçük bir test setidir. Prod'a erişim: `vercel env pull .env.production-db --environment=production` + araçlarda `--db prod`.
+- **Tarife verisi tek yetkili yazım yolu:** `npm run db:import-tariffs` (dry-run → onay → `--apply`). Eski `prisma/seed-maersk-tariffs.ts/.sql` 2026-07'de KALDIRILDI (7 şehir-liman/12 tip taksonomisi bayattı; gerekirse git geçmişinden bakılır). Format: `main/data/tariffs/README.md`.
+- **ID'ler ortamlar arasında tutarsız** (dev'de `"Maersk"` literal id, prod'da uuid) — eşleştirme daima `code` alanıyla yapılır.
 
 ---
 
@@ -119,9 +88,9 @@ Tüm worker CLI'lar (Claude Haiku, Gemini, Codex) için ortak risk matrisi. CLI-
 
 ---
 
-## 🤖 gpt-oss / Codex Workflow
+---
 
-**Üç-parçalı packet protokolü:**
+## 🔐 NextAuth v5 (beta)
 - **A) PROMPT PACKET** — gpt-oss'a kopya-yapıştır. İçerir:
   - Görev tanımı
   - **Dokunulacak dosya listesi** (explicit)
@@ -201,8 +170,8 @@ Tüm worker CLI'lar (Claude Haiku, Gemini, Codex) için ortak risk matrisi. CLI-
 - **Commit format:** `<type>(<scope>): <imperative description>`
   - type: feat | fix | refactor | chore | docs | style
 - **Co-Author:** `Co-Authored-By: Claude CEO (Opus) <noreply@anthropic.com>` (Claude Code default)
-- **Push policy:** GitHub push **yalnızca CEO (Opus)** yapar. Worker agent'lar (Gemini, Codex, Claude Haiku) commit atar, push'lamaz.
-- **Batch push:** Bireysel ticket push edilmez. Tüm `tickets/in-review/` birikip Push ticket'ı (her roadmap'in son task'i, `assignee: opus`) altında tek seferde push edilir; ticket'lar `in-review → done` doğrudan atlanır (v2'de `approved` ara durumu kaldırıldı).
+- **Push policy:** GitHub push kullanıcı onayıyla yapılır.
+- **Batch push:** Bireysel ticket push edilmez. Tüm `tickets/in-review/` birikip tek seferde push edilir; ticket'lar `in-review → done` geçişi yapılır (v2'de `approved` ara durumu kaldırıldı).
 - **PR review:** Bu projede şu an PR akışı değil, doğrudan main'e merge + push kullanılıyor.
 - **Force push:** YASAK (main'e), feature branch'e bile sorgula.
 

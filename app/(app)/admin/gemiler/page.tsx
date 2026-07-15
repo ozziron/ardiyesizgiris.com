@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pencil, Trash2, Plus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface Carrier {
   id: string
   name: string
@@ -22,7 +24,7 @@ export default function CarriersManagementPage() {
 
   const fetchCarriers = async () => {
     try {
-      const response = await fetch("/api/admin/carriers")
+      const response = await apiFetch("/api/admin/carriers")
       const data = await response.json()
       setCarriers(data.data || [])
     } catch (error) {

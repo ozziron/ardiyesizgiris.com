@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { apiFetch } from '@/lib/api-client';
+
 import {
   Form,
   FormControl,
@@ -163,8 +165,8 @@ export default function BulkTariffPage() {
     const fetchData = async () => {
       try {
         const [carriersRes, portsRes] = await Promise.all([
-          fetch("/api/carriers"),
-          fetch("/api/ports"),
+          apiFetch("/api/carriers"),
+          apiFetch("/api/ports"),
         ])
         const [carriersData, portsData] = await Promise.all([
           carriersRes.json(),
@@ -240,7 +242,7 @@ export default function BulkTariffPage() {
         notes: values.notes || null,
       }
 
-      const response = await fetch("/api/admin/tariff-rules/bulk", {
+      const response = await apiFetch("/api/admin/tariff-rules/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

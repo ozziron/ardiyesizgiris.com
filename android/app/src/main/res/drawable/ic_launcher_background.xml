@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Adaptive icon background layer.
+    Solid emerald-500 (#10b981).
+    This drawable is referenced BY the <adaptive-icon> in mipmap-anydpi-v26/,
+    not the other way around.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/adaptiveBackground" />
+</shape>

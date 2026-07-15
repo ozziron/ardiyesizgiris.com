@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Mail, Phone, MapPin, Send } from "lucide-react"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface FormData {
   name: string
   email: string
@@ -46,7 +48,7 @@ export default function IletisimPage() {
     setError("")
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await apiFetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

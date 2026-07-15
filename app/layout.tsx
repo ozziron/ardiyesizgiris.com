@@ -3,12 +3,14 @@ import "./globals.css"
 import { Inter, Inter_Tight } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
+import { DeepLinkHandler } from "@/components/deep-link-handler"
 import { AppShell } from "@/components/layout/app-shell"
 import { MobileBottomTabBar } from "@/components/layout/mobile-bottom-tab-bar"
 import { ScrollLockGuard } from "@/components/scroll-lock-guard"
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register"
 import { InstallPrompt } from "@/components/pwa/install-prompt"
 import { OfflineBanner } from "@/components/pwa/offline-banner"
+import { CapacitorSentryProvider } from "@/components/sentry/capacitor-sentry-provider"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -37,13 +39,13 @@ export const metadata = {
     "Konteyner taşımacılığında ardiyesiz giriş tarihlerini hesaplayın. Tüm Türkiye limanları için geçerli ardiyesiz gün hesaplama aracı.",
   keywords:
     "ardiyesiz giriş, konteyner, liman, lojistik, ardiye hesaplama, gümrük",
-  generator: "v0.dev",
+  generator: "nextjs",
   // PWA theme-color — Android status bar per color scheme
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#10b981" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
   ],
-  // PWA & icon metadata
+  // PWA & icon metadata — favicon sizes + apple + manifest reference
   icons: {
     icon: [
       { url: "/icons/icon-192.svg", type: "image/svg+xml", sizes: "192x192" },
@@ -51,12 +53,39 @@ export const metadata = {
     ],
     shortcut: "/icons/icon-192.svg",
     apple: "/icons/apple-touch-icon.svg",
+    other: [
+      {
+        rel: "apple-touch-icon",
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+      },
+    ],
   },
   appleWebApp: {
     capable: true,
     title: "Ardiyesiz Giriş",
     statusBarStyle: "black-translucent",
-    startupImage: [],
+    startupImage: [
+      // iOS splash screens — device-specific sizes
+      // 6.7" iPhone (iPhone 14 Pro Max, 15 Pro Max): 1290×2796
+      {
+        url: "/icons/splash-iphone-6-7.png",
+        media:
+          "screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      // 6.5" iPhone (iPhone 11 Pro Max, XS Max): 1242×2688
+      {
+        url: "/icons/splash-iphone-6-5.png",
+        media:
+          "screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      // 5.5" iPhone (iPhone 8 Plus): 1242×2208
+      {
+        url: "/icons/splash-iphone-5-5.png",
+        media:
+          "screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+    ],
   },
   openGraph: {
     type: "website",
@@ -122,7 +151,9 @@ export default function RootLayout({
         <ScrollLockGuard />
         <ServiceWorkerRegister />
         <OfflineBanner />
+        <CapacitorSentryProvider />
         <AuthSessionProvider>
+          <DeepLinkHandler />
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <AppShell>{children}</AppShell>
             <MobileBottomTabBar />

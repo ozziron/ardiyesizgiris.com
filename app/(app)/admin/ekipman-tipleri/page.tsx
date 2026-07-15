@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pencil, Trash2, Plus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { apiFetch } from '@/lib/api-client';
+
 interface ContainerType {
   id: string
   code: string
@@ -24,7 +26,7 @@ export default function ContainerTypesPage() {
 
   const fetchTypes = async () => {
     try {
-      const res = await fetch("/api/admin/container-types")
+      const res = await apiFetch("/api/admin/container-types")
       const data = await res.json()
       setTypes(data.data || [])
     } catch {

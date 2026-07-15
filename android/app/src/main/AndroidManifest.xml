@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Internet access (TWA requires network) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- POST_NOTIFICATIONS (Android 13+) — needed for future push -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="${applicationName}"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ArdiyesizGiris"
+        android:usesCleartextTraffic="false">
+
+        <!--
+            Trusted Web Activity — wraps https://www.ardiyesizgiris.com
+            as a standalone Android app.
+        -->
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+
+            <!-- Digital Asset Links verification -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                android:value="${defaultUrl}" />
+
+            <!-- Android App Links — opens ardiyesizgiris.com URLs in the app -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="${hostName}" />
+            </intent-filter>
+
+            <!-- Launcher intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            TWA service — delegation and verification provider.
+            Required for Play Store distribution (verifies the app owns the domain).
+        -->
+        <service
+            android:name="com.google.androidbrowserhelper.trusted.DelegationService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <!-- Status bar color (Android 5–7 fallback) -->
+        <meta-data
+            android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+            android:resource="@color/statusBarColor" />
+
+        <!-- Splash screen background (shown while TWA loads) -->
+        <meta-data
+            android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+            android:resource="@drawable/splash_icon" />
+
+        <meta-data
+            android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+            android:resource="@color/backgroundColor" />
+
+        <!-- Hide TWA toolbar (launch in standalone mode) -->
+        <meta-data
+            android:name="android.support.customtabs.trusted.DISPLAY_MODE"
+            android:value="standalone" />
+
+        <!-- Fallback behavior: custom tabs if TWA can't launch -->
+        <meta-data
+            android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
+            android:value="CUSTOM_TABS" />
+
+        <!-- Navigation bar color -->
+        <meta-data
+            android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+            android:resource="@color/backgroundColor" />
+
+        <!-- App shortcuts (long-press launcher icon) -->
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
+    </application>
+</manifest>

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { tariffRuleSchema } from "@/lib/validation/schemas"
+import { apiFetch } from '@/lib/api-client';
 import { useContainerTypes } from "@/hooks/use-container-types"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -105,7 +106,7 @@ export function TariffRuleForm({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [portsResponse, carriersResponse] = await Promise.all([fetch("/api/ports"), fetch("/api/carriers")])
+        const [portsResponse, carriersResponse] = await Promise.all([apiFetch("/api/ports"), apiFetch("/api/carriers")])
         const [portsData, carriersData] = await Promise.all([portsResponse.json(), carriersResponse.json()])
 
         setPorts(portsData.data || [])
